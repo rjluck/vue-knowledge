@@ -1,0 +1,15 @@
+{
+  "devDependencies": {
+    "vuepress": "^1.2.0"
+  },
+  "name": "vue-knowledge",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:rjluck/vue-knowledge.git",
+  "author": "rongjia <1085879662@qq.com>",
+  "license": "MIT",
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
+  }
+}
