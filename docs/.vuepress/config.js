@@ -47,6 +47,25 @@ let sidebar = {
             ]
         },
     ],
+    '/typeScript/': [
+        {
+            title: 'TypeScript简介', // 侧边栏名称
+            collapsable: true, // 可折叠
+            children: [
+                // ''空字符串代表主页，显示README.md中的内容
+                ['/typeScript/introduction/', 'TypeScript简介']//使用数组为侧边栏起别名，前边是md名称，后边是链接显示的文字
+            ]
+        },
+        {
+            title: 'TypeScript基础', // 侧边栏名称
+            collapsable: true, // 可折叠
+            children: [
+                '/typeScript/base/dataType', // 你的md文件地址
+                '/typeScript/base/typeInference',
+                '/typeScript/base/unionType',
+            ]
+        }
+    ]
 }
 
 module.exports = {
@@ -67,7 +86,7 @@ module.exports = {
                 text: '博文',
                 items: [
                     { text: 'About', link: '/about/' },
-                    { text: 'Study', link: '/study/' },
+                    { text: 'TypeScript', link: '/typeScript/' },
                     { text: 'Web', link: '/web/' }
                 ]
             },
