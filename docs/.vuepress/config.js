@@ -26,6 +26,39 @@
 // };
 
 let sidebar = {
+    '/typeScript/': [
+        {
+            title: 'TypeScript简介', // 侧边栏名称
+            collapsable: false, // 可折叠
+            children: [
+                // ''空字符串代表主页，显示README.md中的内容
+                ['', 'TypeScript简介']//使用数组为侧边栏起别名，前边是md名称，后边是链接显示的文字
+            ]
+        },
+        {
+            title: 'TypeScript基础', // 侧边栏名称
+            collapsable: false, // 可折叠
+            // children: [
+            //     '/typeScript/dataType', // 你的md文件地址
+            //     '/typeScript/typeInference',
+            //     '/typeScript/unionType',
+            //     '/typeScript/interface',
+            // ]
+            children: [
+                { title: '数据类型', path: '/typeScript/dataType' },
+                { title: '类型推论', path: '/typeScript/typeInference' },
+                { title: '联合类型', path: '/typeScript/unionType' },
+            ]
+        },
+        {
+            title: 'TypeScript进阶', // 侧边栏名称
+            collapsable: false, // 可折叠
+            children: [
+                { title: '类', path: '/typeScript/class' },
+                { title: '接口', path: '/typeScript/interface' },
+            ]
+        }
+    ],
     '/about/': [
         {
             title: 'JavaScript', // 侧边栏名称
@@ -46,25 +79,6 @@ let sidebar = {
                 '/about/two'
             ]
         },
-    ],
-    '/typeScript/': [
-        {
-            title: 'TypeScript简介', // 侧边栏名称
-            collapsable: true, // 可折叠
-            children: [
-                // ''空字符串代表主页，显示README.md中的内容
-                ['/typeScript/introduction/', 'TypeScript简介']//使用数组为侧边栏起别名，前边是md名称，后边是链接显示的文字
-            ]
-        },
-        {
-            title: 'TypeScript基础', // 侧边栏名称
-            collapsable: true, // 可折叠
-            children: [
-                '/typeScript/base/dataType', // 你的md文件地址
-                '/typeScript/base/typeInference',
-                '/typeScript/base/unionType',
-            ]
-        }
     ]
 }
 
@@ -76,17 +90,18 @@ module.exports = {
         ['link', { rel: 'manifest', href: '/manifest.json' }],
     ],
     themeConfig: {
+        // activeHeaderLinks: false,
         //sidebarDepth: 4,//这是嵌套标题链接，自动显示当前激活（导航）页面标题的链接，即显示深度（h1-h6的深度）
         lastUpdated: 'Last Updated',// 文档更新时间：每个文件git最后提交的时间
-        displayAllHeaders: true,// 侧边栏只会显示由当前活动页面的标题（headers）组成的链接，你可以将 themeConfig.displayAllHeaders 设置为 true 来显示所有页面的标题链接：
+        displayAllHeaders: false,// 侧边栏只会显示由当前活动页面的标题（headers）组成的链接，你可以将 themeConfig.displayAllHeaders 设置为 true 来显示所有页面的标题链接：
         // 顶部导航栏
         nav: [
             { text: '主页', link: '/' },
             {
                 text: '博文',
                 items: [
-                    { text: 'About', link: '/about/' },
                     { text: 'TypeScript', link: '/typeScript/' },
+                    { text: 'About', link: '/about/' },
                     { text: 'Web', link: '/web/' }
                 ]
             },
@@ -97,6 +112,7 @@ module.exports = {
         // sidebar: ['/', '/about/', '/study/'],
         // 添加侧边栏,该语法表示使用当前页面标题自动生成侧边栏
         // sidebar: 'auto',
+        editLinks: false,
         sidebar: sidebar,
 
     },
