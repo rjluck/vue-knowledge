@@ -48,6 +48,7 @@ let sidebar = {
                 { title: '数据类型', path: '/typeScript/dataType' },
                 { title: '类型推论', path: '/typeScript/typeInference' },
                 { title: '联合类型', path: '/typeScript/unionType' },
+                { title: '函数类型', path: '/typeScript/function' },
             ]
         },
         {

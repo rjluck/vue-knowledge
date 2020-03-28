@@ -256,3 +256,146 @@ square.color = 'blue'
 square.sideLength = 10
 square.penWidth = 5.0
 ```
+
+## 可索引类型
+
+与使用接口描述函数类型差不多，我们也可以描述那些能够“通过索引得到”的类型，比如 `a[10]` 或 `ageMap['daniel']`。 可索引类型具有一个 索引签名，它描述了对象索引的类型，还有相应的索引返回值类型。 让我们看一个例子：
+
+```typeScript
+interface StringArray{
+    [index:number]:string
+}
+
+let myArray:StringArray
+myArray = ['Bob','Fred']
+let myStr:string = myArray[0];//数字索引
+```
+
+上面例子里，我们定义了 `StringArray` 接口，它具有索引签名。 这个索引签名表示了当用 `number` 去索引 `StringArray` 时会得到 `string` 类型的返回值。
+
+
+ypeScript 支持两种索引签名：字符串和数字。 可以同时使用两种类型的索引，但是数字索引的返回值必须是字符串索引返回值类型的子类型。 这是因为当使用 number 来索引时，JavaScript 会将它转换成string 然后再去索引对象。 也就是说用 100（一个 number）去索引等同于使用'100'（一个 string ）去索引，因此两者需要保持一致。
+
+> 数字索引和字符串索引可以同时使用的，当同时使用时数字索引返回值必须是字符串索引返回值的子类型，因为此时会将数字转为字符串array['0']
+
+```typeScript
+class Animal{
+    name:string
+}
+
+class Dog extends Animal{
+    breed:string
+}
+
+interface NotOkay {
+    [x:number]:Dog
+    [x:string]:Animal
+}
+
+// 错误：使用数值型的字符串索引，有时会得到完全不同的Animal!
+interface NotOkay {
+  [x: number]: Animal
+  [x: string]: Dog
+}
+```
+>当索引类型和非索引类型同时存在时，非索引类型必须和索引类型一致
+
+```typeScript
+interface NumberDictionary{
+    [index:string]:number
+    length:number
+    name:string  //error
+}
+```
+
+> 索引类型可以设置为只读
+
+```typeScript
+interface ReadonlyStringArray{
+    readonly [index:number]:string
+}
+
+let myArray:ReadonlyStringArray =['ww','ee']
+myArray[0]="uuu"; //error
+```
+
+## 类实现接口（类类型）
+
+强制一个类去符合某种契约
+
+实现（implements）是面向对象中的一个重要概念。一般来讲，一个类只能继承自另一个类，有时候不同类之间可以有一些共有的特性，这时候就可以把特性提取成接口（interfaces），用 `implements` 关键字来实现。这个特性大大提高了面向对象的灵活性。
+
+接口描述了类的公共部分，而不是公共和私有两部分。
+```typeScript
+interface ClockInterface {
+  currentTime: Date
+}
+
+class Clock implements ClockInterface {
+  currentTime: Date
+  constructor(h: number, m: number) { }
+}
+```
+你也可以在接口中描述一个方法，在类里实现它，如同下面的 setTime 方法一样：
+```typeScript
+interface ClockInterface {
+  currentTime: Date
+  setTime(d: Date)
+}
+
+class Clock implements ClockInterface {
+  currentTime: Date
+  setTime(d: Date) {
+    this.currentTime = d
+  }
+  constructor(h: number, m: number) { }
+}
+```
+
+举例来说，门是一个类，防盗门是门的子类。如果防盗门有一个报警器的功能，我们可以简单的给防盗门添加一个报警方法。这时候如果有另一个类，车，也有报警器的功能，就可以考虑把报警器提取出来，作为一个接口，防盗门和车都去实现它：
+```typeScript
+interface Alarm {
+    alert(): void;
+}
+​
+class Door {
+}
+​
+class SecurityDoor extends Door implements Alarm {
+    alert() {
+        console.log('SecurityDoor alert');
+    }
+}
+​
+class Car implements Alarm {
+    alert() {
+        console.log('Car alert');
+    }
+}
+```
+
+一个类可以实现多个接口：
+
+Car 实现了 Alarm 和 Light 接口，既能报警，也能开关车灯
+```typeScript
+interface Alarm {
+    alert(): void;
+}
+​
+interface Light {
+    lightOn(): void;
+    lightOff(): void;
+}
+​
+class Car implements Alarm, Light {
+    alert() {
+        console.log('Car alert');
+    }
+    lightOn() {
+        console.log('Car light on');
+    }
+    lightOff() {
+        console.log('Car light off');
+    }
+}
+```

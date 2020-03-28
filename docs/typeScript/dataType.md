@@ -80,19 +80,45 @@ let num: number = u;
 
 ## 数组
 
-TypeScript 像 JavaScript 一样可以操作数组元素。 有两种方式可以定义数组。 第一种，可以在元素类型后面接上 `[]`，表示由此类型元素组成的一个数组：
+TypeScript 像 JavaScript 一样可以操作数组元素。 有3种方式可以定义数组。 第一种，可以在元素类型后面接上 `[]`，表示由此类型元素组成的一个数组：
 
 ```typescript
 let list: number[] = [1, 2, 3]
+var arr:number[] =[1,2,3]
+var arr1:string[]=["1","2"]
+var arr2:any[] = [1,"2",true]
 ```
 
 第二种方式是使用数组泛型，`Array<元素类型>`：
 
 ```typescript
 let list: Array<number> = [1, 2, 3]
+var arrType:Array<number> = [1,2,3]
+var arrType2:Array<string> =["1","2"]
+var arrType3:Array<any> =[1,"2",true]
 ```
 
+第三种方式可采用接口表示法
+```typescript
+//接口表示
+interface Istate {
+    username:string,
+    age:number
+}
+interface IArr {
+    //[index:number]:number
+    [index:number]:Istate
+}
 
+//var arrType4:IArr =[1,2,3]
+var arrType4:IArr =[{username:"张三",age:10}]
+//此时，强制约定数组里的每一项必须是符合Istate接口的约束规则
+
+//同理
+var arrType5:Array<Istate> = [{username:"张三",age:10}]
+
+var arrType6:Istate[] = [{username:"张三",age:10}]
+```
 
 
 
@@ -105,6 +131,8 @@ let list: Array<number> = [1, 2, 3]
 let x: [string, number]
 x = ['hello', 10] // OK
 x = [10, 'hello'] // Error
+
+let  arr:[string,number] = ["aaa",10]
 ```
 
 当访问一个已知索引的元素，会得到正确的类型：
@@ -180,7 +208,16 @@ let unusable: void = undefined
 
 ## 枚举 enum
 
+枚举（enum）类型用于取值被限定在一定范围内的场景
+
+采用关键字enum定义
+> 例如：enum Days{Sun, Mon,Tue}
+
+枚举成员会被赋值为从0开始递增的数字，同时也会被枚举值到枚举名进行反向映射。
+
 `enum` 类型是对 JavaScript 标准数据类型的一个补充。 像 C# 等其它语言一样，使用枚举类型可以为一组数值赋予友好的名字。
+
+
 
 ```typescript
 enum Color {Red, Green, Blue}
@@ -210,6 +247,25 @@ let colorName: string = Color[2]
 console.log(colorName)  // 显示'Green'因为上面代码里它的值是2
 ```
 
+```typescript
+//使用枚举可以定义一些有名字的数字常量
+enum Days{
+    Sun,
+    Mon,
+    Tue,
+    Wed,
+    Thu,
+    Fri,
+    Sat
+}
+
+console.log(Days.Sun)//0
+console.log(Days.Sat)//6
+//枚举类型会被编译成一个双向映射的对象
+console.log(Days[0])//Sun
+
+let day:Days= Days.Sun;
+```
 
 
 
@@ -270,6 +326,21 @@ create(undefined) // Error
 
 通过类型断言这种方式可以告诉编译器，“相信我，我知道自己在干什么”。 类型断言好比其它语言里的类型转换，但是不进行特殊的数据检查和解构。 它没有运行时的影响，只是在编译阶段起作用。 TypeScript 会假设你，程序员，已经进行了必须的检查。
 
+在`tsx`语法（react的jsx语法的ts版）必须采用后面一种
+
+类型断言不是类型转换，断言成一个联合类型种不存在的类型是不允许的
+```typescript
+let num:number|string = "10";
+num = 20;
+console.log(num.length);//报错
+//类型断言  只能断言联合类型种存在的类型
+function getAssert(name:string|number){
+    //return (<string>name).length;
+    return (name as string).length;
+    //return (name as boolean).length;//报错
+}
+```
+
 类型断言有两种形式。 其一是“尖括号”语法：
 
 ```typescript
@@ -287,3 +358,50 @@ let strLength: number = (someValue as string).length
 ```
 
 两种形式是等价的。 至于使用哪个大多数情况下是凭个人喜好；然而，当你在 TypeScript 里使用 JSX 时，只有 `as` 语法断言是被允许的。
+
+
+
+## 类型别名
+
+类型别名可以用来给一个类型起一个新名字
+
+采用关键字`type`
+
+> 例如:type Name = string | number
+
+例子中的Name就表示可设置字符串和数值类型
+```typescript
+var str:string|number = "10";
+//类型别名
+type strType = string|number;
+var str:strType ="10";
+str = 10;
+
+//可以对于接口也采用类型别名
+interface muchType1{
+    name:string
+}
+
+interface muchType2{
+    age:number
+}
+
+type muchType = muchType1|muchType2;
+var obj:muchType = {name:"张三"}
+var obj2:muchType = {age:10}
+var obj3:muchType = {name:"张三",age:10}
+```
+
+也可以采用type来约束取值只能是某些字符串中的一个
+
+> 例如:type EventNames = "click"|"scroll"|"mousemove"
+```typescript
+//限制字符串的选择
+type sex = "男"|"女";
+function getSex(s:sex):string{
+    return s;
+}
+
+getSex("1")//报错
+getSex("男")
+```
