@@ -67,6 +67,32 @@ let a = new Animal('Kitty'); // setter: Kitty
 a.name = 'Tom'; // setter: Tom
 console.log(a.name); // Jack
 ```
+```typeScript
+let passcode = 'serect passcode';
+
+class Employee{
+    private _fullName:string,
+    //访问_fullName时触发
+    get fullName():string{
+        return this._fullName
+    }
+    //修改_fullName时触发
+    set fullName(newName:string){
+        if(passcode && passcode === 'serect passcode'){
+           this._fullName =  newName
+        }else{
+            console.log('Error: Unauthorized update of employee')
+        }
+    }
+}
+
+let employee = new Employee();
+employee.fullName = 'Bob';
+if(employee.fullName){
+    console.log(employee.fullName )
+}
+```
+
 
 #### 静态方法
 使用 `static` 修饰符修饰的方法称为静态方法，它们不需要实例化，而是直接通过类来调用：
@@ -161,7 +187,7 @@ let greeter = new Greeter('world')  //返回对象
 greeter.greet()  //通过对象调用greet方法
 ```
 
-#### 类的修饰符
+## 类的修饰符
 
 - public  公开
 - private  私有
@@ -242,9 +268,95 @@ class Child extends  Person{
 }
 console.log(Child.test());//类的静态方法里面，是不允许用this的
 ```
+```typeScript
+class Animal{
+    private name:string,
+    public constructor(name:string){
+        this.name = name
+    }
+    public move(distance:number = 0){
+        console.log(`${this.name} moved ${distance}m`)
+    }
+}
+
+new Animal('Cat').name  //error
+class Rhino extends Animal{
+    constructor(){
+        super('Rhino')
+    }
+}
+
+class Employee{
+    private name:string,
+    constructor(name:string){
+        this.name = name;
+    }
+}
+
+let animal = new Animal('Goat')
+let rhino = new Rhino()
+let employee = new Employee('Bob')
+
+animal = rhino;
+animal = employee; //error
+```
+```typeScript
+//受保护的类型，可在其子类中使用，外部不可调用
+class  Person {
+    protected name:string,
+    protected constructor(name:string){
+        this.name = name
+    }
+}
+
+class Employee extends Person{
+    private department:string,
+    constructor(name:string,department:string){
+        super(name);
+        this.department = department
+    }
+    
+    getElevatorPitch(){
+        return `Hello,my name is ${this.name} and I work in ${this.department}`
+    }
+}
+
+let howard = new Employee('Howard','Sales')
+console.log(howard.getElevatorPitch())
+console.log(howard.name); //error
+```
+## readonly修饰符
+
+可以被外部访问，但是不可以被修改
+```typeScript
+class Person{
+    readonly name:string
+    constructor(name:string){
+        this.name = name
+    }
+}
+
+let john = new Person('john')
+john.name = ''; //error
+```
+
+参数属性
+```typeScript
+class Person{
+    constructor(readonly name:string){
+        
+    }
+}
+
+let john = new Person('john')
+console.log(john.name);
+john.name = '';//error
+```
+
 
 ## 类的静态属性和静态方法
 
+静态属性和静态方法存在于类的本身，而不是类的实例上
 ```typeScript
 //js中的静态属性
 function Person(){
@@ -286,6 +398,31 @@ var p = new Person("张三",18);
 console.log(p.print());
 ```
 
+```typeScript
+class Grid {
+    static origin = {x:0,y:0}
+    scale:number
+    constructor(scale:number){
+        this.scale = scale
+    }
+    
+    calculateDistanceFromOrigin(point:{x:number,y:number}){
+        let xDist = point.x - Grid.origin.x
+        let yDist = point.y - Grid.origin.y
+        return Math.sqrt(xDist*xDist + yDist*yDist)* this.scale
+    }
+}
+
+let grid1 = new Grid(1.0)
+let grid2 = new Grid(5.0)
+
+console.log(grid1.claculateDistanceFromOrigin({x:3,y:4})) //5
+
+console.log(grid2.claculateDistanceFromOrigin({x:3,y:4}))  //25
+```
+
+
+
 
 ## 类的多态
 比如：同一个父类下面不同的子类有一个不同的实现
@@ -317,11 +454,14 @@ c1.eat();
 
 关键词 `abstract`
 
-抽象类是提供其他类继承的基类(父类),不能直接被实例化
+抽象类是提供其他类继承的基类(父类),不能直接被实例化。
+抽象类通常作为其他派生类的基类使用，一般不能被直接实例化
 
+抽象类中可以有抽象方法，抽象方法不能直接被实现，必须在他的派生类中实现
 抽象方法只能包含在抽象类中，抽象类中可以包含抽象方法和非抽象方法
 
 子类继承抽象类，实现抽象方法
+
 ```typeScript
 //定义
 abstract class Animal{
@@ -348,7 +488,50 @@ c1.eat();
 var c2 = new Dog();
 c2.eat();
 ```
+```typeScript
+abstract class Animal {
+    abstract makeSound():void,
+    move():void{
+        console.log('roaming the earth ...')
+    }
+}
+```
 
+```typeScript
+abstract class Department{
+    name:string,
+    constructor(name:string){
+        this.name = name;
+    }
+    printName():void{
+        console.log('Department name ' + this.name)
+    }
+    abstract printMeeting():void
+}
+
+class AccountingDepartment extends Department{
+    constructor(){
+        super('Accounting ad ')
+    }
+    printMeeting():void{
+        console.log('The Accounting Department')
+    }
+    genterateReports():void{
+        console.log('Generating accounting reports...')
+    }
+}
+
+let department:Department
+//抽象类不能被实例化
+department = new Department()//error
+
+//其派生类可以被实例化
+department = new AccountingDepartment()
+department.printName()
+department.printMeeting()
+//department被定义为Department类型，所以不能访问其genterateReports方法
+department.genterateReports();//error
+```
 
 ## 类的继承
 
@@ -431,4 +614,19 @@ let tom:Animal = new Horse('Tommy');
 
 sam.move()
 tom.move(34)
+```
+
+## 高级技巧
+类当成接口使用(不推荐)
+```
+class Point {
+    x:number
+    y:number
+}
+
+interface Point3d extends Point {
+    z:number
+}
+
+let point3d:Point3d = {x:1,y:2,z:3}
 ```
