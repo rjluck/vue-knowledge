@@ -2,6 +2,8 @@
 
 ## 知识梳理
 
+[JavaScript知识梳理](/javaScript/)
+
 [TypeScript知识梳理](/typeScript/)
 
 ## 相关资料

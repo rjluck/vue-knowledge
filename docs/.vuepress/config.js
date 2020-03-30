@@ -64,24 +64,21 @@ let sidebar = {
             ]
         }
     ],
-    '/about/': [
+    '/javaScript/': [
         {
-            title: 'JavaScript', // 侧边栏名称
+            title: 'JavaScript简介', // 侧边栏名称
             collapsable: true, // 可折叠
             children: [
                 // ''空字符串代表主页，显示README.md中的内容
-                '',
-                '/about/first'
-                //['first', '111111111111111111'],//使用数组为侧边栏起别名，前边是md名称，后边是链接显示的文字
-
+                ''
             ]
         },
         {
-            title: 'css', // 侧边栏名称
+            title: 'JavaScript基础', // 侧边栏名称
             collapsable: true, // 可折叠
             children: [
-                '/about/first', // 你的md文件地址
-                '/about/two'
+                '/javaScript/first', // 你的md文件地址
+                '/javaScript/two'
             ]
         },
     ]
@@ -109,8 +106,8 @@ module.exports = {
                 text: '分类', //格式二：添加下拉菜单，link指向的文件路径
                 ariaLabel: '分类',   //用于识别的label
                 items: [//点击标签会跳转至link的markdown文件生成的页面
+                    { text: 'JavaScript', link: '/javaScript/' },
                     { text: 'TypeScript', link: '/typeScript/' },
-                    { text: 'About', link: '/about/' },
                     { text: 'Web', link: '/web/' }
                 ]
             },
