@@ -1,22 +1,15 @@
-# || 框架介绍
-
-[[toc]]
-
-## 安装
-
-安装 nodeJS 环境：打开`INSTALL.MSI`文件夹，运行`node-v8.9.3-x64.msi`完成安装  
-安装包管理工具 yarn：打开`INSTALL.MSI`文件夹，运行`yarn-1.7.0.msi`完成安装
-
-## 初始化项目
-
-1.  打开项目的根目录，打开 CMD
-2.  在命令行输入 `yarn`，回车，等待依赖自动安装完毕(如有报错，请多试几次)
-3.  进入开发模式可以输入 `yarn dev`，会自动打开默认浏览器，编辑代码会自动编译
-    如果是不开发，只是浏览项目，则先输入 `yarn build`进行打包，然后输入`yarn server`会自动打开浏览器查看项目。
-
-## 数据模拟
-
-1. 数据模拟文件`./src/common/_mock.js`
-
-## 文档开发
-### 文档开发
+---
+home: true
+heroImage: /img.jpg
+heroText: 荣佳的前端记录
+tagline: 一点一滴都是进步
+actionText: 马上进入 →
+actionLink: /pages/catalog.md
+features:
+- title: 简洁至上
+  details: 以 Markdown 为中心的项目结构，以最少的配置帮助你专注于写作。
+- title: Vue驱动
+  details: 享受 Vue + webpack 的开发体验，在 Markdown 中使用 Vue 组件，同时可以使用 Vue 来开发自定义主题。
+- title: 高性能
+  details: VuePress 为每个页面预渲染生成静态的 HTML，同时在页面被加载的时候，将作为 SPA 运行。
+---
