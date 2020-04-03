@@ -69,16 +69,16 @@ let sidebar = {
             title: 'JavaScript简介', // 侧边栏名称
             collapsable: true, // 可折叠
             children: [
-                // ''空字符串代表主页，显示README.md中的内容
-                ''
+                '',  // ''空字符串代表主页，显示README.md中的内容
+                '/javaScript/introduction'
             ]
         },
         {
             title: 'JavaScript基础', // 侧边栏名称
             collapsable: true, // 可折叠
             children: [
-                '/javaScript/first', // 你的md文件地址
-                '/javaScript/two'
+                '/javaScript/variate', // 你的md文件地址
+                '/javaScript/dataType'
             ]
         },
     ]
