@@ -78,7 +78,8 @@ let sidebar = {
             collapsable: true, // 可折叠
             children: [
                 '/javaScript/variate', // 你的md文件地址
-                '/javaScript/dataType'
+                '/javaScript/dataType',
+                '/javaScript/operator'
             ]
         },
     ]

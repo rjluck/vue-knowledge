@@ -96,4 +96,32 @@ BOM(Browser Object Model,简称BOM)是指浏览器对象模型，它提供了独
 ---|---
 alert(msg) | 浏览器弹出警示框
 console.log(msg) | 浏览器控制台打印输出消息
-prompt(info) | 浏览器弹出输入框，用户可以输入
+prompt(info) | 浏览器弹出输入框，用户可以输入,取过来的值是字符型的
+
+
+
+## 标识符、关键字、保留字
+
+### 标识符
+
+就是值开发人员为变量、属性、函数、参数取的名字。
+
+标识符不能是关键字或保留字。
+
+### 关键字
+
+是指JS本身已经使用了的字，不能再用它们充当变量名、方法名。
+
+包括：
+```
+break、case、catch、continue、default、delete、do、else、finally、for、function、in、instanceof、new、switch、this、throw、try等
+```
+
+### 保留字
+
+实际上就是预留的"关键字"，意思是现在虽然还不是关键字，但是未来可能会成为关键字，同样不能使用它们当变量名或方法名。
+
+包括：
+```
+boolean、byte、char、class、const、deubgger、double、enum、export、extends、fimal、float、goto、implements、import、int、interface、long、mative、package等
+```
