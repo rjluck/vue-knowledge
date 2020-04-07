@@ -92,6 +92,7 @@ BOM(Browser Object Model,简称BOM)是指浏览器对象模型，它提供了独
 ## JavaScript输入输出语句
 
 为了方便信息的输入输出，JS提供了一些输入输出语句，其常用的语句如下：
+
 方法 | 说明
 ---|---
 alert(msg) | 浏览器弹出警示框

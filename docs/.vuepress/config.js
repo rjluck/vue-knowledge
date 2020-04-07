@@ -79,7 +79,19 @@ let sidebar = {
             children: [
                 '/javaScript/variate', // 你的md文件地址
                 '/javaScript/dataType',
-                '/javaScript/operator'
+                '/javaScript/operator',
+                '/javaScript/process'
+            ]
+        },
+    ],
+    '/webInterview/': [
+        {
+            title: 'JavaScript', // 侧边栏名称
+            collapsable: true, // 可折叠
+            children: [
+                '',  // ''空字符串代表主页，显示README.md中的内容
+                '/webInterview/js/',
+                '/webInterview/first'
             ]
         },
     ]
@@ -109,7 +121,7 @@ module.exports = {
                 items: [//点击标签会跳转至link的markdown文件生成的页面
                     { text: 'JavaScript', link: '/javaScript/' },
                     { text: 'TypeScript', link: '/typeScript/' },
-                    { text: 'Web', link: '/web/' }
+                    { text: 'Web面试题', link: '/webInterview/' }
                 ]
             },
             { text: '关于', link: '/about/' },
