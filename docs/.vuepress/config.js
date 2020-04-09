@@ -80,7 +80,9 @@ let sidebar = {
                 '/javaScript/variate', // 你的md文件地址
                 '/javaScript/dataType',
                 '/javaScript/operator',
-                '/javaScript/process'
+                '/javaScript/process',
+                '/javaScript/array',
+                '/javaScript/function'
             ]
         },
     ],
