@@ -82,7 +82,10 @@ let sidebar = {
                 '/javaScript/operator',
                 '/javaScript/process',
                 '/javaScript/array',
-                '/javaScript/function'
+                '/javaScript/function',
+                '/javaScript/scope',
+                '/javaScript/parse',
+                '/javaScript/object'
             ]
         },
     ],
