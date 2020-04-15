@@ -85,7 +85,8 @@ let sidebar = {
                 '/javaScript/function',
                 '/javaScript/scope',
                 '/javaScript/parse',
-                '/javaScript/object'
+                '/javaScript/object',
+                '/javaScript/type'
             ]
         },
     ],
