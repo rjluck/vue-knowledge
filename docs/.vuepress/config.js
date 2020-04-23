@@ -86,7 +86,16 @@ let sidebar = {
                 '/javaScript/scope',
                 '/javaScript/parse',
                 '/javaScript/object',
-                '/javaScript/type'
+                '/javaScript/type',
+            ]
+        },
+        {
+            title: 'Web APIs', // 侧边栏名称
+            collapsable: true, // 可折叠
+            children: [
+                '/javaScript/webAPIs/',
+                '/javaScript/webAPIs/DOM',
+                '/javaScript/webAPIs/eg'
             ]
         },
     ],
