@@ -77,16 +77,16 @@ let sidebar = {
             title: 'JavaScript基础', // 侧边栏名称
             collapsable: true, // 可折叠
             children: [
-                '/javaScript/variate', // 你的md文件地址
-                '/javaScript/dataType',
-                '/javaScript/operator',
-                '/javaScript/process',
-                '/javaScript/array',
-                '/javaScript/function',
-                '/javaScript/scope',
-                '/javaScript/parse',
-                '/javaScript/object',
-                '/javaScript/type',
+                '/javaScript/jsBase/variate', // 你的md文件地址
+                '/javaScript/jsBase/dataType',
+                '/javaScript/jsBase/operator',
+                '/javaScript/jsBase/process',
+                '/javaScript/jsBase/array',
+                '/javaScript/jsBase/function',
+                '/javaScript/jsBase/scope',
+                '/javaScript/jsBase/parse',
+                '/javaScript/jsBase/object',
+                '/javaScript/jsBase/type',
             ]
         },
         {

@@ -6,59 +6,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        ul {
-            margin-top: 50px;
+        table {
+            width: 500px;
+            margin: 100px auto;
+            border-collapse: collapse;
+            text-align: center;
         }
 
-        li {
-            width: 300px;
-            padding: 5px;
-            background-color: wheat;
-            color: red;
-            font-size: 14px;
-            margin: 15px 0;
+        td,
+        th {
+            border: 1px solid #333;
         }
 
-        li a {
-            float: right;
+        thead tr {
+            height: 40px;
+            background-color: #ccc;
         }
     </style>
 </head>
 
 <body>
-    <textarea name="" id="" cols="30" rows="10">122</textarea>
-    <button>发布</button>
-    <ul>
+    <table cellspacing="0">
+        <thead>
+            <tr>
+                <th>姓名</th>
+                <th>科目</th>
+                <th>成绩</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>嘻嘻嘻</td>
+                <td>js</td>
+                <td>100</td>
+                <td><a href="javaScript:;">删除</a></td>
+            </tr>
+        </tbody>
 
-    </ul>
+    </table>
     <script>
-        var textarea = document.querySelector('textarea');
-        var btn = document.querySelector('button');
-        var ul = document.querySelector('ul');
-
-        btn.onclick = function () {
-            if (textarea.value == '') {
-                alert('您没有输入内容');
-                return false;
-            } else {
-                var li = document.createElement('li');
-                li.innerHTML = textarea.value + "<a href='javascript:;'>删除</a>";
-                //ul.appendChild(li);//添加
-                ul.insertBefore(li, ul.children[0]);
-                //删除
-                var as = document.querySelectorAll('a');
-                for (var i = 0; i < as.length; i++) {
-                    as[i].onclick = function () {
-                        ul.removeChild(this.parentNode);
-                    }
-                }
+        //1.准备假数据
+        var datas = [
+            {
+                name: 'xxx',
+                subject: 'js',
+                score: 100
+            },
+            {
+                name: '111',
+                subject: 'js',
+                score: 98
+            },
+            {
+                name: '222',
+                subject: 'js',
+                score: 90
             }
+        ]
 
+        //往tbody里面放行
+        var tbody = document.querySelector('tbody');
+        for (var i = 0; i < datas.length; i++) {
+            //1.创建tr
+            var tr = document.createElement('tr');
+            tbody.appendChild(tr);
+            //2.行里面创建td,取决于每个对象里面有几个属性
+            for (var k in datas[i]) {
+                var td = document.createElement('td');
+                td.innerHTML = datas[i][k];
+                tr.appendChild(td)
+            }
+            //3.创建操作单元格
+            var td = document.createElement('td');
+            td.innerHTML = '<a href="javascript:;">删除</a>';
+            tr.appendChild(td);
         }
-
-
-
-
+        //4.删除操作 开始
+        var as = document.querySelectorAll('a');
+        for (var i = 0; i < as.length; i++) {
+            as[i].onclick = function () {
+                //node.removeChild(child)
+                //this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)
+                tbody.removeChild(this.parentNode.parentNode)
+            }
+        }
     </script>
 </body>
 

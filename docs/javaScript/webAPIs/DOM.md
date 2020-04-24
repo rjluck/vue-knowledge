@@ -10,6 +10,14 @@
 
 W3C已经定义了一系列的DOM接口,通过这些DOM接口可以改变网页的内容、结构和样式。
 
+- 对于`JavaScript`,为了能够使`JavaScript`操作`HTML`,`JavaScript`就有了一套自己的`DOM`编程接口。
+- 对于`HTML`,`DOM`使得`HTML`形成一棵dom树,包含文档、元素、节点。
+
+
+> 我们获取过来的DOM元素是一个对象(object)，所以称为文档对象模型
+
+关于dom操作,我们主要针对元素的操作。主要有创建、增、删、改、查、属性操作、事件操作。
+
 ### DOM树
 
 ![image](/javaScript/DOM.png)
@@ -822,12 +830,102 @@ eg:
 
 ### 6.复制节点(克隆节点)
 
+`node.cloneNode()`
+
+- 该方法返回调用该方法的节点的下一个副本,也称为克隆节点/拷贝节点。
+- 如果括号参数为空或者为`false`,则是浅拷贝，即只克隆复制节点本身，不克隆里面的子节点。
+- 如果括号参数为`true`，则是深拷贝,会复制节点本身以及里面所有的子节点。
+
+eg：
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <ul>
+        <li>1</li>
+        <li>2</li>
+        <li>3</li>
+    </ul>
+    <script>
+        var ul = document.querySelector('ul');
+        var lili = ul.children[0].cloneNode(true);
+        ul.appendChild(lili)
+    </script>
+</body>
+
+</html>
+```
+
+### 7.三种动态创建元素的区别
+
+- document.write()
+- document.innerHTML
+- document.createElement()
+
+**区别**
+- document.write 是直接将内容写入页面的内容流,**但是文档流执行完毕,则它会导致页面全部重绘**
+```js
+var btn = document.querySelector('button');
+btn.onclick = function(){
+    document.write('<div>111</div>')
+}
+```
+```js
+window.onload = function(){
+    document.write('<div>111</div>')
+}
+```
+- innerHTML 是将内容写入某个`DOM`节点,不会导致页面全部重绘
+- innerHTML 创建多个元素效率更高(不要拼接字符串(3109)，采取数组形式拼接(6))，结构稍微复杂。
+```js
+var inner = document.querySelector('.inner');
+for(var i = 0;i<100;i++){
+    inner.innerHTML = '<a href="javascript:;">百度</a>'
+}
+```
+
+```js
+var inner = document.querySelector('.inner');
+var arr = [];
+for(var i = 0;i<100;i++){
+     arr.push('<a href="javascript:;">百度</a>')
+}
+inner.innerHTML = arr.join('')
+```
+
+- createElement() 创建多个元素效率稍微低一点点(17),但是结构更清晰
+```js
+var ceate = document.querySelector('.ceate');
+for(var i = 0;i<100;i++){
+    var a = document.createElement('a');
+    create.appendChild(a);
+}
+```
 
 
+**document.write()**
+```js
+document.write('<div></div>')
+```
 
+**document.innerHTML**
+```js
+var inner = document.querySelector('.inner');
+inner.innerHTML = '<a href="javascript:;">百度</a>'
+```
 
+**document.createElement()**
+```js
+var ceate = document.querySelector('.ceate');
+var a = document.createElement('a');
+create.appendChild(a);
+```
 
-
-
-
-
+> 总结:不同浏览器下,innerHTML 效率要比 createElement 高
