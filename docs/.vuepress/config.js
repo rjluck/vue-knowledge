@@ -95,6 +95,7 @@ let sidebar = {
             children: [
                 '/javaScript/webAPIs/',
                 '/javaScript/webAPIs/DOM',
+                '/javaScript/webAPIs/DOMHigh',
                 '/javaScript/webAPIs/eg'
             ]
         },
