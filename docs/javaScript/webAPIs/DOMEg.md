@@ -711,3 +711,170 @@
 ```
 
 
+## 跟随鼠标的天使
+
+- 鼠标不断的移动,使用鼠标移动事件:`mousemove`
+- 在页面中移动,给`document`注册事件
+- 图片要移动距离,而且不占位置,我们使用绝对定位即可
+- 核心原理:每次鼠标移动,我们都会获得最新的鼠标坐标,把这个x和y坐标作为图片的top和left值就可以移动图片
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        img {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <img src="images/1.jpg" alt="">
+    <script>
+        var pic = document.querySelector('img');
+        document.addEventListener('mousemove', function (e) {
+            console.log(1, pic.width)
+            var x = e.pageX;
+            var y = e.pageY;
+            //千万不要忘记给left和top添加px单位
+            pic.style.left = x - (pic.width / 2) + 'px';
+            pic.style.top = y - (pic.height / 2) + 'px';
+        })
+    </script>
+</body>
+
+</html>
+```
+
+## 模拟京东按键输入内容
+
+当我们按下`s`键,光标就定位到搜索框
+
+- 核心思路:检测用户是否按下了`s`键,如果按下`s`键,就把光标定位到搜索框里面
+- 使用键盘事件对象里面的`keyCode`判断用户按下的是否是`s`键
+- 搜索框获得焦点:使用`js`里面的`focus()`方法
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        img {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="text">
+    <script>
+        var search = document.querySelector('input');
+        document.addEventListener('keyup', function (e) {
+            console.log(e.keyCode);
+            if (e.keyCode === 83) {
+                search.focus();
+            }
+        })
+    </script>
+</body>
+
+</html>
+```
+
+
+## 模拟京东快递单号查询
+
+要求:当我们在文本框中输入内容时,文本框上面自动显示大字号的内容
+
+- 快递单号输入内容时,上面的大号字体盒子(con)显示(这里面的字号更大)
+- 表单检测用户输入:给表单添加键盘事件
+- 同时把快递单号里面的值(value)获取过来赋值给con盒子(innerText)做为内容
+- 如果快递单号里面内容为空,则隐藏大号字体盒子(con)盒子
+- 失去焦点，就隐藏这个con盒子
+
+> 注意:keydown 和 keypress 在文本框里面的特点:他们两个事件触发的时候,文字还没有落入文本框中
+
+> keyup事件触发的时候,文字已经落入文本框里面了
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .search {
+            position: relative;
+            width: 178px;
+            margin: 100px;
+        }
+
+        .con {
+            display: none;
+            position: absolute;
+            top: -40px;
+            width: 171px;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+            padding: 5px 0;
+            font-size: 18px;
+            line-height: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="search">
+        <div class="con">123</div>
+        <input type="text" placeholder="请输入您的快递单号" class="jd">
+    </div>
+
+    <script>
+        var con = document.querySelector('.con');
+        var jd_input = document.querySelector('.jd');
+        jd_input.addEventListener('keyup', function () {
+            console.log('输入内容啦')
+            if (this.value == '') {
+                con.style.display = 'none';
+            } else {
+                con.style.display = 'block';
+                con.innerText = this.value;
+            }
+
+        })
+
+        //失去焦点,就隐藏这个con盒子
+        jd_input.addEventListener('blur', function () {
+            con.style.display = 'none';
+        })
+        //获得焦点,就显示这个con盒子
+        jd_input.addEventListener('focus', function () {
+            if (this.value !== '') con.style.display = 'block';
+        })
+    </script>
+</body>
+
+</html>
+```
+
+
+
+
+
+

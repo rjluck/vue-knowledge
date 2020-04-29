@@ -96,7 +96,9 @@ let sidebar = {
                 '/javaScript/webAPIs/',
                 '/javaScript/webAPIs/DOM',
                 '/javaScript/webAPIs/DOMHigh',
-                '/javaScript/webAPIs/eg'
+                '/javaScript/webAPIs/DOMEg',
+                '/javaScript/webAPIs/BOM',
+                '/javaScript/webAPIs/BOMEg'
             ]
         },
     ],

@@ -8,29 +8,26 @@
 </head>
 
 <body>
-    <button>监听</button>
+    手机号码: <input type="number"> <button>发送</button>
     <script>
         var btn = document.querySelector('button');
-        //事件侦听注册事件 
-        //1.attachEvent ie9以前的版本才支持,其他浏览器及ie9以上的都不支持 
-        btn.attachEvent('onclick', function () {
-            alert('222')
-        })
-        btn.addEventListener('onclick', function () {
-            alert('333')
-        })
+        var time = 10;
+        btn.addEventListener('click', function () {
+            btn.disabled = true;
+            var timer = setInterval(function () {
+                if (time == 0) {
+                    clearInterval(timer);
+                    btn.disabled = false;
+                    btn.innerHTML = '发送';
+                    time = 10;
+                } else {
+                    btn.innerHTML = '还剩下' + time + '秒';
+                    time--;
+                }
 
-        function addEventListener(element, eventName, fn) {
-            //判断当前浏览器是否支持 addEventListener 方法
-            if (element.addEventListener) {
-                element.addEventListener(eventName, fn);//第三个参数,默认是false
-            } else if (element.attachEvent) {
-                element.attachEvent('on' + eventName, fn);
-            } else {
-                //相当于 element.onclick = fn;
-                element['on' + eventName] = fn;
-            }
-        }
+            }, 1000)
+
+        })
     </script>
 </body>
 
