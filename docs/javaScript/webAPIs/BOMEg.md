@@ -135,3 +135,110 @@
 
 </html>
 ```
+
+
+## 5秒钟后自动跳转页面
+
+- 利用定时器做倒计时效果
+- 时间到了,就跳转页面。使用location.href
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <button>点击</button>
+    <div></div>
+    <script>
+        var btn = document.querySelector('button');
+        var div = document.querySelector('div');
+        // btn.addEventListener('click', function () {
+        //     console.log(location.href);
+        //     location.href = 'https://www.baidu.com/'
+        // })
+        var timer = 5;
+        setInterval(function () {
+            if (timer == 0) {
+                location.href = 'https://www.baidu.com/'
+            }
+            div.innerHTML = '您将在' + timer + '秒钟之后跳转到首页'
+            timer--;
+        }, 1000)
+    </script>
+</body>
+
+</html>
+```
+
+
+
+## 获取URL参数数据
+
+- 主要练习数据在不同页面中传递
+- 第一个登录页面,里面有提交表单,`action`提交到`index.html`页面
+- 第二个页面,可以使用第一个页面的参数,这样实现了一个数据不同页面之间传递的效果
+- 第二个页面之所以可以使用第一个页面的数据,是利用了`URL`里面的`location.search`参数
+- 在第二个页面中,需要把这个参数提取
+- 第一步去掉`?`利用`substr`
+- 第二步 利用`=`分割键和值 `split('=')`
+
+```html
+/*login.html*/
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form action="index.html">
+        用户名:<input type="text" name="username" />
+        <input type="submit" value="登录">
+    </form>
+</body>
+
+</html>
+```
+
+```html
+/*index.html*/
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div></div>
+    <script>
+        console.log(location.search);//?username=1111
+        //1.先去掉?  substr('起始的位置',截取几个字符)
+        var params = location.search.substr(1);//username=1111
+        //2.利用=把字符串分割为数组 split('=');
+        var arr = params.split('=');//["username","1111"]
+        //3.把数据写入div中
+        var div = document.querySelector('div');
+        div.innerHTML = arr[1] + '欢迎您';
+    </script>
+</body>
+
+</html>
+```
+
+
+
+
+
+

@@ -98,7 +98,8 @@ let sidebar = {
                 '/javaScript/webAPIs/DOMHigh',
                 '/javaScript/webAPIs/DOMEg',
                 '/javaScript/webAPIs/BOM',
-                '/javaScript/webAPIs/BOMEg'
+                '/javaScript/webAPIs/BOMEg',
+                '/javaScript/webAPIs/PC'
             ]
         },
     ],

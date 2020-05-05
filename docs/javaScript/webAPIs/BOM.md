@@ -311,7 +311,235 @@ var fun = new Fun();
 `JavaScript`语言的一大特点是单线程,也就是说,**同一个时间只能做一件事**。这是因为`JavaScript`这门脚本语言诞生的使命---`JavaScript`是为了处理页面中用户的交互，以及操作`DOM`而诞生的。比如我们对某个`DOM`元素进行添加和删除操作,不能同时进行。应该先进行添加,之后再删除。
 
 
+单线程就意味着,所有任务需要排队,前一个任务结束,才会执行后一个任务,这样导致的问题就是:如果JS执行的时间过长,这样就会造成页面的渲染不连贯，导致页面渲染加载堵塞的感觉。
+
+**以下代码执行的结果是什么?**
+```js
+console.log(1);
+
+setTimeout(function(){
+    console.log(3)
+},1000);
+
+console.log(2);
+```
+> 123
+
+
+### 2.同步和异步
+
+为了解决这个问题,利用多核`CPU`的计算能力,`HTML5`提出`Web Worker`标准,允许`JavaScript`脚本创建多个线程。于是，`JS`中出现了**同步**和**异步**
+
+#### 同步
+
+前一个任务结束再执行后一个任务,程序的执行顺序与任务的排列顺序是一致的、同步的。比如做饭的同步做法:我们要烧水煮饭,等水开了(10分钟),再去切菜，炒菜。
+
+#### 异步
+
+在做一件事的时候,因为这件事会花费很长时间,在做这件事的同时,你还可以去处理其他事情。比如做饭的异步做法:我们在烧水的同时,利用这10分钟,去切菜，炒菜。
+
+他们的本质区别:这条流水线上各个流程的执行顺序不同。
+
+
+**以下代码执行的结果是什么?**
+```js
+console.log(1);
+
+setTimeout(function(){
+    console.log(3)
+},0);
+
+console.log(2);
+```
+> 123
+
+#### 同步任务
+
+同步任务都在主线程上执行,形成一个**执行栈**
+
+#### 异步任务
+
+`JS`的异步是通过回调函数实现的。
+
+一般而言,异步任务有以下三种类型:
+
+- 普通事件,如`click、resize`等
+- 资源价值,如`load、error`等
+- 定时器,包括`setInterval、setTimeout`等
+
+异步任务相关回调函数添加到任务队列中(任务队列也称为消息队列)
+
+
+### 3.JS执行机制
+
+- 先执行**执行栈中的同步任务**
+- 异步任务(回调函数)放入任务队列中
+- 一旦执行栈中的所有同步任务执行完毕,系统就会按次序读取任务队列中的异步任务,于是被读取的异步任务结束等待状态,进入执行栈,开始执行。
+
+
+**以下代码执行的结果是什么?**
+```js
+console.log(1);
+document.onClick = function(){
+    console.log('click');
+}
+console.log(2);
+setTimeout(function(){
+    console.log(3)
+},3000);
+
+```
+> 123
+
+
+由于主线程不断的重复获得任务、执行任务、再获取任务、再执行，这种机制被称为**事件循环(event loop)**
+
+![image](/javaScript/execute.png)
+
 
 ## location 对象
+
+### 1.什么是location对象
+
+`window`对象给我们提供了一个`location`属性用于获取或设置窗体的`URL`,并且可以用于解析`URL`,因为这个属性返回的是一个对象,所以我们将这个属性也称为**location对象**
+
+### 2.URL
+
+统一资源定位符(Uniform Resource Locator,URL)是互联网上标准资源的地址。互联网上的每个文件都有一个唯一的URL,它包含的信息指出文件的位置以及浏览器应该怎么处理它。
+
+URL的一般语法格式为:
+```
+protocol://host[:port]/path/[?query]#fragment
+
+http://www.itcast.cn/index.html?name=andy&age=18#link
+```
+
+组成 | 说明
+---|---
+protocol | 通信协议  常用http、ftp、maito等
+host | 主机(域名) www.itcast.cn
+port | 端口号 可选,省略时使用方案的默认端口,如http的默认端口为80
+path | 路径  由  零或多个'/'符号隔开的字符串,一般用来表示主机上的一个目录或文件地址
+query | 参数  以键值对的形式通过 & 符号分隔开来
+fragment| 片段  #后面内容 常见于链接 锚点
+
+
+
+### 3.location对象的属性
+
+location对象属性 | 返回值
+---|---
+location.href | 获取或者设置整个URL
+location.host | 返回主机(域名) www.itcast.cn
+location.port | 返回端口号,如果未写返回空字符串
+location.pathname | 返回路径
+location.search | 返回参数 
+location.hash| 返回片段 #后面内容  常见于链接 锚点
+
+
+### 4.location对象的方法
+
+location对象方法 | 返回值
+---|---
+location.assign() | 跟`href`一样,可以跳转页面(也称为重定向页面)
+location.replace() | 替换当前页面,因为不记录历史,所以不能后退页面
+location.reload() | 重新加载页面,相当于刷新按钮或者F5,如果参数为`true`强制刷新`ctrl+F5`
+
+```html
+<body>
+    <button>点击</button>
+    <script>
+        var btn = document.querySelector('button');
+        btn.addEventListener('click', function () {
+            //记录浏览历史,所以可以实现后退功能
+            //location.assign('http://www.baidu.com')
+            //不记录历史,所以不能后退页面
+            //location.replace('http://www.baidu.com')
+            location.reload();
+        })
+    </script>
+</body>
+```
+
+
+
 ## navigator 对象
+
+`navigator`对象包含有关浏览器的信息,它有很多属性,我们常用的是`userAgent`,该属性可以返回由客户机发送服务器的`user-agent`头部的值。
+
+判断用户哪个终端打开页面,实现跳转
+```js
+  //判断用户哪个终端打开页面,实现跳转
+        if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile| BlackBerry | IEMobile | MQQBrowser | JUC | Fennec | wOSBrowser| BrowserNG | WebOS | Symbian | WindowsPhone) /i)) {
+            // window.location.href = "https://www.bilibili.com/video/BV1HJ41147DG?p=285";//手机
+            window.location.href = "";//手机
+        } else {
+            // window.location.href = "https://www.baidu.com/";
+            window.location.href = "";//电脑
+        }
+```
+
+
+
+
 ## history 对象
+
+`window`对象给我们提供了一个`history`对象,与浏览器历史记录进行交互.该对象包含用户(在浏览器窗口中)访问过的`URL`
+
+history对象方法 | 作用
+---|---
+back() | 可以后退功能
+forward() | 前进功能
+go(参数) | 前进后退功能,参数如果是1,前进一个页面,如果是-1后退1个页面
+
+```html
+/*index*/
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <a href="test1.html">点我去列表页</a>
+    <button>前进</button>
+    <script>
+        var btn = document.querySelector('button');
+        btn.addEventListener('click', function () {
+            // history.forward();
+            history.go(1);//前进一步
+        })
+    </script>
+</body>
+
+</html>
+```
+
+```html
+/*list*/
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <a href="test.html">点我去首页</a>
+    <button>后退</button>
+    <script>
+        var btn = document.querySelector('button');
+        btn.addEventListener('click', function () {
+            //history.back();
+            history.go(-1)
+        })
+    </script>
+</body>
+
+</html>
+```
