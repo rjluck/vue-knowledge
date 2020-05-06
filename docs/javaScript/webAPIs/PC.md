@@ -249,5 +249,413 @@ element.scrollWidth | 返回自身实际的宽度,不含边框,返回数值不�
 ## mouseenter和mouseover的区别
 
 
+- 当鼠标移动到元素上时就会触发`mouseenter`事件
+- 类似`mouseover`,它们两者之间的差别是
+- `mouseover`鼠标经过自身盒子会触发,经过子盒子还会触发。`mouseenter`只会经过自身盒子触发。
+- 之所以这样,就是因为`mouseenter`不会冒泡
+- 跟`mouseenter`搭配鼠标离开`mouseleave`同样不会冒泡
+
+
+
+
+
 ## 动画函数封装
+
+
+### 1.动画实现原理
+
+核心原理:通过定时器`setInterval()`不断移动盒子位置
+
+实现步骤:
+
+- 获得盒子当前位置
+- 让盒子在当前位置加上1个移动距离
+- 利用定时器不断重复这个操作
+- 加一个结束定时器的条件
+- 注意此元素需要添加定位,才能使用`element.style.left`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        div {
+            position: absolute;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            background-color: pink;
+        }
+    </style>
+</head>
+<body>
+    <div></div>
+    <script>
+        var div = document.querySelector('div');
+        var timer = setInterval(() => {
+            if (div.offsetLeft >= 400) {
+                clearInterval(timer);
+            }
+            div.style.left = div.offsetLeft + 1 + 'px';
+        }, 30);
+
+    </script>
+</body>
+
+</html>
+```
+
+### 2.动画函数简单封装
+
+注意函数需要传递两个参数，**动画对象**和**移动到的距离**
+
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        div {
+            position: absolute;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            background-color: pink;
+        }
+
+        span {
+            position: absolute;
+            display: block;
+            width: 150px;
+            height: 150px;
+            background-color: purple;
+        }
+    </style>
+</head>
+
+<body>
+    <div></div>
+    <span></span>
+    <script>
+        //简单动画函数封装
+        function animate(obj, target) {
+            var timer = setInterval(() => {
+                if (obj.offsetLeft >= target) {
+                    clearInterval(timer);
+                }
+                obj.style.left = obj.offsetLeft + 1 + 'px';
+            }, 30);
+        }
+
+        var div = document.querySelector('div');
+        var span = document.querySelector('span');
+
+        animate(div, 100);
+        animate(span, 100);
+    </script>
+</body>
+
+</html>
+```
+
+### 3.动画函数给不同元素记录不同定时器
+
+如果多个元素都使用这个动画函数,每次都要`var`声明定时器。我们可以给不同的元素使用不同的定时器(自己专门用自己的定时器)
+
+核心原理:利用`JS`是一门动态语言,可以很方便的给当前对象添加属性
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        div {
+            position: absolute;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            background-color: pink;
+        }
+
+        span {
+            position: absolute;
+            display: block;
+            width: 150px;
+            height: 150px;
+            background-color: purple;
+        }
+    </style>
+</head>
+
+<body>
+    <button>按钮</button>
+    <div></div>
+    <span></span>
+    <script>
+        //给不同的元素指定了不同的定时器
+        function animate(obj, target) {
+            //当我们不断的点击按钮,这个元素的速度会越来越快,因为开启了太多的定时器
+            //解决方案就是,让我们元素只有一个定时器执行
+            //先清除以前的定时器,只保留当前的一个定时器执行
+            clearInterval(obj.timer);
+            obj.timer = setInterval(() => {
+                if (obj.offsetLeft >= target) {
+                    clearInterval(obj.timer);
+                }
+                obj.style.left = obj.offsetLeft + 1 + 'px';
+            }, 30);
+        }
+
+        var div = document.querySelector('div');
+        var span = document.querySelector('span');
+        var btn = document.querySelector('button');
+
+        animate(div, 100);
+        btn.addEventListener('click', function () {
+            animate(span, 100);
+        })
+
+    </script>
+</body>
+
+</html>
+```
+
+### 4.缓慢动画原理
+
+缓慢动画就是让元素运动速度有所变化,最常见的是让速度慢慢停下来。
+
+思路:
+
+- 让盒子每次移动的距离慢慢变小,速度就会慢慢落下来
+- 核心算法:缓慢动画公式`(目标值 - 现在的位置)/10(目标值 - 现在的位置)/10`,作为每次移动的距离步长
+- 停止的条件:让当前盒子位置等于目标位置就停止定时器
+- 注意步长值需要取整
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        div {
+            position: absolute;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            background-color: pink;
+        }
+
+        span {
+            position: absolute;
+            display: block;
+            width: 150px;
+            height: 150px;
+            background-color: purple;
+        }
+    </style>
+</head>
+<body>
+    <button>按钮</button>
+    <div></div>
+    <span></span>
+    <script>
+        function animate(obj, target) {
+            clearInterval(obj.timer);
+            obj.timer = setInterval(() => {
+                //步长值写到定时器的里面 (目标值 - 现在的位置)/10
+                //把我们步长值改为整数,不要出现小数问题
+                var step = Math.ceil((target - obj.offsetLeft) / 10);
+                if (obj.offsetLeft == target) {
+                    clearInterval(obj.timer);
+                }
+                //每次
+                obj.style.left = obj.offsetLeft + step + 'px';
+            }, 30);
+        }
+
+        var div = document.querySelector('div');
+        var span = document.querySelector('span');
+        var btn = document.querySelector('button');
+
+        animate(div, 300);
+        btn.addEventListener('click', function () {
+            animate(span, 300);
+        })
+
+    </script>
+</body>
+
+</html>
+```
+
+
+### 5.动画函数多个目标值之间移动
+
+- 可以让动画函数从800移到500
+- 当我们点击按钮时，判断步长是正值还是负值
+- 如果是正值,则步长往大了取整
+- 如果是负值,则步长往小了取整
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        div {
+            position: absolute;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            background-color: pink;
+        }
+
+        span {
+            position: absolute;
+            display: block;
+            width: 150px;
+            height: 150px;
+            background-color: purple;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="btn500">按钮到500</button>
+    <button class="btn800">按钮到800</button>
+    <div></div>
+    <span></span>
+    <script>
+        function animate(obj, target) {
+            clearInterval(obj.timer);
+            obj.timer = setInterval(() => {
+                //步长值写到定时器的里面 (目标值 - 现在的位置)/10
+
+                var step = (target - obj.offsetLeft) / 10;
+                step = step > 0 ? Math.ceil(step) : Math.floor(step)
+
+                if (obj.offsetLeft == target) {
+                    clearInterval(obj.timer);
+                }
+                //每次
+                obj.style.left = obj.offsetLeft + step + 'px';
+            }, 30);
+        }
+
+        var div = document.querySelector('div');
+        var span = document.querySelector('span');
+        var btn500 = document.querySelector('.btn500');
+        var btn800 = document.querySelector('.btn800');
+        btn500.addEventListener('click', function () {
+            animate(span, 500);
+        })
+        btn800.addEventListener('click', function () {
+            animate(span, 800);
+        })
+    </script>
+</body>
+
+</html>
+```
+
+
+### 6.动画函数添加回调函数
+
+回调函数原理:函数可以作为一个参数.将这个函数作为参数传到另一个函数里面,当那个函数执行完毕之后,再执行传进去的这个函数,这个过程就叫做回调。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        div {
+            position: absolute;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            background-color: pink;
+        }
+
+        span {
+            position: absolute;
+            display: block;
+            width: 150px;
+            height: 150px;
+            background-color: purple;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="btn500">按钮到500</button>
+    <button class="btn800">按钮到800</button>
+    <div></div>
+    <span></span>
+    <script>
+        function animate(obj, target, callback) {
+            //callback = function(){}
+            clearInterval(obj.timer);
+            obj.timer = setInterval(() => {
+                //步长值写到定时器的里面 (目标值 - 现在的位置)/10
+
+                var step = (target - obj.offsetLeft) / 10;
+                step = step > 0 ? Math.ceil(step) : Math.floor(step)
+
+                if (obj.offsetLeft == target) {
+                    clearInterval(obj.timer);
+                    //回调函数写到定时器结束里面
+                    if (callback) {
+                        callback();
+                    }
+                }
+                //每次
+                obj.style.left = obj.offsetLeft + step + 'px';
+            }, 30);
+        }
+
+        var div = document.querySelector('div');
+        var span = document.querySelector('span');
+        var btn500 = document.querySelector('.btn500');
+        var btn800 = document.querySelector('.btn800');
+        btn500.addEventListener('click', function () {
+            animate(span, 500);
+        })
+        btn800.addEventListener('click', function () {
+            animate(span, 800, function () {
+                span.style.backgroundColor = 'red';
+            });
+        })
+    </script>
+</body>
+
+</html>
+```
+
+### 7.动画函数封装到单独JS文件里面
+
+因为以后经常使用这个动画函数,可以单独封装到一个JS文件里面,使用的时候用这个JS文件即可
+
+
 ## 常见网页特效案例
