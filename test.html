@@ -5,65 +5,116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+
     <style>
-        div {
-            position: absolute;
-            left: 0;
-            width: 100px;
-            height: 100px;
-            background-color: pink;
+        * {
+            padding: 0;
+            margin: 0;
         }
 
-        span {
+        .box {
+            position: relative;
+            width: 700px;
+            height: 400px;
+            border: 1px solid #ccc;
+            margin: 0px auto;
+            overflow: hidden;
+        }
+
+        .box ul {
+            width: 500%;
+            height: 400px;
             position: absolute;
-            display: block;
-            width: 150px;
-            height: 150px;
-            background-color: purple;
+            top: 0;
+            left: 0;
+        }
+
+        .box ul li {
+            width: 700px;
+            height: 400px;
+            text-align: center;
+            float: left;
+            list-style: none;
+        }
+
+        .box ul li img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .circle {
+            width: 100px;
+            position: absolute;
+            bottom: 3%;
+            left: 300px;
+        }
+
+        .circle li {
+            list-style: none;
+            float: left;
+            width: 15px;
+            height: 15px;
+            border: 1px solid #aaa;
+            border-radius: 50%;
+            margin-left: 5px;
+
+        }
+
+        .arrow-l,
+        .arrow-r {
+            display: none;
+            position: absolute;
+            top: 50%;
+            width: 24px;
+            height: 40px;
+            background-color: pink;
+            z-index: 999;
+            line-height: 40px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .arrow-r {
+            right: 0;
+        }
+
+        .current {
+            background-color: yellow;
         }
     </style>
+
+    <!-- 因为test.js依赖animate.js,所以animate.js要写到index.js上面 -->
+    <script src="./animate.js"></script>
+    <script src="./test.js"></script>
 </head>
 
 <body>
-    <button class="btn500">按钮到500</button>
-    <button class="btn800">按钮到800</button>
-    <div></div>
-    <span></span>
-    <script>
-        function animate(obj, target, callback) {
-            //callback = function(){}
-            clearInterval(obj.timer);
-            obj.timer = setInterval(() => {
-                //步长值写到定时器的里面 (目标值 - 现在的位置)/10
+    <div class="box">
+        <!-- 左侧按钮 -->
+        <a href="javascript:;" class="arrow-l">&lt;</a>
+        <!-- 右侧按钮 -->
+        <a href="javascript:;" class="arrow-r">&gt;</a>
+        <!-- 核心的滚动区域 -->
+        <ul>
+            <li>
+                <img src="./images/1.jpg"></img>
+            </li>
+            <li>
+                <img src="./images/2.jpg"></img>
+            </li>
+            <li>
+                <img src="./images/3.jpg"></img>
+            </li>
+            <li>
+                <img src="./images/4.jpg"></img>
+            </li>
 
-                var step = (target - obj.offsetLeft) / 10;
-                step = step > 0 ? Math.ceil(step) : Math.floor(step)
+        </ul>
+        <!-- 小圆圈 -->
+        <ol class="circle">
 
-                if (obj.offsetLeft == target) {
-                    clearInterval(obj.timer);
-                    //回调函数写到定时器结束里面
-                    if (callback) {
-                        callback();
-                    }
-                }
-                //每次
-                obj.style.left = obj.offsetLeft + step + 'px';
-            }, 30);
-        }
-
-        var div = document.querySelector('div');
-        var span = document.querySelector('span');
-        var btn500 = document.querySelector('.btn500');
-        var btn800 = document.querySelector('.btn800');
-        btn500.addEventListener('click', function () {
-            animate(span, 500);
-        })
-        btn800.addEventListener('click', function () {
-            animate(span, 800, function () {
-                span.style.backgroundColor = 'red';
-            });
-        })
-    </script>
+        </ol>
+    </div>
 </body>
 
 </html>

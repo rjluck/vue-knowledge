@@ -99,7 +99,8 @@ let sidebar = {
                 '/javaScript/webAPIs/DOMEg',
                 '/javaScript/webAPIs/BOM',
                 '/javaScript/webAPIs/BOMEg',
-                '/javaScript/webAPIs/PC'
+                '/javaScript/webAPIs/PC',
+                '/javaScript/webAPIs/PCEg'
             ]
         },
     ],

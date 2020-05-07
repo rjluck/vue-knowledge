@@ -561,3 +561,362 @@ window.addEventListener('load', function (e) {
 </html>
 ```
 
+## 网页轮播图
+
+轮播图也称焦点图,是网页中比较常见的网页特效
+
+功能需求:
+
+- 鼠标经过轮播图模块,左右按钮显示,离开隐藏左右按钮
+- 点击右侧按钮一次，图片往左播放一次,以此类推,左侧按钮同理
+- 图片播放的同时,下面小圆圈模块跟随一起变化
+- 点击小圆圈,可以播放相应图片
+- 鼠标不经过轮播图,轮播图也会自动播放图片
+- 鼠标经过轮播图模块,自动播放停止
+
+动态生成小圆圈
+
+- 核心思路:小圆圈的个数要跟图片张数一致
+- 所以首先先得到ul里面图片的张数(图片放入li里面,所以就是li的个数)
+
+点击小圆滚动图片
+
+- 此时用到animate.js动画函数,将js文件引入
+- 使用动画函数的前提,该元素必须有定位
+- 注意是ul移动，而不是li
+- 滚动图片的核心算法:点击某个小圆圈,就让图片滚动,小圆圈的**索引号乘上图片的宽度**作为ul移动的距离
+- 此时需要知道小圆圈的索引号,我们可以在生成小圆圈的时候,给它设置一个自定义属性,点击的时候获取这个自定义属性即可
+
+
+点击右侧按钮一次,就让图片滚动一张
+
+- 声明一个`num`,点击一次,自增1,让这个变量乘以图片宽度,就是`ul`滚动的距离
+- 图片无缝滚动原原理:把`ul`第一个`li`复制一份,放到`ul`的最后面,当图片滚动到克隆的最后一张图片时，让ul快速的，不做动画的跳到最左侧，left为0
+- 同时`num`复制为0,可以从新开始滚动图片了
+
+克隆第一张图片
+
+- 克隆ul第一个li `cloneNode()` 小括号里加`true`深克隆,复制里面的子节点,`false`浅克隆
+- 添加到ul最后面appendChild
+
+
+点击右侧按钮,小圆圈跟随变化
+
+- 最简单的做法是再声明一个变量`circle`，每次点击自增1,注意,左侧按钮也需要这个变量,因此要声明全局变量
+- 但是图片有5张,我们小圆圈只有4个,少一个,必须加一个判断条件
+- 如果`circle == 4`就从新复原为0
+
+
+自动播放模块
+
+- 添加一个定时器
+- 自动播放轮播图，实际就类似于点击了右键按钮
+- 此时我们使用手动调用右侧按钮点击事件 `arrow_r.click()`
+- 鼠标经过focus就会停止定时器
+
+```js
+// animate.js
+function animate(obj, target, callback) {
+    console.log(obj)
+    console.log(target)
+    //callback = function(){}
+    clearInterval(obj.timer);
+    obj.timer = setInterval(() => {
+        //步长值写到定时器的里面 (目标值 - 现在的位置)/10
+
+        var step = (target - obj.offsetLeft) / 10;
+        step = step > 0 ? Math.ceil(step) : Math.floor(step)
+
+        if (obj.offsetLeft == target) {
+            clearInterval(obj.timer);
+            //回调函数写到定时器结束里面
+            // if (callback) {
+            //     callback();
+            // }
+            callback && callback();
+        }
+        //每次
+        obj.style.left = obj.offsetLeft + step + 'px';
+    }, 30);
+}
+```
+
+```js
+//index.js
+window.addEventListener('load', function () {
+    var arrow_l = document.querySelector('.arrow-l');
+    var arrow_r = document.querySelector('.arrow-r');
+    var box = document.querySelector('.box');
+    var boxWidth = box.offsetWidth;
+    //1.鼠标经过
+    box.addEventListener('mouseenter', function () {
+        arrow_l.style.display = 'block';
+        arrow_r.style.display = 'block';
+        clearInterval(timer);
+        timer = null;//清除定时器变量
+    })
+    box.addEventListener('mouseleave', function () {
+        arrow_l.style.display = 'none';
+        arrow_r.style.display = 'none';
+        timer = setInterval(function () {
+            arrow_r.click();//手动调用点击事件
+        }, 2000)
+    })
+    //2.动态生成小圆圈
+    var ul = box.querySelector('ul');
+    var ol = box.querySelector('.circle');
+
+    console.log(ul.children.length);
+    for (var i = 0; i < ul.children.length; i++) {
+        //创建一个小li
+        var li = document.createElement('li');
+        //记录当前小圆圈的索引号,通过自定义属性
+        li.setAttribute('index', i)
+        //把小li插入到ol里面
+        ol.appendChild(li);
+        //小圆圈的排他思想,我们可以直接在生成小圆圈的同时直接绑定点击事件
+        li.addEventListener('click', function () {
+            for (var i = 0; i < ol.children.length; i++) {
+                ol.children[i].className = ''
+            }
+            this.className = 'current';
+            //点击小圆圈，移动图片，当然移动的是ul
+            //ul的移动距离：小圆圈的索引号 乘以 图片的宽度,注意是负值
+            //当我们点击了某个小li,就拿到当前小li的索引号
+            var index = this.getAttribute('index')
+            //但我们点击了某个li,就要把这个li的索引号给num和circle
+            num = index;//解决当小圆点点击第3个时，再点击右侧箭头，图片移动异常
+            circle = index;//解决当小圆点点击第3个时，再点击右侧箭头，小圆点移动异常
+            animate(ul, -index * boxWidth);
+        })
+    }
+    //把ol里面的第一个小li设置类名为current
+    ol.children[0].className = 'current';
+    //3.克隆第一张图片(li) 放到ul最后面
+    var first = ul.children[0].cloneNode(true);
+    ul.appendChild(first);
+    //4.点击右侧按钮,图片滚动一张
+    var num = 0;
+    var circle = 0;//控制小圆圈的播放
+    var flag = true;//节流阀
+    arrow_r.addEventListener('click', function () {
+        if (flag) {
+            flag = false;//关闭节流阀
+
+            //如果走到了最后复制的一张图片，此时，我们的ul要快速复原 left 改为0
+            if (num == ul.children.length - 1) {
+                ul.style.left = 0;
+                num = 0;
+            }
+            num++;
+            animate(ul, -num * boxWidth, function () {
+                flag = true;//动画执行完毕,开启节流阀
+            });
+
+            //点击右侧按钮,小圆圈跟随一起变化,声明变量控制小圆圈的播放
+            circle++;
+            //如果circle == 4 说明走到最后我们克隆的这张图片了
+            if (circle == ol.children.length) {
+                circle = 0;
+            }
+            circleChange();//调用函数
+        }
+
+    })
+
+
+    arrow_l.addEventListener('click', function () {
+        if (flag) {
+            flag = false;
+
+            //如果走到了最后复制的一张图片，此时，我们的ul要快速复原 left 改为0
+            if (num == 0) {
+                num = ul.children.length - 1;
+                console.log('num', num)
+                ul.style.left = -(num) * boxWidth + 'px';
+            }
+            num--;
+            animate(ul, -num * boxWidth, function () {
+                flag = true;//动画执行完毕,开启节流阀
+            });
+
+            //点击右侧按钮,小圆圈跟随一起变化,声明变量控制小圆圈的播放
+            circle--;
+            //如果circle == 4 说明走到最后我们克隆的这张图片了
+            if (circle < 0) {
+                circle = ol.children.length - 1;
+            }
+
+            circleChange();//调用函数
+        }
+    })
+
+
+    //先清除其余小圆圈的current类名,留下当前小圆圈的current类名
+    function circleChange() {
+        for (var i = 0; i < ol.children.length; i++) {
+            ol.children[i].className = ''
+        }
+        ol.children[circle].className = 'current';
+    }
+    //5.自动播放轮播图
+    var timer = setInterval(function () {
+        arrow_r.click();//手动调用点击事件
+    }, 2000)
+
+})
+
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .box {
+            position: relative;
+            width: 700px;
+            height: 400px;
+            border: 1px solid #ccc;
+            margin: 0px auto;
+            overflow: hidden;
+        }
+
+        .box ul {
+            width: 500%;
+            height: 400px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .box ul li {
+            width: 700px;
+            height: 400px;
+            text-align: center;
+            float: left;
+            list-style: none;
+        }
+
+        .box ul li img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .circle {
+            width: 100px;
+            position: absolute;
+            bottom: 3%;
+            left: 300px;
+        }
+
+        .circle li {
+            list-style: none;
+            float: left;
+            width: 15px;
+            height: 15px;
+            border: 1px solid #aaa;
+            border-radius: 50%;
+            margin-left: 5px;
+
+        }
+
+        .arrow-l,
+        .arrow-r {
+            display: none;
+            position: absolute;
+            top: 50%;
+            width: 24px;
+            height: 40px;
+            background-color: pink;
+            z-index: 999;
+            line-height: 40px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .arrow-r {
+            right: 0;
+        }
+
+        .current {
+            background-color: yellow;
+        }
+    </style>
+
+    <!-- 因为test.js依赖animate.js,所以animate.js要写到index.js上面 -->
+    <script src="./animate.js"></script>
+    <script src="./index.js"></script>
+</head>
+
+<body>
+    <div class="box">
+        <!-- 左侧按钮 -->
+        <a href="javascript:;" class="arrow-l">&lt;</a>
+        <!-- 右侧按钮 -->
+        <a href="javascript:;" class="arrow-r">&gt;</a>
+        <!-- 核心的滚动区域 -->
+        <ul>
+            <li>
+                <img src="./images/1.jpg"></img>
+            </li>
+            <li>
+                <img src="./images/2.jpg"></img>
+            </li>
+            <li>
+                <img src="./images/3.jpg"></img>
+            </li>
+            <li>
+                <img src="./images/4.jpg"></img>
+            </li>
+
+        </ul>
+        <!-- 小圆圈 -->
+        <ol class="circle">
+
+        </ol>
+    </div>
+</body>
+
+</html>
+```
+
+
+## 返回顶部(仿淘宝)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

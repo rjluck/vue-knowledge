@@ -657,5 +657,131 @@ element.scrollWidth | 返回自身实际的宽度,不含边框,返回数值不�
 
 因为以后经常使用这个动画函数,可以单独封装到一个JS文件里面,使用的时候用这个JS文件即可
 
+```js
+// animate.js
+ function animate(obj, target, callback) {
+            //callback = function(){}
+            clearInterval(obj.timer);
+            obj.timer = setInterval(() => {
+                //步长值写到定时器的里面 (目标值 - 现在的位置)/10
+
+                var step = (target - obj.offsetLeft) / 10;
+                step = step > 0 ? Math.ceil(step) : Math.floor(step)
+
+                if (obj.offsetLeft == target) {
+                    clearInterval(obj.timer);
+                    //回调函数写到定时器结束里面
+                    if (callback) {
+                        callback();
+                    }
+                }
+                //每次
+                obj.style.left = obj.offsetLeft + step + 'px';
+            }, 30);
+}
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./animate.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .sliderbar {
+            width: 40px;
+            height: 40px;
+            background-color: pink;
+            position: relative;
+            left: 1000px;
+        }
+
+        span {
+            position: absolute;
+            text-align: center;
+            color: #fff;
+        }
+
+        .con {
+            width: 200px;
+            height: 40px;
+            background-color: purple;
+            position: absolute;
+            z-index: -1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sliderbar">
+        <span>←</span>
+        <div class="con">问题反馈</div>
+    </div>
+
+    <script>
+        //当我们鼠标经过sliderbar 就会让 con这个盒子滑动到左侧
+        //当我们鼠标离开sliderbar 就会让 con这个盒子滑动到右侧
+
+        var sliderbar = document.querySelector('.sliderbar');
+        var con = document.querySelector('.con');
+
+        sliderbar.addEventListener('mouseenter', function () {
+            animate(con, -160, function () {
+                sliderbar.children[0].innerHTML = '→'
+            })
+        })
+
+        sliderbar.addEventListener('mouseleave', function () {
+            animate(con, 0, function () {
+                sliderbar.children[0].innerHTML = '←'
+            })
+        })
+    </script>
+</body>
+
+</html>
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## 常见网页特效案例
+
+- 网页轮播图
+
+### 1.节流阀
+
+防止轮播图按钮连续点击造成播放过快。
+
+节流阀目的:当上一个函数动画内容执行完毕,再去执行下一个函数动画,让事件无法连续触发。
+
+核心思路：利用回调函数,添加一个变量来控制,锁住函数和解锁函数。
+
+- 开始设置一个变量`var flag = true`
+- `if(flag){flag = false; do something}` 关闭水龙头
+- 利用回调函数,动画执行完毕,`flag = true` 打开水龙头
