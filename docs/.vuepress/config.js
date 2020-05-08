@@ -100,7 +100,9 @@ let sidebar = {
                 '/javaScript/webAPIs/BOM',
                 '/javaScript/webAPIs/BOMEg',
                 '/javaScript/webAPIs/PC',
-                '/javaScript/webAPIs/PCEg'
+                '/javaScript/webAPIs/PCEg',
+                '/javaScript/webAPIs/Mobile',
+                '/javaScript/webAPIs/MobileEg'
             ]
         },
     ],

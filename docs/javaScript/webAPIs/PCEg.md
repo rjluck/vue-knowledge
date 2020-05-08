@@ -894,6 +894,251 @@ window.addEventListener('load', function () {
 
 ## 返回顶部(仿淘宝)
 
+- 滚动窗口至文档中的特定位置`window.scroll(x,y)`
+- 里面的x,y不跟单位的,直接写数字即可
+
+带有动画的返回顶部
+
+- 此时可以继续使用我们封装的动画函数
+- 只需要把所有的left相关的值改为 跟 页面垂直滚动距离相关就可以了
+- 页面滚动了多少,就可以通过`window.pageYOffset`得到
+- 最后页面滚动,使用`window.scroll(x,y)`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .w {
+            width: 1200px;
+            margin: 10px auto;
+        }
+
+        .slider-bar {
+            position: absolute;
+            left: 50%;
+            top: 300px;
+            margin-left: 600px;
+            width: 45px;
+            height: 130px;
+            background-color: pink;
+
+        }
+
+        .header {
+            height: 150px;
+            background-color: violet;
+        }
+
+        .banner {
+            height: 250px;
+            background-color: teal;
+        }
+
+        .main {
+            height: 1000px;
+            background-color: yellowgreen;
+        }
+
+        span {
+            position: absolute;
+            bottom: 0;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slider-bar">
+        <span class="goBack">返回顶部</span>
+    </div>
+    <div class="header w">头部区域</div>
+    <div class="banner w">banner区域</div>
+    <div class="main w">主体部分</div>
+    <script>
+        var sliderbar = document.querySelector('.slider-bar');
+        var banner = document.querySelector('.banner');
+        var bannerTop = banner.offsetTop;//就是被卷去头部的大小
+
+        var sliderbarTop = sliderbar.offsetTop - bannerTop;//侧边栏固定定位之后应该变化的值
+
+        var main = document.querySelector('.main');
+        var goBack = document.querySelector('.goBack');
+        var mainTop = main.offsetTop;
+
+        document.addEventListener('scroll', function () {
+            //window.pageYOffset页面被卷去的头部
+            console.log(window.pageYOffset);
+            //当我们页面被卷去的头部大于等于了 bannerTop 此时 侧边栏就要改为固定定位
+            if (window.pageYOffset >= bannerTop) {
+                sliderbar.style.position = 'fixed';
+                sliderbar.style.top = sliderbarTop + 'px';
+            } else {
+                sliderbar.style.position = 'absolute';
+                sliderbar.style.top = 300 + 'px';
+            }
+
+            //当我们页面滚动到main盒子,就显示goback模块
+            if (window.pageYOffset >= mainTop) {
+                goBack.style.display = 'block';
+            } else {
+                goBack.style.display = 'none';
+            }
+        })
+
+        //当我们点击了返回顶部模块,就让窗口滚动的页面在最上方
+        goBack.addEventListener('click', function () {
+            // window.scroll(0, 0)
+            //因为是窗口滚动，所以对象是window
+            animate(window, 0)
+        })
+
+        //动画函数
+        function animate(obj, target, callback) {
+            //callback = function(){}
+            clearInterval(obj.timer);
+            obj.timer = setInterval(() => {
+                //步长值写到定时器的里面 (目标值 - 现在的位置)/10
+                var step = (target - window.pageYOffset) / 10;
+                step = step > 0 ? Math.ceil(step) : Math.floor(step)
+                if (window.pageYOffset == target) {
+                    clearInterval(obj.timer);
+                    callback && callback();
+                }
+                //每次
+                window.scroll(0, window.pageYOffset + step)
+            }, 30);
+        }
+    </script>
+</body>
+
+</html>
+```
+
+
+##  筋斗云案例
+
+- 鼠标经过某个`li`,筋斗云跟着到当前`li`的位置
+- 鼠标离开这个`li`,筋斗云复原为原来的位置
+- 鼠标点击了某个`li`,筋斗云就会留在点击这个`li`的位置
+
+案例分析
+
+- 利用动画函数做动画效果
+- 原先筋斗云的起始位置是0
+- 鼠标经过某个`li`,把当前li的`offsetLeft`位置作为目标值即可
+- 鼠标离开某个`li`,就把目标值设为0
+- 如果点击了某个小li,就把当前的位置存储起来,做为筋斗云的起始位置
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .c_nav {
+            margin: 0 auto;
+            width: 560px;
+            height: 40px;
+            position: relative;
+
+        }
+
+        .c_nav ul {
+            width: 560px;
+            height: 40px;
+            background-color: pink;
+        }
+
+        .c_nav ul li {
+            width: 80px;
+            height: 40px;
+            line-height: 40px;
+            float: left;
+            color: #fff;
+            text-align: center;
+        }
+
+        .c_nav ul li a {
+            color: #fff;
+            position: absolute;
+            display: block;
+            width: 80px;
+            height: 40px;
+            text-align: center;
+        }
+
+        .c_nav span {
+            display: inline-block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 80px;
+            height: 40px;
+            background: url(images/1.jpg) no-repeat;
+
+        }
+    </style>
+    <script src="./animate.js"></script>
+    <script>
+        window.addEventListener('load', function () {
+            var cloud = document.querySelector('.cloud');
+            var c_nav = document.querySelector('.c_nav');
+            var lis = c_nav.querySelectorAll('li');
+            var current = 0;//做为筋斗云的起始位置
+            for (var i = 0; i < lis.length; i++) {
+                lis[i].addEventListener('mouseenter', function () {
+                    animate(cloud, this.offsetLeft)
+                })
+                lis[i].addEventListener('mouseleave', function () {
+                    animate(cloud, current)
+                })
+                lis[i].addEventListener('click', function () {
+                    current = this.offsetLeft;
+                })
+            }
+        })
+    </script>
+</head>
+
+<body>
+    <div id="c_nav" class="c_nav">
+        <span class="cloud"></span>
+        <ul>
+            <li><a href="javascript:;">首页新闻</a></li>
+            <li><a href="javascript:;">师资力量</a></li>
+            <li><a href="javascript:;">活动策划</a></li>
+            <li><a href="javascript:;">企业文化</a></li>
+            <li><a href="javascript:;">招聘信息</a></li>
+            <li><a href="javascript:;">公司简介</a></li>
+            <li><a href="javascript:;">nnnn</a></li>
+        </ul>
+    </div>
+</body>
+
+</html>
+```
+
 
 
 
