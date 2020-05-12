@@ -102,9 +102,11 @@ let sidebar = {
                 '/javaScript/webAPIs/PC',
                 '/javaScript/webAPIs/PCEg',
                 '/javaScript/webAPIs/Mobile',
-                '/javaScript/webAPIs/MobileEg'
+                '/javaScript/webAPIs/MobileEg',
+                '/javaScript/webAPIs/Store',
             ]
-        },
+        }
+
     ],
     '/webInterview/': [
         {
