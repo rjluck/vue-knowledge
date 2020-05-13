@@ -2,6 +2,8 @@
 
 ## 知识梳理
 
+[JQuery知识梳理](/JQuery/)
+
 [JavaScript知识梳理](/javaScript/)
 
 [TypeScript知识梳理](/typeScript/)
