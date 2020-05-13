@@ -353,7 +353,52 @@ https://github.com/ireaderlab/zyMedia
 
 
 
+## 记住用户名
 
+如果勾选记住用户名,下次用户打开浏览器,就在文本框里面自动显示上次登录的用户名
+
+案例分析
+
+- 把数据存起来,用到本地存储
+- 关闭页面,也可以显示用户名,所以用到`localStorage`
+- 打开页面,先判断是否有这个用户名,如果有,就在表单里面显示用户名,并且勾选复选框
+- 当复选框发生改变的时候`change`事件
+- 如果勾选，就存储，否则就移除
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <input type="text" id="username">
+    <input type="checkbox" name='' id="rember">记住用户名
+
+    <script>
+        var username = document.querySelector('#username');
+        var rember = document.querySelector('#rember');
+        if (localStorage.getItem('username')) {
+            username.value = localStorage.getItem('username');
+            rember.checked = true;
+        }
+
+        rember.addEventListener('change', function () {
+            if (this.checked) {
+                localStorage.setItem('username', username.value)
+            } else {
+                localStorage.removeItem('username')
+            }
+        })
+    </script>
+</body>
+
+</html>
+```
 
 
 

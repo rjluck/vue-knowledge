@@ -3,20 +3,30 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=video, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="./css/zy.media.css">
-    <script src="./css/zy.media.min.js"></script>
 </head>
 
 <body>
-    <video src=""></video>
-    <div class="zy_media">
-        <video poster="test.jpg" data-config='{"mediaTitle": "《疯狂动物城》--腾讯视频"}'>
-            <source src="test.mp4" type="video/mp4">
-            您的浏览器不支持HTML5视频
-        </video>
-    </div>
+    <input type="text" id="username">
+    <input type="checkbox" name='' id="rember">记住用户名
+
+    <script>
+        var username = document.querySelector('#username');
+        var rember = document.querySelector('#rember');
+        if (localStorage.getItem('username')) {
+            username.value = localStorage.getItem('username');
+            rember.checked = true;
+        }
+
+        rember.addEventListener('change', function () {
+            if (this.checked) {
+                localStorage.setItem('username', username.value)
+            } else {
+                localStorage.removeItem('username')
+            }
+        })
+    </script>
 </body>
 
 </html>
