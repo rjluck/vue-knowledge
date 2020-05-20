@@ -1,5 +1,5 @@
 
-#   JQuery
+#   JQuery简介
 
 [[toc]]
 
@@ -145,7 +145,45 @@ eg：
 </body>
 ```
 
-DOM对象和jQuery对象之间是可以相互转换的
+DOM对象和jQuery对象之间是可以相互转换的。
+
+因为原生`js`比`jQuery`更大,原生的一些属性和方法`jQuery`没有给我们封装,要想使用这些属性和方法需要把`jQuery`对象转换为DOM对象才能使用。
+
+**DOM对象转换为jQuery对象**
+
+`$(DOM对象)`
+
+eg:
+```js
+$('div');
+```
+
+**jQuery对象转换为DOM对象**
+
+两种方式
+
+- `$('div')[index]`  index是索引号
+- `$('div').get(index)` index是索引号
+
+eg:
+```html
+<body>
+    <video src="mov.mp4" muted></video>
+    <script>
+        //1.DOM对象转换为jQuery对象
+        //(1)我们直接获取视频,得到就是jQuery对象
+        $('video');
+        //(2)我们已经使用原生js获取过来DOM对象
+        var myvideo = document.querySelector('video');
+        //$(myvideo).play();  //jQuery里面没有play这个方法
+
+        //2.jQuery对象转换为DOM对象
+        //myvideo.play();//谷歌浏览器自动播放属性被禁用的，需要加muted属性才可以
+        $('video')[0].play();
+    </script>
+</body>
+
+```
 
 
 
