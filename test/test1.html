@@ -11,18 +11,286 @@
             padding: 0;
             margin: 0;
         }
+
+        a {
+            text-decoration: none;
+        }
+
+        .cart-thead {
+            width: 100%;
+            height: 45px;
+            background-color: #ddd;
+        }
+
+        .cart-thead div {
+            display: inline-block;
+            height: 45px;
+            line-height: 45px;
+            text-align: center;
+        }
+
+        .cart-thead .t-checkbox,
+        .t-price,
+        .t-sum {
+            width: 10%;
+        }
+
+        .cart-thead .t-goods {
+            width: 40%;
+        }
+
+        .cart-thead .t-num,
+        .t-action {
+            width: 13%;
+        }
+
+        /*  */
+        .cart-item-list .cart-item {
+            width: 100%;
+            height: 100px;
+            background-color: greenyellow;
+            padding-top: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .cart-item-list .cart-item div {
+            display: inline-block;
+            text-align: center;
+        }
+
+        .cart-item-list .cart-item .p-checkbox,
+        .p-price,
+        .p-sum {
+            width: 10%;
+        }
+
+        .cart-item-list .cart-item .p-goods {
+            width: 40%;
+        }
+
+        .cart-item-list .cart-item .p-num,
+        .p-action {
+            width: 13%;
+        }
+
+        .itxt {
+            width: 9%;
+        }
+
+        /*  */
+        .cart-floatbar {
+            height: 45px;
+            background-color: #ddd;
+        }
+
+        .cart-floatbar div {
+            display: inline-block;
+            text-align: center;
+        }
+
+        .cart-floatbar .select-all {
+            width: 10%;
+        }
+
+        .cart-floatbar .operation {
+            width: 25%;
+            margin-right: 20%;
+        }
+
+        .cart-floatbar .toolbar-right {
+            width: 42%;
+
+        }
+
+        .cart-floatbar .operation a {
+            margin-right: 3%;
+        }
+
+        .toolbar-right div {
+            margin-right: 2%;
+        }
+
+        .toolbar-right .btn-area {
+            width: 30%;
+            background-color: red;
+        }
     </style>
 
 </head>
 
 <body>
-    <span>123</span>
-    <div data-index="11"></div>
+    <div class="cart-wrap">
+        <!-- 头部全选框 -->
+        <div class="cart-thead">
+            <div class="t-checkbox">
+                <input type="checkbox" class="checkall">全选
+            </div>
+            <div class="t-goods">商品</div>
+            <div class="t-price">单价</div>
+            <div class="t-num">数量</div>
+            <div class="t-sum">小计</div>
+            <div class="t-action">操作</div>
+        </div>
+        <!-- 商品详细模块 -->
+        <div class="cart-item-list">
+            <div class="cart-item check-cart-item">
+                <div class="p-checkbox">
+                    <input type="checkbox" name="" id="" class="j-checkbox">
+                </div>
+                <div class="p-goods">
+                    <div class="p-img">
+                        <img src="" alt="">
+                    </div>
+                    <div class="p-msg">xxxxxxxxxxxxxxxxx</div>
+                </div>
+                <div class="p-price">￥12.20</div>
+                <div class="p-num">
+                    <div class="quantity-form">
+                        <a href="javascript:;" class="decrement">-</a>
+                        <input type="text" class="itxt" value="1">
+                        <a href="javascript:;" class="increment">+</a>
+                    </div>
+                </div>
+                <div class="p-sum">￥12.20</div>
+                <div class="p-action"><a href="javascript:;">删除</a></div>
+            </div>
+            <div class="cart-item check-cart-item">
+                <div class="p-checkbox">
+                    <input type="checkbox" name="" id="" class="j-checkbox">
+                </div>
+                <div class="p-goods">
+                    <div class="p-img">
+                        <img src="" alt="">
+                    </div>
+                    <div class="p-msg">xxxxxxxxxxxxxxxxx</div>
+                </div>
+                <div class="p-price">￥12.22</div>
+                <div class="p-num">
+                    <div class="quantity-form">
+                        <a href="javascript:;" class="decrement">-</a>
+                        <input type="text" class="itxt" value="1">
+                        <a href="javascript:;" class="increment">+</a>
+                    </div>
+                </div>
+                <div class="p-sum">￥12.22</div>
+                <div class="p-action"><a href="javascript:;">删除</a></div>
+            </div>
+            <div class="cart-item check-cart-item">
+                <div class="p-checkbox">
+                    <input type="checkbox" name="" id="" class="j-checkbox">
+                </div>
+                <div class="p-goods">
+                    <div class="p-img">
+                        <img src="" alt="">
+                    </div>
+                    <div class="p-msg">xxxxxxxxxxxxxxxxx</div>
+                </div>
+                <div class="p-price">￥12.22</div>
+                <div class="p-num">
+                    <div class="quantity-form">
+                        <a href="javascript:;" class="decrement">-</a>
+                        <input type="text" class="itxt" value="1">
+                        <a href="javascript:;" class="increment">+</a>
+                    </div>
+                </div>
+                <div class="p-sum">￥12.22</div>
+                <div class="p-action"><a href="javascript:;">删除</a></div>
+            </div>
+        </div>
+
+        <!-- 结算模块 -->
+        <div class="cart-floatbar">
+            <div class="select-all">
+                <input type="checkbox" class="checkall">全选
+            </div>
+            <div class="operation">
+                <a href="javascript:;" class="remove-batch">删除选中的商品</a>
+                <a href="javascript:;" class="clear-all">清理购物车</a>
+            </div>
+            <div class="toolbar-right">
+                <div class="amount-sum">已经选<em>1</em>件商品</div>
+                <div class="price-sum">总价:<em>￥100</em></div>
+                <div class="btn-area">去结算</div>
+            </div>
+        </div>
+    </div>
     <script>
         $(function () {
-            $("span").data("username", "andy");
-            console.log($("span").data("username"));//andy
-            console.log($("div").data("index"));//11
+            getSum();
+            //1.全选 全不选功能模块
+            //就是把全选按钮(checkall)的状态赋值给 三个小的input(j-checkbox)
+            $(".checkall").change(function () {
+                $(".j-checkbox,.checkall").prop("checked", $(this).prop("checked"))
+            })
+
+            //2.反全选
+            $(".j-checkbox").change(function () {
+                console.log('aaa', $(".j-checkbox:checked").length);
+                console.log('aaa', $(".j-checkbox").length);
+                if ($(".j-checkbox:checked").length == $(".j-checkbox").length) {
+                    $(".checkall").prop("checked", true);
+                } else {
+                    $(".checkall").prop("checked", false);
+                }
+            })
+
+            //3.增减商品数量模块
+            //首先声明一个变量，当我们点击+号，就让这个值++,然后赋值给文本框
+            $(".increment").click(function () {
+                var n = $(this).siblings('.itxt').val();
+                n++;
+                $(this).siblings('.itxt').val(n);
+                //4.计算小计模块
+                //当前商品的单价
+                var p = $(this).parent().parent().siblings(".p-price").text();
+                p = p.substr(1);
+                var price = (p * n).toFixed(2);//保留2位小数
+                //小计模块赋值
+                $(this).parent().parent().siblings(".p-sum").text("￥" + price)
+                getSum();
+            })
+
+            $(".decrement").click(function () {
+                var n = $(this).siblings('.itxt').val();
+                if (n == 1) {
+                    return false;
+                }
+                n--;
+                $(this).siblings('.itxt').val(n);
+                //4.计算小计模块
+                //当前商品的单价
+                // var p = $(this).parent().parent().siblings(".p-price").text();
+                var p = $(this).parents(".p-num").siblings(".p-price").text();
+                p = p.substr(1);
+                var price = (p * n).toFixed(2);//保留2位小数
+                //小计模块赋值
+                $(this).parents(".p-num").siblings(".p-sum").text("￥" + price)
+                getSum();
+            })
+
+            //5.用户修改文本框的值   计算  小计模块
+            $(".itxt").change(function () {
+                var n = $(this).val();
+                var p = $(this).parents(".p-num").siblings(".p-price").text().substr(1);
+                var price = (p * n).toFixed(2);//保留2位小数
+                //小计模块赋值
+                $(this).parents(".p-num").siblings(".p-sum").text("￥" + price)
+                getSum();
+            })
+
+            //6.计算总计和总额模块
+            function getSum() {
+                var count = 0;
+                var money = 0;
+                $(".itxt").each(function (i, ele) {
+                    count += parseInt($(ele).val());
+                })
+                $(".amount-sum em").text(count);
+                $(".p-sum").each(function (i, ele) {
+                    money += parseFloat($(ele).text().substr(1));
+                })
+                $(".price-sum em").text("￥" + money.toFixed(2));
+            }
         })
     </script>
 </body>

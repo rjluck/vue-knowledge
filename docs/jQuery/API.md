@@ -738,17 +738,133 @@ eg:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 ## jQuery文本属性值
+
+主要针对元素的**内容**还有**表单的值**操作
+
+### 1.普通元素内容 html()  
+
+相当于原生`innerHTML`
+
+- 获取元素内容 `html()`
+- 设置元素内容 `html("内容")`
+
+
+### 2.普通元素文本内容 text()  
+
+相当于原生`inneText`
+
+- 获取元素文本内容 `text()`
+- 设置元素文本内容 `text("内容")`
+
+
+### 3.表单的值 val()
+
+相当于原生`value`
+
+- 获取表单元素的值 `val()`
+- 设置表单元素的值 `val("内容")`
+
+eg:
+```html
+<body>
+    <div><span>我是内容</span></div>
+    <input type="text" value="请输入">
+    <script>
+        //1.获取设置元素内容 html()
+        console.log($("div").html());
+        $("div").html("222");
+        console.log($("div").html());
+        //2.获取设置元素文本内容 text()
+        console.log($("div").text());
+        $("div").text("2232");
+        console.log($("div").text());
+        //3.获取设置表单值 val()
+        console.log($("input").val());
+        $("input").val("666");
+        console.log($("input").val());
+    </script>
+</body>
+```
+
+
+
+
+
+
+
 ## jQuery元素操作
+
+主要是遍历、创建、添加、删除元素操作。
+
+### 1.遍历元素
+
+`jQuery`隐式迭代是对同一类元素做了同样的操作。如果想要给同一类元素做不同操作，就需要用到遍历。
+
+**语法1**
+```js
+$("div").each(function(index,domEle){xxx})
+```
+- `each`方法遍历匹配的每一个元素。主要用`DOM`处理，`each`每一个
+- 里面的回调函数有2个参数:`index`是每个元素的索引号,`demEle`是每个**DOM元素对象,不是jQuery对象**
+- 所以要想使用`jQuery`方法,需要给这个`dom`元素转换为`jQuery`对象`$(domEle)`
+
+
+
+**语法2**
+```js
+$.each(object,function(index,element){xxx})
+```
+
+- `$.each()`方法可用于遍历任何对象。主要用于数据处理，比如数组，对象
+- 里面的函数有2个参数:`index`是每个元素的索引号;`element`遍历内容
+
+
+eg：
+```html
+<body>
+    <div>1</div>
+    <div>2</div>
+    <div>3</div>
+    <script>
+        $(function () {
+            $("div").css("color", "red");
+            //如果针对同一类元素做不同操作,需要用到遍历元素(类似for,但是比for强大)
+            //1.each 方法遍历元素
+            var arr = ["red", "green", "blue"];
+            var sum = 0;
+            $("div").each(function (index, domEle) {
+                //回调函数第一个参数 一定是索引号
+                //回调函数第二个参数 一定是dom元素对象
+                console.log(index)
+                console.log(domEle)
+                //domEle.css("color"); dom对象没有css方法
+                $(domEle).css("color", arr[index]);
+                sum += parseInt($(domEle).text());
+            })
+
+            //2.$.each() 方法遍历元素  主要用于遍历数据，处理数据
+            $.each($("div"), function (i, ele) {
+                console.log(i)
+                console.log(ele)
+            })
+
+            $.each(arr, function (i, ele) {
+                console.log(i)
+                console.log(ele)
+            })
+
+            $.each({ name: "andy", age: 18 }, function (i, ele) {
+                console.log(i);//  name age
+                console.log(ele);// andy  18
+            })
+        })
+    </script>
+</body>
+```
+
+
+### 2.创建元素
+
+
 ## jQuery尺寸、位置操作

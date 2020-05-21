@@ -5,26 +5,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <script src="js/jquery.min.js"></script>
 </head>
 
 <body>
-    <input type="text" id="username">
-    <input type="checkbox" name='' id="rember">记住用户名
-
+    <div>1</div>
+    <div>2</div>
+    <div>3</div>
     <script>
-        var username = document.querySelector('#username');
-        var rember = document.querySelector('#rember');
-        if (localStorage.getItem('username')) {
-            username.value = localStorage.getItem('username');
-            rember.checked = true;
-        }
+        $(function () {
+            $("div").css("color", "red");
+            //如果针对同一类元素做不同操作,需要用到遍历元素(类似for,但是比for强大)
+            //1.each 方法遍历元素
+            var arr = ["red", "green", "blue"];
+            var sum = 0;
+            $("div").each(function (index, domEle) {
+                //回调函数第一个参数 一定是索引号
+                //回调函数第二个参数 一定是dom元素对象
+                console.log(index)
+                console.log(domEle)
+                //domEle.css("color"); dom对象没有css方法
+                $(domEle).css("color", arr[index]);
+                sum += parseInt($(domEle).text());
+            })
 
-        rember.addEventListener('change', function () {
-            if (this.checked) {
-                localStorage.setItem('username', username.value)
-            } else {
-                localStorage.removeItem('username')
-            }
+            //2.$.each() 方法遍历元素  主要用于遍历数据，处理数据
+            $.each($("div"), function (i, ele) {
+                console.log(i)
+                console.log(ele)
+            })
+
+            $.each(arr, function (i, ele) {
+                console.log(i)
+                console.log(ele)
+            })
+
+            $.each({ name: "andy", age: 18 }, function (i, ele) {
+                console.log(i);//  name age
+                console.log(ele);// andy  18
+            })
         })
     </script>
 </body>
