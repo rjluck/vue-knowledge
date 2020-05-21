@@ -434,10 +434,203 @@ eg:
 
             //2.事件切换 hover 如果只写一个函数,那么鼠标经过和离开都会触发这个函数
             $(".nav>li").hover(function () {
-                $(this).children("ul").slideToggle();
+                $(this).children("ul").stop().slideToggle();
             })
         })
     </script>
 </body>
 </html>
 ```
+
+## 简洁版透明度修改
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="js/jquery.min.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .wrap {
+            width: 600px;
+            height: 400px;
+            background-color: greenyellow;
+            margin: 100px auto;
+        }
+
+        .wrap ul li {
+            list-style: none;
+            width: 198px;
+            height: 198px;
+            border: 1px solid #ccc;
+            float: left;
+        }
+
+        .wrap ul li img {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <script>
+        $(function () {
+
+            $(".wrap li").hover(function () {
+                //鼠标进入的时候,其他的li标签透明度0.5
+                $(this).siblings().stop().fadeTo(400, 0.5)
+            }, function () {
+                //鼠标离开,其他li透明度改为1
+                $(this).siblings().stop().fadeTo(400, 1)
+            })
+        })
+    </script>
+</head>
+<body>
+    <div class="wrap">
+        <ul>
+            <li><a href="#"><img src="./images/1.jpg" alt=""></a></li>
+            <li><a href="#"><img src="./images/2.jpg" alt=""></a></li>
+            <li><a href="#"><img src="./images/3.jpg" alt=""></a></li>
+            <li><a href="#"><img src="./images/1.jpg" alt=""></a></li>
+            <li><a href="#"><img src="./images/1.jpg" alt=""></a></li>
+            <li><a href="#"><img src="./images/1.jpg" alt=""></a></li>
+        </ul>
+    </div>
+</body>
+</html>
+```
+
+## 王者荣耀手风琴效果
+
+- 鼠标经过某个小li有两步操作
+- 当前小li宽度变为200px,同时里面的小图片淡出,大图片淡入
+- 其余兄弟小li宽度变为69px，小图片淡入,大图片淡出
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="js/jquery.min.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        .king {
+            height: 100px;
+            width: 520px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+        }
+
+        .king ul {
+            height: 100%;
+        }
+
+        .king ul li {
+            height: 100%;
+            width: 100px;
+            position: relative;
+            float: left;
+            border: 2px solid #ccc;
+        }
+
+        .king li.current {
+            width: 200px;
+        }
+
+        .king li.current .bigImg {
+            display: block;
+        }
+
+        .king li.current .smallImg {
+            display: none;
+        }
+
+        .bigImg {
+            width: 200px;
+            height: 100px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .smallImg {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-radius: 5px;
+        }
+    </style>
+    <script>
+        $(function () {
+            $(".king li").mouseenter(function () {
+                $(this).stop().animate({ width: 200 }).find(".smallImg").stop().fadeOut().siblings(".bigImg").stop().fadeIn();
+                $(this).siblings().stop().animate({ width: 100 }).find(".smallImg").stop().fadeIn().siblings(".bigImg").stop().fadeOut()
+            })
+        })
+    </script>
+</head>
+<body>
+    <div class="king">
+        <ul>
+            <li class="current">
+                <a href="#">
+                    <img class="bigImg" src="./images/2.jpg" alt="">
+                    <img class="smallImg" src="./images/2.jpg" alt="">
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <img class="bigImg" src="./images/1.jpg" alt="">
+                    <img class="smallImg" src="./images/1.jpg" alt="">
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <img class="bigImg" src="./images/3.jpg" alt="">
+                    <img class="smallImg" src="./images/3.jpg" alt="">
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <img class="bigImg" src="./images/4.jpg" alt="">
+                    <img class="smallImg" src="./images/4.jpg" alt="">
+                </a>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+```
+
+
+
+## 购物车全选
+
+
+
+
+
+
+
+
+
+

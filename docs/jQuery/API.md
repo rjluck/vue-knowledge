@@ -477,12 +477,278 @@ eg:
 - `over`:鼠标移到元素上要触发的函数(相当于`mouseenter`)
 - `out`:鼠标移出元素要触发的函数(相当于`mouseleave`)
 
+eg：
+```js
+ //1.事件切换 hover 就是鼠标经过和离开的复合写法
+ // $(".nav>li").hover(function () {
+ //     $(this).children("ul").slideDown(200);
+ // }, function () {
+ //     $(this).children("ul").slideUp(200);
+ // })
+
+ //2.事件切换 hover 如果只写一个函数,那么鼠标经过和离开都会触发这个函数
+ $(".nav>li").hover(function () {
+    $(this).children("ul").slideToggle();
+ })
+```
+
+### 4.动画队列及其停止排队方法
+
+#### 动画或效果队列
+
+动画或者效果一旦触发就会执行,如果多次触发,就造成多个动画或者效果排队执行。
+
+#### 停止排队
+
+`stop()`
+
+- `stop()`方法用于停止动画或效果。
+- 注意:`stop()`写到动画或者效果的前面,相当于停止结束上一次的动画。
+
+```js
+  $(".nav>li").hover(function () {
+    //stop 方法必须写到动画的前面
+    $(this).children("ul").stop().slideToggle();
+  })
+```
+
+### 5.淡入淡出效果
+
+#### 淡入效果语法规范
+
+`fadeIn([speed],[easing],[fn])`
+
+#### 淡出效果语法规范
+
+`fadeOut([speed],[easing],[fn])`
+
+#### 淡入淡出切换效果语法规范
+
+`fadeToggle([speed],[easing],[fn])`
+
+#### 淡入/淡出/切换效果参数
+
+- 参数都可以省略
+- `speed`:三种预定速度之一的字符串(`slow`,`normal`,`fast`)或表示动画时长的毫秒数值(如:1000)
+- `easing`:(Optional)用来指定切换效果,默认是`swing`,可用参数`linear`。
+- `fn`:回调函数,在动画完成时执行函数,每个函数执行一次
+
+#### 渐进方式调整到指定的不透明度
+
+`fadeTo(speed,opacity,[easing],[fn])`
+
+- opacity透明度必须先,取值0~1之间
+- speed:三种预定速度之一的字符串(`slow`,`normal`,`fast`)或表示动画时长的毫秒数值(如:1000),必须写
+- easing:(Optional)用来指定切换效果,默认是`swing`,可用参数`linear`。
+- `fn`:回调函数,在动画完成时执行函数,每个函数执行一次
+
+eg:
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="js/jquery.min.js"></script>
+    <style>
+        div {
+            height: 200px;
+            width: 100px;
+            background-color: greenyellow;
+        }
+    </style>
+</head>
+
+<body>
+    <button>淡入效果</button>
+    <button>淡出效果</button>
+    <button>淡入淡出切换</button>
+    <button>修改透明度</button>
+    <div></div>
+    <script>
+        $(function () {
+            $("button").eq(0).click(function () {
+                $("div").fadeIn(1000);//淡入
+            })
+            $("button").eq(1).click(function () {
+                $("div").fadeOut(1000);//淡出
+            })
+            $("button").eq(2).click(function () {
+                $("div").fadeToggle()
+            })
+            $("button").eq(3).click(function () {
+                $("div").fadeToe(1000, 0.5)
+            })
+        })
+    </script>
+</body>
+```
+
+### 6.自定义动画 animate
+
+#### 语法
+
+`animate(params,[speed],[easing],[fn])`
+
+参数：
+
+- `params`:想要更改的样式属性,以对象形式传递,必须写。属性名可以不用带引号，如果是复合属性则需要采取驼峰命名法 `borderLeft`。其余参数都可以省略。
+- `speed`:三种预定速度之一的字符串(`slow`,`normal`,`fast`)或表示动画时长的毫秒数(如：1000)
+- `easing`:(Optional)用来指定切换效果,默认是`swing`,可用参数`linear`.
+- `fn`:回调函数,在动画完成执行的函数,每个元素执行一次。
 
 
+eg：
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="js/jquery.min.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        div {
+            width: 200px;
+            height: 200px;
+            background-color: greenyellow;
+            position: absolute;
+        }
+    </style>
+    <script>
+        $(function () {
+            $("button").click(function () {
+                $("div").animate({
+                    left: 200,
+                    top: 300,
+                    opacity: .4
+                }, 500);
+            })
+        })
+    </script>
+</head>
+<body>
+    <button>动起来</button>
+    <div></div>
+</body>
+</html>
+```
 
 
 
 ## jQuery属性操作
+
+### 1.设置或获取元素固有属性值 prop()
+
+所谓元素固有属性就是元素本身自带的属性,比如`<a>`元素里面的`href`，比如`<input>`元素里面的`type`
+
+#### 获取属性语法
+
+`prop("属性")`
+
+#### 设置属性语法
+
+`prop("属性","属性值")`
+
+eg:
+```html
+<body>
+    <a href="aaa">111</a>
+    <input type="checkbox" checked>
+    <script>
+        $(function () {
+            //1.element.prop("属性名")  获取元素固有的属性值
+            $("a").prop("href")
+            console.log('$("a").prop("href")', $("a").prop("href"))
+            $("a").prop("title", "挺好");
+
+            $("input").change(function () {
+                console.log($(this).prop('checked'))
+            })
+        })
+    </script>
+</body>
+```
+
+### 2.设置或获取元素自定义属性值 attr()
+
+用户自己给元素添加的属性,我们称为自定义属性。比如给`div`添加`index="1"`
+
+#### 获取属性语法
+
+`attr("属性")`  类似原生`getAttribute()`
+
+#### 设置属性语法
+
+`attr("属性","属性值")` 类似原生`setAttribute()`
+
+该方法也可以获取H5自定义属性
+
+eg:
+```html
+<body>
+    <div index="1" data-index="2">222</div>
+    <script>
+        $(function () {
+            console.log('$("div").attr("index")', $("div").attr("index"));//1
+            $("div").attr("index", 6)
+            console.log('$("div").attr("data-index")', $("div").attr("data-index"));//2
+        })
+    </script>
+</body>
+```
+
+### 3.数据缓存 data()
+
+`data()` 方法可以在指定的元素上存取数据,并不会修改`DOM`元素结构。一旦页面刷新,之前存放的数据都将被移除。
+
+#### 附加数据语法
+
+`data("属性","属性值")`  向被选元素附加数据
+
+#### 获取数据性语法
+
+`data("属性")` 向被选元素获取数据
+
+同时,还可以获取`HTML5`自定义属性`data-index`，得到的是数字型
+
+eg:
+```html
+<body>
+    <span>123</span>
+    <div data-index="11"></div>
+    <script>
+        $(function () {
+            $("span").data("username", "andy");
+            console.log($("span").data("username"));//andy
+            console.log($("div").data("index"));//11
+        })
+    </script>
+</body>
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## jQuery文本属性值
 ## jQuery元素操作
 ## jQuery尺寸、位置操作
