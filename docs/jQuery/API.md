@@ -866,5 +866,67 @@ eg：
 
 ### 2.创建元素
 
+**语法**
+
+`$("<li></li>")`
+
+动态的创建一个`<li>`
+
+### 3.添加元素
+
+**内部添加**
+
+- `element.append("内容")` 把内容放入匹配元素内部最**后面**,类似原生`appendChild`
+
+- `element.prepend("内容")` 把内容放入匹配元素内部最**前面**
+
+>内部添加元素,生成之后，它们是父子关系
+
+
+**外部添加**
+
+- `element.after("内容")`把内容放入目标元素后面
+
+- `element.before("内容")` 把内容放入目标元素前面
+
+>外部添加元素,生成之后，它们是兄弟关系
+
+
+### 4.删除元素
+
+- `element.remove()`  删除匹配的元素(本身)
+- `element.empty()`  删除匹配的元素集合中所有的子节点
+- `element.html("")`  清空匹配的元素集合中所有的子节点
+
+eg：
+```html
+<body>
+    <ul>
+        <li>原先的li</li>
+    </ul>
+    <div class="test">原先的div</div>
+    <script>
+        $(function () {
+            //1.创建元素
+            var li = $("<li>后来创建的li</li>");
+            var div = $("<div>后来的div</div>")
+            //2.添加元素
+            //(1)内部添加
+            $("ul").append(li);//内部添加并且放到内容的最后面
+            $("ul").prepend(li);//内部添加并且放到内容的最前面
+            //(2)外部添加
+            $("div").after(div);
+            $("div").before(div);
+            //3.删除元素
+            //$("ul").remove();
+            $("ul").empty();
+            $("ul").html("");
+        })
+    </script>
+</body>
+```
+
+
 
 ## jQuery尺寸、位置操作
+

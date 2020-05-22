@@ -6,44 +6,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script src="js/jquery.min.js"></script>
+    <style>
+        div {
+            width: 200px;
+            height: 200px;
+            border: 1px solid #ccc;
+        }
+    </style>
 </head>
 
 <body>
-    <div>1</div>
-    <div>2</div>
-    <div>3</div>
+    <div></div>
+    <input type="text">
     <script>
         $(function () {
-            $("div").css("color", "red");
-            //如果针对同一类元素做不同操作,需要用到遍历元素(类似for,但是比for强大)
-            //1.each 方法遍历元素
-            var arr = ["red", "green", "blue"];
-            var sum = 0;
-            $("div").each(function (index, domEle) {
-                //回调函数第一个参数 一定是索引号
-                //回调函数第二个参数 一定是dom元素对象
-                console.log(index)
-                console.log(domEle)
-                //domEle.css("color"); dom对象没有css方法
-                $(domEle).css("color", arr[index]);
-                sum += parseInt($(domEle).text());
+            $("div").on("click", function () {
+                alert(1111)
             })
 
-            //2.$.each() 方法遍历元素  主要用于遍历数据，处理数据
-            $.each($("div"), function (i, ele) {
-                console.log(i)
-                console.log(ele)
+            //1.自动触发事件
+            // $("div").click();
+            // $("div").trigger("click")
+            $("div").triggerHandler("click");
+            $("input").on("focus", function () {
+                $(this).val("你好吗?")
             })
 
-            $.each(arr, function (i, ele) {
-                console.log(i)
-                console.log(ele)
-            })
-
-            $.each({ name: "andy", age: 18 }, function (i, ele) {
-                console.log(i);//  name age
-                console.log(ele);// andy  18
-            })
+            $("input").triggerHandler("focus");
         })
     </script>
 </body>

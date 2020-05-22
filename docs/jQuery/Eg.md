@@ -663,6 +663,23 @@ eg:
 - 注意：总计是文本框里面的值相加用`val()`,总额是普通元素的内容用`text()`
 - 要注意普通元素里面的内容要去掉`￥`并且转换为数字型才能相加
 
+
+### 删除商品模块
+
+- 核心思路:把商品`remove()`删除元素即可
+- 有3个地方需要删除:1.商品后面的删除按钮 2.删除选中的商品 3.清理购物车
+- 商品后面的删除按钮:一定是删除当前的商品，所以从`$(this)`出发
+
+
+### 选中商品添加背景
+
+- 核心思路:选中的商品添加背景,不选中移除背景即可
+- 全选按钮点击:如果全选是选中的,则所有的商品添加背景,否则移除背景
+- 小的复选框点击:如果是选中状态,则当前商品添加背景,否则移除背景
+- 这个背景,可以通过类名修改,添加类和删除类
+
+
+
 eg:
 ```html
 <!DOCTYPE html>
@@ -715,7 +732,7 @@ eg:
         .cart-item-list .cart-item {
             width: 100%;
             height: 100px;
-            background-color: greenyellow;
+            /* background-color: greenyellow; */
             padding-top: 10px;
             border-bottom: 1px solid #ccc;
         }
@@ -781,8 +798,15 @@ eg:
             width: 30%;
             background-color: red;
         }
+
+        /* 背景颜色 */
+        .check-cart-item {
+            background-color: pink;
+        }
     </style>
+
 </head>
+
 <body>
     <div class="cart-wrap">
         <!-- 头部全选框 -->
@@ -798,7 +822,7 @@ eg:
         </div>
         <!-- 商品详细模块 -->
         <div class="cart-item-list">
-            <div class="cart-item check-cart-item">
+            <div class="cart-item">
                 <div class="p-checkbox">
                     <input type="checkbox" name="" id="" class="j-checkbox">
                 </div>
@@ -816,10 +840,10 @@ eg:
                         <a href="javascript:;" class="increment">+</a>
                     </div>
                 </div>
-                <div class="p-sum">￥100</div>
+                <div class="p-sum">￥12.20</div>
                 <div class="p-action"><a href="javascript:;">删除</a></div>
             </div>
-            <div class="cart-item check-cart-item">
+            <div class="cart-item">
                 <div class="p-checkbox">
                     <input type="checkbox" name="" id="" class="j-checkbox">
                 </div>
@@ -837,10 +861,10 @@ eg:
                         <a href="javascript:;" class="increment">+</a>
                     </div>
                 </div>
-                <div class="p-sum">￥100</div>
+                <div class="p-sum">￥12.22</div>
                 <div class="p-action"><a href="javascript:;">删除</a></div>
             </div>
-            <div class="cart-item check-cart-item">
+            <div class="cart-item">
                 <div class="p-checkbox">
                     <input type="checkbox" name="" id="" class="j-checkbox">
                 </div>
@@ -858,7 +882,7 @@ eg:
                         <a href="javascript:;" class="increment">+</a>
                     </div>
                 </div>
-                <div class="p-sum">￥100</div>
+                <div class="p-sum">￥12.22</div>
                 <div class="p-action"><a href="javascript:;">删除</a></div>
             </div>
         </div>
@@ -870,21 +894,29 @@ eg:
             </div>
             <div class="operation">
                 <a href="javascript:;" class="remove-batch">删除选中的商品</a>
-                <a href="javascript:;" class="clear-all">清理购物车</a>
+                <a href="javascript:;" class="clear-all">清空购物车</a>
             </div>
             <div class="toolbar-right">
-                <div class="amount-sum">已经选<em>1</em>件商品</div>
-                <div class="price-sum">总价:<em>￥100</em></div>
+                <div class="amount-sum">已经选<em>0</em>件商品</div>
+                <div class="price-sum">总价:<em>￥0</em></div>
                 <div class="btn-area">去结算</div>
             </div>
         </div>
     </div>
     <script>
         $(function () {
+            getSum();
             //1.全选 全不选功能模块
             //就是把全选按钮(checkall)的状态赋值给 三个小的input(j-checkbox)
             $(".checkall").change(function () {
-                $(".j-checkbox,.checkall").prop("checked", $(this).prop("checked"))
+                $(".j-checkbox,.checkall").prop("checked", $(this).prop("checked"));
+                //8.添加背景色
+                console.log('$(this).prop("checked")', $(this).prop("checked"))
+                if ($(this).prop("checked")) {
+                    $(".cart-item").addClass("check-cart-item");
+                } else {
+                    $(".cart-item").removeClass("check-cart-item");
+                }
             })
 
             //2.反全选
@@ -895,6 +927,13 @@ eg:
                     $(".checkall").prop("checked", true);
                 } else {
                     $(".checkall").prop("checked", false);
+                }
+
+                //8.添加背景色
+                if ($(this).prop("checked")) {
+                    $(this).parents(".cart-item").addClass("check-cart-item");
+                } else {
+                    $(this).parents(".cart-item").removeClass("check-cart-item");
                 }
             })
 
@@ -911,6 +950,7 @@ eg:
                 var price = (p * n).toFixed(2);//保留2位小数
                 //小计模块赋值
                 $(this).parent().parent().siblings(".p-sum").text("￥" + price)
+                getSum();
             })
 
             $(".decrement").click(function () {
@@ -928,6 +968,7 @@ eg:
                 var price = (p * n).toFixed(2);//保留2位小数
                 //小计模块赋值
                 $(this).parents(".p-num").siblings(".p-sum").text("￥" + price)
+                getSum();
             })
 
             //5.用户修改文本框的值   计算  小计模块
@@ -937,6 +978,99 @@ eg:
                 var price = (p * n).toFixed(2);//保留2位小数
                 //小计模块赋值
                 $(this).parents(".p-num").siblings(".p-sum").text("￥" + price)
+                getSum();
+            })
+
+            //6.计算总计和总额模块
+            function getSum() {
+                var count = 0;
+                var money = 0;
+                $(".itxt").each(function (i, ele) {
+                    count += parseInt($(ele).val());
+                })
+                $(".amount-sum em").text(count);
+                $(".p-sum").each(function (i, ele) {
+                    money += parseFloat($(ele).text().substr(1));
+                })
+                $(".price-sum em").text("￥" + money.toFixed(2));
+            }
+
+            //7.删除商品模块
+            //(1) 商品后面的删除按钮
+            $(".p-action a").click(function () {
+                $(this).parents(".cart-item").remove();
+                getSum();
+            })
+            //(2) 删除选中的商品
+            $(".remove-batch").click(function () {
+                // $(".j-checkbox").each(function (i, domEle) {
+                //     console.log('domEle', $(domEle).prop("checked"))
+                // })
+                $(".j-checkbox:checked").parents(".cart-item").remove();
+                getSum();
+            })
+            //(3) 清空购物车 删除全部商品
+            $(".clear-all").click(function () {
+                $(".cart-item").remove();
+                getSum();
+            })
+        })
+    </script>
+</body>
+</html>
+```
+
+## 发布微博
+
+- 点击发布按钮,动态创建一个`li`,放入文本框的内容和删除按钮,并且添加到`ul`中
+- 点击删除按钮,可以删除当前的微博留言
+
+eg:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="js/jquery.min.js"></script>
+    <style>
+        .box {
+            width: 600px;
+            border: 1px solid #ccc;
+            margin: 100px auto;
+            padding: 30px 30px;
+        }
+
+        li {
+            display: none;
+            border-bottom: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="box" id="weibo">
+        <span>发布微博</span>
+        <textarea name="" id="" cols="60" rows="10" class="txt"></textarea>
+        <button class="btn">发布</button>
+        <ul></ul>
+    </div>
+    <script>
+        $(function () {
+            //1.点击发布按钮
+            $(".btn").on('click', function () {
+                var li = $("<li></li>");
+                li.html($(".txt").val() + "<a href='javascript:;'>删除</a>");
+                $("ul").prepend(li);
+                li.slideDown();
+                $(".txt").val("");
+            })
+
+            //2.点击删除
+            $("ul").on('click', 'a', function () {
+                $(this).parent().slideUp(function () {
+                    $(this).remove();
+                });
             })
         })
     </script>

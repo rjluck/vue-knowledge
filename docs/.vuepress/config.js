@@ -114,7 +114,9 @@ let sidebar = {
             collapsable: true, // 可折叠
             children: [
                 '',
-                '/jQuery/API'
+                '/jQuery/API',
+                '/jQuery/Event',
+                '/jQuery/Eg'
             ]
         },
     ],
