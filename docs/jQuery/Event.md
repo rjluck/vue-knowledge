@@ -258,3 +258,32 @@ eg:
 
 
 ## jQuery事件对象
+
+
+事件被触发,就会有事件对象的产生。
+
+`element.on(events,[selector],function(event){})`
+
+- 阻止默认行为:`event.preventDefault()` 或者 `return false`
+- 阻止冒泡:`event.stopPropagation()`
+
+eg:
+```html
+<body>
+    <div></div>
+    <script>
+        $(function () {
+            $(document).on("click", function (event) {
+                // console.log("事件对象", event)
+                console.log(点击了document);
+            })
+
+            $("div").on("click", function (event) {
+                // console.log("事件对象", event)
+                console.log(点击了div);
+                event.stopPropagation();
+            })
+        })
+    </script>
+</body>
+```

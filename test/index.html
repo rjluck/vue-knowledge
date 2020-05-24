@@ -5,36 +5,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src="js/jquery.min.js"></script>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="css/default.css">
     <style>
-        div {
-            width: 200px;
-            height: 200px;
-            border: 1px solid #ccc;
+        img {
+            display: block;
+            margin: 0 auto;
+            margin-top: 100px;
         }
     </style>
 </head>
 
 <body>
-    <div></div>
-    <input type="text">
-    <script>
-        $(function () {
-            $("div").on("click", function () {
-                alert(1111)
-            })
+    <img data-lazy-src="https://picsum.photos/500/300?image=100" />
+    <img data-lazy-src="https://picsum.photos/500/300?image=101" />
+    <img data-lazy-src="https://picsum.photos/500/300?image=102" />
+    <img data-lazy-src="https://picsum.photos/500/300?image=103" />
+    <img data-lazy-src="https://picsum.photos/500/300?image=104" />
+    <img data-lazy-src="https://picsum.photos/500/300?image=105" />
+    <img data-lazy-src="https://picsum.photos/500/300?image=106" />
 
-            //1.自动触发事件
-            // $("div").click();
-            // $("div").trigger("click")
-            $("div").triggerHandler("click");
-            $("input").on("focus", function () {
-                $(this).val("你好吗?")
-            })
+    <script src="js/jquery-1.11.0.min.js"></script>
+    <script src="./dist/EasyLazyload.min.js"></script>
 
-            $("input").triggerHandler("focus");
-        })
+    <script type="text/javascript">
+        lazyLoadInit({
+            coverColor: "white",
+            coverDiv: "<h1>test</h1>",
+            offsetBottom: 0,
+            offsetTopm: 0,
+            showTime: 1100,
+            onLoadBackEnd: function (i, e) {
+                console.log("onLoadBackEnd:" + i);
+            }
+            , onLoadBackStart: function (i, e) {
+                console.log("onLoadBackStart:" + i);
+            }
+        });
+
     </script>
+
+
 </body>
 
 </html>
