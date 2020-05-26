@@ -164,6 +164,17 @@ eg:
 </html>
 ```
 
+### 7.链式编程
+
+链式编程是为了节省代码量,看起来更优雅。
+
+```js
+$(this).css("color","red").sibling().css("color","");
+```
+
+使用链式编程一定注意是哪个对象执行样式。
+
+
 
 
 
@@ -930,3 +941,251 @@ eg：
 
 ## jQuery尺寸、位置操作
 
+### 1.jQuery尺寸
+
+语法 | 用法
+---|---
+width()/height() | 取得匹配元素宽度和高度值,只算`width`/`height`
+innerWidth()/innderHeight() | 取得匹配元素宽度和高度值,包含`padding`
+outerWidth()/outerHeight() | 取得匹配元素宽度和高度值,包含`padding`、`border`
+outerWidth(true)/outerHeight(true) | 取得匹配元素宽度和高度值,包含`padding`、`border`、`margin`
+
+eg:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        div {
+            width: 200px;
+            height: 200px;
+            background-color: pink;
+            padding: 10px;
+            border: 15px solid red;
+            margin: 20px;
+        }
+    </style>
+    <script src="./js/jquery.min.js"></script>
+</head>
+<body>
+    <div></div>
+    <script>
+        $(function () {
+            //1.width()/height()
+            console.log('width()', $("div").width());//200
+            console.log('height()', $("div").height());//200
+            //2.innerWidth()/innerHeight()    padding
+            console.log('innerWidth()', $("div").innerWidth());//220
+            console.log('innerHeight()', $("div").innerHeight());//220
+            //3.outerWidth()/outerHeight()   padding+border
+            console.log('outerWidth()', $("div").outerWidth());//250
+            console.log('outerHeight()', $("div").outerHeight());//250
+            //4.outerWidth(true)/outerHeight(true)  padding+border+margin
+            console.log('outerWidth(true)', $("div").outerWidth(true));//290
+            console.log('outerHeight(true)', $("div").outerHeight(true));//290
+        })
+    </script>
+</body>
+</html>
+```
+
+- 以上参数为空,则是获取相应值,返回的是数字型。
+- 如果参数为数字,则是修改相应值。
+- 参数可以不必写单位。
+
+
+### 2.jQuery位置 
+
+位置主要有三个
+
+- `offset()`
+- `position()`
+- `scrollTop()`/`scrollLeft()`
+
+
+#### (1) offset()设置或获取元素偏移
+
+- `offset()`方法设置或返回被选元素相对于**文档**的偏移坐标,跟父级没有关系。
+- 该方法有2个属性`left`、`top`。 `offset().top`用于获取距离文档顶部的距离,`offset().left`用于获取距离文档左侧的距离
+- 可以设置元素的偏移:`offset({top:10,left:30})`
+eg：
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        .father {
+            width: 400px;
+            height: 400px;
+            background-color: pink;
+            margin: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+        .son {
+            width: 150px;
+            height: 150px;
+            background-color: purple;
+            position: absolute;
+            left: 10px;
+            top: 10px;
+        }
+    </style>
+    <script src="./js/jquery.min.js"></script>
+</head>
+<body>
+    <div class="father">
+        <div class="son"></div>
+    </div>
+    <script>
+        $(function () {
+            //1.获取设置距离文档的位置(偏移)
+            console.log($(".son").offset());//{top: 110, left: 110}
+            $(".son").offset({
+                top: 200,
+                left: 200
+            })
+        })
+    </script>
+</body>
+</html>
+```
+
+#### (2) position()获取元素偏移
+
+- `position()`方法用于返回被选元素相对于**带有定位的父级**偏移坐标,如果父级都没有定位,则以文档为准。
+
+eg:
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .father {
+            width: 400px;
+            height: 400px;
+            background-color: pink;
+            margin: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .son {
+            width: 150px;
+            height: 150px;
+            background-color: purple;
+            position: absolute;
+            left: 10px;
+            top: 10px;
+        }
+    </style>
+    <script src="./js/jquery.min.js"></script>
+</head>
+<body>
+    <div class="father">
+        <div class="son"></div>
+    </div>
+    <script>
+        $(function () {
+            //获取距离带有定位父级位置(偏移),如果么有带有定位的父级元素,则以文档为准
+            console.log($(".son").position());//{top: 10, left: 10}
+            //这个方法只能获取，不能设置
+        })
+    </script>
+</body>
+</html>
+```
+
+#### (3) scrollTop()/scrollLeft() 设置或获取元素被卷去的头部和左侧
+
+- `scrollTop()`方法设置或返回被选元素被卷去的头部
+
+eg：
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .back {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            background-color: yellow;
+            right: 30px;
+            bottom: 100px;
+            display: none;
+        }
+
+        .container {
+            width: 200px;
+            height: 2000px;
+            background-color: pink;
+            margin: 400px auto;
+        }
+    </style>
+    <script src="./js/jquery.min.js"></script>
+</head>
+
+<body>
+    <div class="back">返回顶部</div>
+    <div class="container"></div>
+    <script>
+        $(function () {
+            //设置
+            $(document).scrollTop(100)
+            //页面滚动事件
+            var boxTop = $(".container").offset().top;
+            $(window).scroll(function () {
+                console.log('$(document).scrollTop()', $(document).scrollTop())
+                if ($(document).scrollTop() >= boxTop) {
+                    $(".back").fadeIn();
+                } else {
+                    $(".back").fadeOut();
+                }
+            });
+
+            //返回顶部
+            $(".back").click(function () {
+                //1.无动画返回顶部
+                //$(document).scrollTop(0);
+
+                //2.有动画返回顶部
+                //核心原理:使用animate动画返回顶部
+                //animate动画函数里面有个scrollTop属性,可以设置位置
+                //但是是元素做动画,因此$("body,html").animate({scrollTop:0})
+                $("body,html").stop().animate({ scrollTop: 0 })
+            })
+        })
+    </script>
+</body>
+
+</html>
+```

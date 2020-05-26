@@ -1077,3 +1077,436 @@ eg:
 </body>
 </html>
 ```
+
+
+
+## 综合案例 toDoList
+
+www.todolist.cn
+
+- 文本框里面输入内容,按下回车，就可以生成待办事项
+- 点击待办事项复选框,就可以把当前数据添加到已完成事项里面
+- 点击已完成事项复选框,就可以把当前数据添加到待办事项里面
+- 但是本页面内容刷新不会丢失
+
+- 刷新页面不会丢失数据,因此需要用到本地存储`localStorage`
+- 核心思路:不管按下回车,还是点击复选框,都是把本地存储的数据加载到页面中,这样保证刷新关闭不会丢失数据
+- 存储的数据格式:`var todolist = [{title:'xxx',done:false}]`
+- 注意点1:本地存储`localStorage`里面只能存储字符串格式,因此需要把对象转换为字符串`JSON.stringify(data)`
+- 注意点2：获取本地存储数据,需要把里面的字符串转换为对象格式`JSON.parse()`我们才能使用里面的数据。
+
+### 按下回车把新数据添加到本地存储里面
+
+- 切记:页面中的数据,都要从本地存储里面获取,这样刷新页面不会丢失数据，所以先把数据保存到本地存储里面
+- 利用事件对象`keyCode`判断用户按下回车键(13)
+- 声明一个数组,保存数据
+- 先要读取本地存储原来的数据(声明函数`getData()`),放到这个数组里面。
+- 之后把最新从表单获取过来的数据，追加到数组里面
+- 最后把数组存储给本地存储(声明函数`saveData()`)
+
+### 本地存储数据渲染加载到页面
+
+- 因为后面也会经常渲染加载操作,所以声明一个函数`load`,方便后面调用
+- 先要读取本地存储数据。(数据不要忘记转换为对象格式)
+- 之后遍历这个数据(`$.eacn()`),有几条数据,就生成几个小`li`到`ol`
+- 每次渲染之前,先把原先里面`ol`的内容清空,然后渲染加载最新的数据
+
+### 删除
+
+- 点击里面的`a`标签,不是删除的`li`,而是删除本地存储对应的数据
+- 核心原理:先获取本地存储数据,删除对应的数据,保存给本地存储,重新渲染列表`li`
+- 我们可以给链接自定义属性，记录当前的索引号
+- 根据这个索引号删除相关的数据--- 数组`splice(i,1)`方法
+- 存储修改后的数据,然后存储给本地存储
+- 重新渲染加载数据列表
+- 因为`a`是动态创建的,我们使用`on`方法绑定事件
+
+
+### 正在进行和已完成选项操作
+
+- 当我们点击了小的复选框,修改本地存储数据,再重新渲染数据列表
+- 点击之后,获取本地存储数据
+- 修改对应数据属性`done`为当前复选框的`checked`状态
+- 之后保存数据到本地存储
+- 重新渲染加载数据列表
+- `load`加载函数里面,新增一个条件,如果当前数据的`done`为`true`就是已完成的,就把列表渲染加载到`ul`里面。
+- 如果当前数据的`done`为`false`就是待办事项,就把列表渲染加载到`ol`里面
+
+### 统计正在进行和已完成个数
+
+- 在我们`load`函数里面操作
+- 声明两个变量:`todoCount`待办个数,`doneCount`已完成个数
+
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./js/jquery.min.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        header {
+            height: 45px;
+            background-color: #333;
+        }
+
+        section {
+            width: 50%;
+            margin: 0 auto;
+        }
+
+        header section {
+            width: 50%;
+            height: 45px;
+            line-height: 45px;
+            background-color: #333;
+            margin: 0 auto;
+            color: #fff;
+        }
+
+        header section label {
+            color: #fff;
+            font-size: 16px;
+            margin-right: 100px;
+        }
+
+        header section input {
+            width: 30%;
+            border: none;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+        }
+
+        li {
+            list-style: none;
+            border: 1px solid #ccc;
+            border-left: 5px solid green;
+            height: 30px;
+            line-height: 30px;
+            padding: 0 10px;
+            margin-top: 10px;
+        }
+
+        li p {
+            display: inline-block;
+        }
+
+        li a {
+            float: right;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        footer {
+            margin: 0 auto;
+            width: 15%;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        $(function () {
+            //本地存储里面只能存储字符串的数据格式,把我们的数组对象转换为字符串格式  JSON.stringify()
+            //location.setItem('todo',JSON.stringify(data))
+            //获取本地存储的数据,我们需要把里面的字符串数据转换为  对象格式 JSON.parse()
+            //location.getItem('todo',JSON.parse(data))  
+            load();
+            //按下回车  把完整数据  存储到本地存储里面
+            $("#title").on('keydown', function (event) {
+                if (event.keyCode === 13) {
+                    if ($(this).val() === '') {
+                        alert('请输入您要的操作')
+                    } else {
+                        //按下了回车键
+                        //读取本地原来的数据
+                        var local = getData();
+                        console.log('local: ', local);
+                        local.push({ title: $(this).val(), done: false }); //添加新数据到local
+                        saveData(local);//存储到本地
+                        load();//渲染
+                        $(this).val("");
+                    }
+
+                }
+            })
+
+            //读取本地原来的数据
+            function getData() {
+                var data = localStorage.getItem("todolist");
+                if (data !== null) {
+                    return JSON.parse(data)
+                } else {
+                    return [];
+                }
+            }
+
+            //保存本地数据
+            function saveData(data) {
+                var data = localStorage.setItem("todolist", JSON.stringify(data));
+            }
+
+            //渲染加载数据
+            function load() {
+                var data = getData();
+                var todoCount = 0;
+                var doneCount = 0;
+                $("ol").empty();//遍历之前先清空
+                $("ul").empty();//遍历之前先清空
+                $.each(data, function (i, n) {
+                    if (n.done) {
+                        doneCount++;
+                        $("ul").prepend(`<li><input type='checkbox' checked/><p>${n.title}</p><a href='javascript:;'  id=${i}>删除</a></li>`)
+                    } else {
+                        todoCount++
+                        $("ol").prepend(`<li><input type='checkbox'/><p>${n.title}</p><a href='javascript:;'  id=${i}>删除</a></li>`)
+                    }
+
+                })
+
+                $("#todocount").text(todoCount);
+                $("#donecount").text(doneCount);
+            }
+
+            //3.删除操作
+            $("ol,ul").on('click', 'a', function () {
+                var data = getData();
+                var index = $(this).attr("id");
+                data.splice(index, 1);
+                saveData(data);
+                load();
+            });
+
+            //4.正在进行和已完成操作
+            $("ol,ul").on("click", "input", function () {
+                var data = getData();
+                var index = $(this).siblings("a").attr("id");
+                data[index].done = $(this).prop("checked");
+                saveData(data);
+                load();
+            })
+        })
+    </script>
+</head>
+<body>
+    <header>
+        <section>
+            <label for="title">ToDoList</label>
+            <input type="text" id="title" name="title" placeholder="添加ToDo">
+        </section>
+    </header>
+    <section>
+        <h2>正在进行 <span id="todocount"></span></h2>
+        <ol id="todolist" class="demo-box">
+            <li>
+                <input type="checkbox" name="" id="">
+                <p>111</p>
+                <a href="#">删除</a>
+            </li>
+        </ol>
+        <h2>已经完成 <span id="donecount"></span></h2>
+        <ul id="donelist">
+            <li>
+                <input type="checkbox" name="" id="">
+                <p>111</p>
+                <a href="#">删除</a>
+            </li>
+        </ul>
+    </section>
+    <footer>
+        CopyRight &copy; 2020 todolist.cn
+    </footer>
+</body>
+</html>
+```
+
+
+
+## 品优购电梯导航
+
+- 但我们滚动到  某个模块，就让电梯导航显示出来
+- 点击电梯导航页面可以滚动到相应内容区域
+- 核心算法:因为电梯导航模块和内容区模块是一一对应的
+- 当我们点击电梯导航某个小模块,就可以拿到当前小模块的索引号
+- 就可以把`animate`要移动的距离求出来:当前索引号内容区模块它的`offset().top`
+- 然后执行动画即可
+
+
+- 但我们点击电梯导航某个小`li`，当前小`li`添加`current`类,兄弟移除类名
+- 当我们页面滚动到内容区域某个模块,左侧电梯导航,相对应的小`li`模块,也会添加`current`类,兄弟移除`current`类
+- 触发的事件是页面滚动,因此这个功能要写到页面滚动事件里面
+- 需要用到`each`,遍历内容区域大模块。`each`里面能拿到内容区域每一个模块元素和索引号
+- 判断条件：被卷去的头部大于等于 内容区域里面每个模块的`offset().top`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .fixedtool {
+            position: fixed;
+            width: 8%;
+            top: 100px;
+            left: 1%;
+            /* margin-left: -776px; */
+            background-color: pink;
+            display: none;
+        }
+
+        .fixedtool li {
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            font-size: 12px;
+            border-bottom: 1px solid #ccc;
+            list-style: none;
+        }
+
+        .nav1 {
+            margin-left: 10%;
+            height: 300px;
+            background-color: red;
+        }
+
+        .nav2 {
+            margin-left: 10%;
+            height: 300px;
+            background-color: violet;
+        }
+
+        .nav3 {
+            margin-left: 10%;
+            height: 300px;
+            background-color: green;
+        }
+
+        .nav4 {
+            margin-left: 10%;
+            height: 300px;
+            background-color: gray;
+        }
+
+        .nav5 {
+            margin-left: 10%;
+            height: 300px;
+            background-color: yellowgreen;
+        }
+
+        .nav6 {
+            margin-left: 10%;
+            height: 300px;
+            background-color: orange;
+        }
+
+        .container {
+            width: 200px;
+            height: 2000px;
+            background-color: yellow;
+        }
+
+        .current {
+            background-color: orangered;
+        }
+    </style>
+    <script src="./js/jquery.min.js"></script>
+</head>
+
+<body>
+    <!-- 固定电梯导航 -->
+    <div class="fixedtool">
+        <ul>
+            <li class="current">家用电器1</li>
+            <li>手机通讯2</li>
+            <li>家用电器3</li>
+            <li>手机通讯4</li>
+            <li>手机通讯5</li>
+            <li>家用电器6</li>
+        </ul>
+    </div>
+    <div class="floor">
+        <div class="nav1">nav1</div>
+        <div class="nav2">nav2</div>
+        <div class="nav3">nav3</div>
+        <div class="nav4">nav4</div>
+        <div class="nav5">nav5</div>
+        <div class="nav6">nav6</div>
+    </div>
+
+    <div class="container"></div>
+    <!--  -->
+    <script>
+        $(function () {
+            //当我们点击了小li  此时不需要执行 页面滚动事件里面的li的背景选择
+            //节流阀  互斥锁
+            var flag = true;
+            //1.显示隐藏电梯导航
+            var toolTop = $(".nav1").offset().top;
+            toggleTool();
+            function toggleTool() {
+                if ($(document).scrollTop() >= toolTop) {
+                    $(".fixedtool").fadeIn();
+                } else {
+                    $(".fixedtool").fadeOut();
+                }
+            }
+
+            $(window).scroll(function () {
+                toggleTool();
+                //3.页面滚动到某个区域,左侧电梯导航小li相应添加和删除current类名
+                if (flag) {
+                    $(".floor div").each(function (i, ele) {
+                        if ($(document).scrollTop() >= $(ele).offset().top) {
+                            console.log(i);
+                            $(".fixedtool li").eq(i).addClass("current").siblings().removeClass();
+                        }
+                    })
+                }
+            })
+
+            //2.点击电梯导航 页面可以滚动到相应内容区域
+            $(".fixedtool li").click(function () {
+                flag = false;
+                //选出对应索引号的内容区的盒子,计算它的offset().top()
+                var current = $(".floor div").eq($(this).index()).offset().top;
+                //页面动画滚动效果
+                $("body,html").stop().animate({
+                    scrollTop: current
+                }, function () {
+                    flag = true;
+                });
+
+                //点击之后,让当前小li添加current类名,兄弟移除current类名
+                $(this).addClass("current").siblings().removeClass();
+            })
+        })
+    </script>
+</body>
+
+</html>
+```
+
+
+
+
+
+
+
+

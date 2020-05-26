@@ -5,45 +5,186 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" type="text/css" href="css/default.css">
+    <script src="./js/jquery.min.js"></script>
     <style>
-        img {
-            display: block;
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        header {
+            height: 45px;
+            background-color: #333;
+        }
+
+        section {
+            width: 50%;
             margin: 0 auto;
-            margin-top: 100px;
+        }
+
+        header section {
+            width: 50%;
+            height: 45px;
+            line-height: 45px;
+            background-color: #333;
+            margin: 0 auto;
+            color: #fff;
+        }
+
+        header section label {
+            color: #fff;
+            font-size: 16px;
+            margin-right: 100px;
+        }
+
+        header section input {
+            width: 30%;
+            border: none;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+        }
+
+        li {
+            list-style: none;
+            border: 1px solid #ccc;
+            border-left: 5px solid green;
+            height: 30px;
+            line-height: 30px;
+            padding: 0 10px;
+            margin-top: 10px;
+        }
+
+        li p {
+            display: inline-block;
+        }
+
+        li a {
+            float: right;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        footer {
+            margin: 0 auto;
+            width: 15%;
+            font-size: 12px;
+            margin-top: 20px;
         }
     </style>
+    <script>
+        $(function () {
+            //本地存储里面只能存储字符串的数据格式,把我们的数组对象转换为字符串格式  JSON.stringify()
+            //location.setItem('todo',JSON.stringify(data))
+            //获取本地存储的数据,我们需要把里面的字符串数据转换为  对象格式 JSON.parse()
+            //location.getItem('todo',JSON.parse(data))  
+            load();
+            //按下回车  把完整数据  存储到本地存储里面
+            $("#title").on('keydown', function (event) {
+                if (event.keyCode === 13) {
+                    if ($(this).val() === '') {
+                        alert('请输入您要的操作')
+                    } else {
+                        //按下了回车键
+                        //读取本地原来的数据
+                        var local = getData();
+                        console.log('local: ', local);
+                        local.push({ title: $(this).val(), done: false }); //添加新数据到local
+                        saveData(local);//存储到本地
+                        load();//渲染
+                        $(this).val("");
+                    }
+
+                }
+            })
+
+            //读取本地原来的数据
+            function getData() {
+                var data = localStorage.getItem("todolist");
+                if (data !== null) {
+                    return JSON.parse(data)
+                } else {
+                    return [];
+                }
+            }
+
+            //保存本地数据
+            function saveData(data) {
+                var data = localStorage.setItem("todolist", JSON.stringify(data));
+            }
+
+            //渲染加载数据
+            function load() {
+                var data = getData();
+                var todoCount = 0;
+                var doneCount = 0;
+                $("ol").empty();//遍历之前先清空
+                $("ul").empty();//遍历之前先清空
+                $.each(data, function (i, n) {
+                    if (n.done) {
+                        doneCount++;
+                        $("ul").prepend(`<li><input type='checkbox' checked/><p>${n.title}</p><a href='javascript:;'  id=${i}>删除</a></li>`)
+                    } else {
+                        todoCount++
+                        $("ol").prepend(`<li><input type='checkbox'/><p>${n.title}</p><a href='javascript:;'  id=${i}>删除</a></li>`)
+                    }
+
+                })
+
+                $("#todocount").text(todoCount);
+                $("#donecount").text(doneCount);
+            }
+
+            //3.删除操作
+            $("ol,ul").on('click', 'a', function () {
+                var data = getData();
+                var index = $(this).attr("id");
+                data.splice(index, 1);
+                saveData(data);
+                load();
+            });
+
+            //4.正在进行和已完成操作
+            $("ol,ul").on("click", "input", function () {
+                var data = getData();
+                var index = $(this).siblings("a").attr("id");
+                data[index].done = $(this).prop("checked");
+                saveData(data);
+                load();
+            })
+        })
+    </script>
 </head>
 
 <body>
-    <img data-lazy-src="https://picsum.photos/500/300?image=100" />
-    <img data-lazy-src="https://picsum.photos/500/300?image=101" />
-    <img data-lazy-src="https://picsum.photos/500/300?image=102" />
-    <img data-lazy-src="https://picsum.photos/500/300?image=103" />
-    <img data-lazy-src="https://picsum.photos/500/300?image=104" />
-    <img data-lazy-src="https://picsum.photos/500/300?image=105" />
-    <img data-lazy-src="https://picsum.photos/500/300?image=106" />
-
-    <script src="js/jquery-1.11.0.min.js"></script>
-    <script src="./dist/EasyLazyload.min.js"></script>
-
-    <script type="text/javascript">
-        lazyLoadInit({
-            coverColor: "white",
-            coverDiv: "<h1>test</h1>",
-            offsetBottom: 0,
-            offsetTopm: 0,
-            showTime: 1100,
-            onLoadBackEnd: function (i, e) {
-                console.log("onLoadBackEnd:" + i);
-            }
-            , onLoadBackStart: function (i, e) {
-                console.log("onLoadBackStart:" + i);
-            }
-        });
-
-    </script>
+    <header>
+        <section>
+            <label for="title">ToDoList</label>
+            <input type="text" id="title" name="title" placeholder="添加ToDo">
+        </section>
+    </header>
+    <section>
+        <h2>正在进行 <span id="todocount"></span></h2>
+        <ol id="todolist" class="demo-box">
+            <li>
+                <input type="checkbox" name="" id="">
+                <p>111</p>
+                <a href="#">删除</a>
+            </li>
+        </ol>
+        <h2>已经完成 <span id="donecount"></span></h2>
+        <ul id="donelist">
+            <li>
+                <input type="checkbox" name="" id="">
+                <p>111</p>
+                <a href="#">删除</a>
+            </li>
+        </ul>
+    </section>
+    <footer>
+        CopyRight &copy; 2020 todolist.cn
+    </footer>
 
 
 </body>

@@ -128,3 +128,12 @@ eg:
 github:https://github.com/alvarotrigo/fullPage.js
 
 中文翻译网站:http://www.dowebok.com/demo/2014/77/
+
+
+- `Bootstrap JS`插件
+
+`bootstrap`框架也是依赖于`jQuery`开发的,因此里面的`js`插件使用,也必须引入`jQuery`文件
+
+- 引入bootstrap.min.css
+- 引入jquery.min.js
+- 引入bootstrap.min.js
