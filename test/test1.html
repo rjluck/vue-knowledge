@@ -5,26 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src="./js/jquery.min.js"></script>
 </head>
 
 <body>
-    <button>快速</button>
-    <button>快速</button>
-    <button>快速</button>
-    <button>快速</button>
-    <button>快速</button>
-    <button>快速</button>
     <script>
-        $(function () {
-            //1.隐式迭代
-            $("button").click(function () {
-                //2.让当前元素变成红色
-                $(this).css("color", "red")
-                //3.让其余兄弟元素不变色
-                $(this).siblings().css("color", "")
-            })
+        var arr = [12, 88, 66];
+        var flag = arr.some(function (value, index, array) {
+            console.log('value: ', value);//12 88 66
+            console.log('index: ', index);//0 1 2
+            console.log('array: ', array);//[12,88,66]
+            return value >= 20;
         })
+
+        console.log('flag: ', flag);//true
     </script>
 </body>
 

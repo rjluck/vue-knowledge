@@ -1,0 +1,86 @@
+*{
+    padding:0;
+    margin:0
+}
+
+li{
+    list-style: none;
+}
+
+main {
+    width:600px;
+    margin:100px auto;
+}
+
+main h4{
+    height: 45px;
+    line-height: 45px;
+}
+
+main #tab .firstnav{
+    height: 45px;
+    line-height: 45px;
+    display:flex;
+    border:1px solid #ccc;
+}
+
+
+.firstnav input {
+    width:60px;
+}
+.tabscon input,section {
+    width:100%;
+    height:100%;
+}
+main #tab ul{
+    flex:3
+}
+
+main #tab ul li{
+    float:left;
+    height:100%;
+    border-right:1px solid #ccc;
+    position: relative;
+    padding: 0 5px 0 5px ;
+}
+main #tab .tabadd{
+    width:20px;
+    height:20px;
+    text-align: center;
+    margin: 10px 10px 0  0;
+    line-height: 20px;
+    border:1px solid #ccc;
+}
+
+.del{
+    width:15px;
+    height:15px;
+    line-height: 15px;
+    text-align: center;
+    background-color:#000;
+    color:#fff;
+    font-size: 12px;
+    position: absolute;
+    right:0;
+    top:0;
+    border-radius: 0 0 5px 6px;
+}
+
+main #tab ul  .liactive{
+    border-bottom:1px solid #fff;
+}
+
+
+.tabscon{
+    border: 1px solid #ccc;
+    border-top: 0px;
+    height:400px;
+}
+.tabscon section{
+    display: none;
+}
+
+
+.tabscon .conactive{
+    display: block;
+}

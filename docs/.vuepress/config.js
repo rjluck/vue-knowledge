@@ -40,7 +40,7 @@ let sidebar = {
             title: 'TypeScript基础', // 侧边栏名称
             collapsable: false, // 可折叠
             // children: [
-            //     '/typeScript/dataType', // 你的md文件地址
+            //     '/typeScript/dataType', // 你的md文件地址·
             //     '/typeScript/typeInference',
             //     '/typeScript/unionType',
             //     '/typeScript/interface',
@@ -105,12 +105,21 @@ let sidebar = {
                 '/javaScript/webAPIs/MobileEg',
                 '/javaScript/webAPIs/Store',
             ]
+        },
+        {
+            title: 'JavaScript高级', // 侧边栏名称
+            collapsable: true, // 可折叠
+            children: [
+                '/javaScript/jsHigh/object',
+                '/javaScript/jsHigh/constructor',
+                '/javaScript/jsHigh/eg',
+            ]
         }
 
     ],
     '/jQuery/': [
         {
-            title: 'jQuery简介', // 侧边栏名称
+            title: 'jQuery', // 侧边栏名称
             collapsable: true, // 可折叠
             children: [
                 '',
