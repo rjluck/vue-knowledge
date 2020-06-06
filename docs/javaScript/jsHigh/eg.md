@@ -281,3 +281,321 @@ class Tab {
 new Tab("#tab");
 
 ```
+
+
+
+## 查询商品
+
+- 把数据渲染到页面中(`forEach`)
+- 根据价格显示数据(`filter`)
+- 根据商品名称显示数据
+
+eg：
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .search {
+            width: 600px;
+            margin: 0 auto;
+        }
+
+        .search input {
+            width: 50px;
+        }
+
+        table {
+            margin: 0 auto;
+        }
+
+        table {
+            border-right: 1px solid #804040;
+            border-bottom: 1px solid #804040;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table td,
+        th {
+            border-left: 1px solid #804040;
+            border-top: 1px solid #804040;
+            width: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="search">
+        按照价格查询:<input type="text" class="start"> - <input type="text" class="end">
+        <button class="search_price">搜索</button>
+        按照商品名称查询: <input type="text" class="product">
+        <button class="search_pro">查询</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>产品名称</th>
+                <th>价格</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- <tr>
+                <td>1</td>
+                <td>小米</td>
+                <td>1000</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>小米</td>
+                <td>1000</td>
+            </tr> -->
+        </tbody>
+    </table>
+
+
+    <script>
+        //利用ES5新增数组方法操作数据
+        var data = [{
+            id: 1,
+            name: '小米',
+            price: 1000
+        }, {
+            id: 2,
+            name: 'oppo',
+            price: 999
+        }, {
+            id: 3,
+            name: '荣耀',
+            price: 2900
+        }, {
+            id: 4,
+            name: '华为',
+            price: 3900
+        }]
+
+        //1.获取相应的元素
+        var tbody = document.querySelector("tbody");
+        var search_price = document.querySelector('.search_price');
+        var start = document.querySelector('.start');
+        var end = document.querySelector('.end');
+        var search_pro = document.querySelector('.search_pro');
+        var product = document.querySelector('.product');
+
+        //2.把数据渲染到页面中
+        setData(data);
+        function setData(mydata) {
+            //先清空原来tbody里面的数据
+            tbody.innerHTML = '';
+            mydata.forEach(function (val) {
+                var tr = document.createElement('tr');
+                tr.innerHTML = `<td>${val.id}</td><td>${val.name}</td><td>${val.price}</td>`
+                tbody.appendChild(tr);
+            })
+        }
+
+
+        //3.根据价格查询商品
+        //当我们点击了按钮,就可以根据我们的商品价格去筛选数组里面的对象
+        search_price.addEventListener('click', function () {
+            var newData = data.filter(function (val) {
+                return val.price >= start.value && val.price <= end.value;
+            })
+            console.log('newData: ', newData);
+            setData(newData)
+        })
+
+
+        //4.根据商品名称查找商品
+        //如果查询数组唯一的元素,用some方法更合适,因为它找到这个元素就不再进行循环,效率更高
+        search_pro.addEventListener('click', function () {
+            var arr = [];
+            data.some(function (val) {
+                if (val.name == product.value) {
+                    console.log(val);
+                    arr.push(val)
+                    return true;//return 后面必须写true
+                }
+
+            })
+            console.log('arr: ', arr);
+            setData(arr)
+        })
+    </script>
+</body>
+
+</html>
+```
+
+
+## 闭包案例-循环注册点击事件
+
+点击li输出当前li的索引号
+
+补充知识点:
+
+异步任务主要有3种
+
+- 定时器中的回调函数
+- 事件中的回调函数
+- axios中的回调函数
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <ul class="nav">
+        <li>榴莲</li>
+        <li>臭豆腐</li>
+        <li>蒜泥</li>
+        <li>芒果</li>
+    </ul>
+    <script>
+        //闭包应用-点击li输出当前li的索引号
+
+        //方式1：利用动态添加属性的方式
+        var lis = document.querySelector('.nav').querySelectorAll("li");
+        //for循环是同步任务
+        for (var i = 0; i < lis.length; i++) {
+            lis[i].index = i;
+            lis[i].onclick = function () {
+                //点击调用函数时异步任务
+                // console.log(i);//4  
+                console.log(this.index);//0 1 2 3
+            }
+        }
+
+
+        //方式2:利用闭包的方式得到当前小li的索引号
+        //立即执行函数也称为小闭包,因为立即执行函数里面的任何一个函数都可以使用它的i这个变量
+        for (var i = 0; i < lis.length; i++) {
+            //利用for循环创建4个立即执行函数
+            (function (i) {
+                lis[i].onclick = function () {
+                    console.log(i);//0 1 2 3  
+                }
+            })(i)
+        }
+    </script>
+</body>
+</html>
+```
+
+
+## 闭包案例-循环中的setTimeout()
+
+3秒钟之后,打印所有li元素的内容
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <ul class="nav">
+        <li>榴莲</li>
+        <li>臭豆腐</li>
+        <li>蒜泥</li>
+        <li>芒果</li>
+    </ul>
+    <script>
+        //闭包应用-3秒钟之后,打印所有li元素的内容
+        var lis = document.querySelector('.nav').querySelectorAll("li");
+
+        //for循环是同步任务
+        for (var i = 0; i < lis.length; i++) {
+            (function (i) {
+                setTimeout(function () {
+                    //异步任务
+                    lis[i].innerHTML
+                    console.log('lis[i].innerHTML: ', lis[i].innerHTML);
+                }, 3000)
+            })(i)
+        }
+    </script>
+</body>
+
+</html>
+```
+
+
+## 闭包案例-计算打车价格
+
+eg:
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        //闭包应用-计算打车价格
+        //打车起步价13(3公里内),之后每多1公里增加5块钱,用户输入公里数就可以计算打车价格
+        //如果有拥堵情况,总价格多收取10块钱拥堵费
+
+        var car = (function () {
+            var start = 13;//起步价
+            var total = 0;//总价
+            return {
+                //正常的总价
+                price: function (n) {
+                    if (n <= 3) {
+                        total = start
+                    } else {
+                        total = start + (n - 3) * 5
+                    }
+                    return total;
+                },
+
+                //拥堵之后的费用
+                yd: function (flag) {
+                    return flag ? total + 10 : total;
+                }
+            }
+        })();
+
+        car.price(5);
+        car.yd(true);//拥堵
+
+        console.log('car.price(5): ', car.price(5));//23
+        console.log('car.yd(true): ', car.yd(true));//33
+        console.log('car.price(1): ', car.price(1));//13
+        console.log('car.yd(false): ', car.yd(false));//13
+    </script>
+</body>
+</html>
+```
+
+
+
+
+
+
+
+
+
+
+
+

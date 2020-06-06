@@ -5,19 +5,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        .search {
+            width: 600px;
+            margin: 0 auto;
+        }
+
+        .search input {
+            width: 50px;
+        }
+
+        table {
+            margin: 0 auto;
+        }
+
+        table {
+            border-right: 1px solid #804040;
+            border-bottom: 1px solid #804040;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table td,
+        th {
+            border-left: 1px solid #804040;
+            border-top: 1px solid #804040;
+            width: 100px;
+        }
+    </style>
 </head>
 
 <body>
+    <div class="search">
+        按照价格查询:<input type="text" class="start"> - <input type="text" class="end">
+        <button class="search_price">搜索</button>
+        按照商品名称查询: <input type="text" class="product">
+        <button class="search_pro">查询</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>产品名称</th>
+                <th>价格</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- <tr>
+                <td>1</td>
+                <td>小米</td>
+                <td>1000</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>小米</td>
+                <td>1000</td>
+            </tr> -->
+        </tbody>
+    </table>
+
+
     <script>
-        var arr = [12, 88, 66];
-        var flag = arr.some(function (value, index, array) {
-            console.log('value: ', value);//12 88 66
-            console.log('index: ', index);//0 1 2
-            console.log('array: ', array);//[12,88,66]
-            return value >= 20;
+        //利用ES5新增数组方法操作数据
+        var data = [{
+            id: 1,
+            name: '小米',
+            price: 1000
+        }, {
+            id: 2,
+            name: 'oppo',
+            price: 999
+        }, {
+            id: 3,
+            name: '荣耀',
+            price: 2900
+        }, {
+            id: 4,
+            name: '华为',
+            price: 3900
+        }]
+
+        //1.获取相应的元素
+        var tbody = document.querySelector("tbody");
+        var search_price = document.querySelector('.search_price');
+        var start = document.querySelector('.start');
+        var end = document.querySelector('.end');
+        var search_pro = document.querySelector('.search_pro');
+        var product = document.querySelector('.product');
+
+        //2.把数据渲染到页面中
+        setData(data);
+        function setData(mydata) {
+            //先清空原来tbody里面的数据
+            tbody.innerHTML = '';
+            mydata.forEach(function (val) {
+                var tr = document.createElement('tr');
+                tr.innerHTML = `<td>${val.id}</td><td>${val.name}</td><td>${val.price}</td>`
+                tbody.appendChild(tr);
+            })
+        }
+
+
+        //3.根据价格查询商品
+        //当我们点击了按钮,就可以根据我们的商品价格去筛选数组里面的对象
+        search_price.addEventListener('click', function () {
+            var newData = data.filter(function (val) {
+                return val.price >= start.value && val.price <= end.value;
+            })
+            console.log('newData: ', newData);
+            setData(newData)
         })
 
-        console.log('flag: ', flag);//true
+
+        //4.根据商品名称查找商品
+        //如果查询数组唯一的元素,用some方法更合适,因为它找到这个元素就不再进行循环,效率更高
+        search_pro.addEventListener('click', function () {
+            var arr = [];
+            data.some(function (val) {
+                if (val.name == product.value) {
+                    console.log(val);
+                    arr.push(val)
+                    return true;//return 后面必须写true
+                }
+
+            })
+            console.log('arr: ', arr);
+            setData(arr)
+        })
     </script>
 </body>
 

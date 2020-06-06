@@ -537,6 +537,21 @@ arr.forEach(function (value, index, array) {
 })
 ```
 
+> forEach里面return不会终止遍历,但是some会
+
+eg:
+```js
+var arr = ['red', 'green', 'yellow'];
+arr.forEach(function (value, index, array) {
+   if(value == 'red'){
+       console('找到了该元素');
+       return true;//forEach里面return 不会终止迭代
+   }
+   console('11111');
+})
+```
+
+
 
 #### `map()`
 
@@ -568,6 +583,21 @@ var newArr = arr.filter(function (value, index, array) {
 console.log('newArr: ', newArr);//[88, 66]
 ```
 
+> filter里面return不会终止遍历,但是some会
+
+eg:
+```js
+var arr = ['red', 'green', 'yellow'];
+arr.filter(function (value, index, array) {
+   if(value == 'red'){
+       console('找到了该元素');
+       return true;//filter里面return 不会终止迭代
+   }
+   console('11111');
+})
+```
+
+
 #### `some()`
 
 `array.some(function(currentValue,index,arr){})`
@@ -594,7 +624,120 @@ console.log('flag: ', flag);//true
 
 > 查找满足条件的元素是否存在,返回的是一个布尔值,如果查找到第一满足条件的元素就终止
 
+> some里面return会终止遍历,所以效率更高
+
+```js
+var arr = ['red', 'green', 'yellow'];
+arr.some(function (value, index, array) {
+   if(value == 'red'){
+       console('找到了该元素');
+       return true;//some里面return 不会终止迭代
+   }
+   console('11111');
+})
+```
 
 #### `every()`
 
 相似于 some
+
+
+### 2.字符串方法
+
+`trim()`方法会从一个字符串的两端删去空白字符。
+
+`str.trim()`
+
+`trim()`方法并不影响原字符串本身,它返回的是一个新的字符串。
+
+eg:
+```js
+//trim 方法去除字符串两侧空格
+var str = '   an dy   ';
+console.log('str: ', str);
+var str1 = str.trim();
+console.log('str1: ', str1);
+```
+
+
+### 3.对象方法
+
+#### Object.keys()  用于获取对象自身所有的属性
+
+`Object.keys(obj)`
+
+- 效果类始于`for..in`
+- 返回一个由属性名组成的数组
+
+eg:
+```js
+//用于获取对象自身的所有属性
+var obj = {
+    id: 1,
+    name: 'andy',
+    price: 1000,
+    num: 90
+}
+var arr = Object.keys(obj);
+console.log('arr: ', arr);//["id", "name", "price", "num"]
+
+arr.forEach(function(value){
+    console.log('value: ', value);
+})
+```
+
+####  Object.definePropery() 定义对象中新属性或修改原有的属性
+
+`Object.defineProperty(obj,prop,descriptor)`
+
+- `obj`:必需。目标对象。
+- `prop`:必需。需定义或修改的属性名字。
+- `descriptor`:必需。目标属性所拥有的特性。
+
+第三个参数`descriptor`说明:
+
+以对象形式`{}`书写
+
+- `value`:设置属性的值，默认为`undefined`
+- `writable`:值是否可以重写。`true`/`false`。默认为`false`
+- `enumerable`:目标属性是否可以被枚举。`true`/`false`。默认为`false`
+- `configurable`:目标属性是否可以被删除或是否可以再次修改特性 `true`/`false`。默认为`false`
+
+eg:
+```js
+//Object.defineProperty() 定义新属性或修改原有的属性
+var obj = {
+    id: 1,
+    name: 'andy',
+    price: 1000,
+}
+//1.以前的对象添加和修改属性的方式
+// obj.num = 666;
+// console.log('obj: ', obj);
+//2.Object.defineProperty() 定义新属性或修改原有的属性
+//添加
+Object.defineProperty(obj, 'num', {
+    value: 1000
+})
+Object.defineProperty(obj, 'price', {
+    value: 999
+})
+Object.defineProperty(obj, 'id', {
+    writable: false //不允许修改这个属性值
+})
+obj.id = 2;
+
+Object.defineProperty(obj, 'address', {
+    value: '地址',
+    writable: false,
+    enumerable: false,//为false则不允许遍历,默认为false 
+    configurable: false//为false则不允许被删除或修改第三个参数里面的特性,默认为false 
+})
+var arr = Object.keys(obj);
+console.log('obj: ', obj);
+console.log('arr: ', arr);//["id", "name", "price"]
+delete obj.address;
+console.log('obj: ', obj);
+```
+
+
