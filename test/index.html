@@ -5,35 +5,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        span {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .right {
+            color: green;
+        }
+
+        .wrong {
+            color: red;
+        }
+    </style>
 </head>
 
 <body>
+    <input type="text" class="uname"> <span>请输入用户名</span>
     <script>
-        var obj = {
-            id: 1,
-            name: 'andy',
-            msg: {
-                age: 18
+        var reg = /^[a-zA-Z0-9-_]{6,16}$/;
+        var uname = document.querySelector('.uname');
+        var span = document.querySelector('span');
+        uname.onblur = function () {
+            if (reg.test(this.value)) {
+                console.log();
+                span.className = 'right';
+                span.innerHTML = '用户名格式输入正确'
+            } else {
+                span.className = 'wrong';
+                span.innerHTML = '用户名格式输入错误'
             }
         }
-        console.log('obj: ', obj);
-
-
-        var o = {};
-        //浅拷贝:方式1
-        // for (var k in obj) {
-        //     //k 是属性名 obj[k] 属性值
-        //     o[k] = obj[k];
-        // }
-        // //浅拷贝把深层次的数据地址拷贝给新对象了，所以新对象改变，原对象也变了
-        // console.log('o', o);
-        // o.msg.age = 20;
-
-
-        //浅拷贝:方式2
-        Object.assign(o, obj);
-        console.log('o', o);
-        o.msg.age = 20;
     </script>
 </body>
 

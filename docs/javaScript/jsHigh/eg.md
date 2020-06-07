@@ -589,9 +589,62 @@ eg:
 ```
 
 
+## 用户名验证
 
+功能需求:
 
+- 如果用户名输入合法,则后面提示信息为:用户名合法,并且颜色为绿色
+- 如果用户名输入不合法,则后面提示信息为:用户名不符合规范,并且颜色为红色
 
+案例分析：
+
+- 用户名只能为英文字母,数字，下划线或短横线组成,并且用户名长度6~16位
+- 首先准备正则表达式`/^[a-zA-Z0-9-_]{6,16}$/`
+- 当表单失去焦点就开始验证
+- 如果符合正则规范,则让后面的span标签添加right类
+- 如果不符合正则规范,则让后面span标签添加wrong类
+
+```js
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        span {
+            color: #aaa;
+            font-size: 14px;
+        }
+        .right {
+            color: green;
+        }
+        .wrong {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="text" class="uname"> <span>请输入用户名</span>
+    <script>
+        var reg = /^[a-zA-Z0-9-_]{6,16}$/;
+        var uname = document.querySelector('.uname');
+        var span = document.querySelector('span');
+        uname.onblur = function () {
+            if (reg.test(this.value)) {
+                console.log();
+                span.className = 'right';
+                span.innerHTML = '用户名格式输入正确'
+            } else {
+                span.className = 'wrong';
+                span.innerHTML = '用户名格式输入错误'
+            }
+        }
+    </script>
+</body>
+</html>
+```
 
 
 

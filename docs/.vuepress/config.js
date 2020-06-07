@@ -113,6 +113,7 @@ let sidebar = {
                 '/javaScript/jsHigh/object',
                 '/javaScript/jsHigh/constructor',
                 '/javaScript/jsHigh/funcAdvance',
+                '/javaScript/jsHigh/regular',
                 '/javaScript/jsHigh/eg',
             ]
         }
