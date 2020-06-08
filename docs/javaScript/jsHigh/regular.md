@@ -223,12 +223,94 @@ var reg = /^[a-zA-Z0-9_-]{6,16}$/;
 - 中括号  字符集合,匹配方括号中的任意字符
 - 小括号  表示优先级
 
+eg：
+```js
+//中括号
+var reg = /^[abc]$/;//a 或 b 或 c
+
+//大括号
+var reg1 = /^abc{3}$/;//让c重复三次
+
+//小括号
+var reg2 = /^(abc){3}$/;//让abc重复三次
+```
+
+可以在线测试:https://c.runoob.com/front-end/854
+
+
+### 6.预定义类
+
+预定义类指的是**某些常见模式的简写方式**。
+
+预定义类 | 说明
+---|---
+\d | 匹配所有0-9之间的任一数字,相当于`[0-9]`
+\D | 匹配所有0-9以外的字符,相当于`[^0-9]`
+\w | 匹配任意的字母、数字和下划线,相当于`[A-Za-z0-9_]`
+\W | 除所有字母、数字和下划线 以外的字符,相当于`[^A-Za-z0-9_]`
+\s | 匹配空格(包含换行符、制表符、空格符等)，相当于`[\t\r\n\v\f]`
+\S | 匹配非空格的字符，相当于`[^\t\r\n\v\f]`
+
+eg:
+```js
+//座机号码验证:全局座机号码  两种格式: 010-12345678 或者 0530-1234567
+//正则里面的或者符合 |
+var reg1 = /^\d{3}-\d{8}|\d{4}-\d{7}$/;
+```
 
 
 
 ## 正则表达式中的替换
 
+### 1.replace替换
 
+`replace()`方法可以实现替换字符串操作,用来替换的参数可以是一个字符串或是一个正则表达式。
 
+`stringObject.replace(regexp/substr,replacement)`
+
+- 第一个参数：被替换的字符串或者正则表达式
+- 第二个参数:替换为的字符串
+- 返回值是一个替换完毕的新字符串
+
+eg:
+```js
+var str = 'andy和red';
+var newStr = str.replace('andy', 'baby');
+console.log('newStr: ', newStr);//baby和red
+```
+
+eg:
+```js
+var str = 'andy和red';
+var newStr = str.replace(/andy/, 'baby')
+console.log('newStr: ', newStr);//baby和red
+```
+
+### 2.正则表达式参数
+
+`/表达式/[switch]`
+
+`switch`也称为修饰符,按照什么样式的模式来匹配,有三种值:
+
+- `g`:全局匹配
+- `i`:忽略大小写
+- `gi`:全局匹配+忽略大小写
+
+eg：敏感词过滤
+```html
+<body>
+    <textarea name="" id="message" cols="30" rows="10"></textarea>
+    <button>提交</button>
+    <div></div>
+    <script>
+        var text = document.querySelector("textarea");
+        var btn = document.querySelector("button");
+        var div = document.querySelector("div");
+        btn.onclick = function () {
+            div.innerHTML = text.value.replace(/小学生|gay/g, '**')
+        }
+    </script>
+</body>
+```
 
 

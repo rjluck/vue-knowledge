@@ -114,6 +114,7 @@ let sidebar = {
                 '/javaScript/jsHigh/constructor',
                 '/javaScript/jsHigh/funcAdvance',
                 '/javaScript/jsHigh/regular',
+                '/javaScript/jsHigh/ES6',
                 '/javaScript/jsHigh/eg',
             ]
         }
