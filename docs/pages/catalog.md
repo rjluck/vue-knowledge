@@ -2,13 +2,21 @@
 
 ## 知识梳理
 
-[JQuery知识梳理](/JQuery/)
+[nodeJs知识梳理](/nodeJs/)
+
+[JQuery知识梳理](/jQuery/)
 
 [JavaScript知识梳理](/javaScript/)
 
 [TypeScript知识梳理](/typeScript/)
 
 ## 相关资料
+
+[Node.js笔记](https://github.com/smallC-L-Y/Demo/blob/notes/nodeJS%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)
+
+[Node.js 官网（中文）](http://nodejs.cn/)
+
+[Node.js 中文社区](https://cnodejs.org/)
 
 [TypeScript 官网（中文）](https://www.tslang.cn/)
 

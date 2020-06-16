@@ -128,7 +128,20 @@ let sidebar = {
                 '',
                 '/jQuery/API',
                 '/jQuery/Event',
+                '/jQuery/Other',
                 '/jQuery/Eg'
+            ]
+        },
+    ],
+    '/nodeJs/': [
+        {
+            title: 'nodeJS', // 侧边栏名称
+            collapsable: true, // 可折叠
+            children: [
+                '',
+                '/nodeJs/start',
+                '/nodeJs/javaScript',
+                '/nodeJs/web'
             ]
         },
     ],
@@ -167,6 +180,7 @@ module.exports = {
                 text: '分类', //格式二：添加下拉菜单，link指向的文件路径
                 ariaLabel: '分类',   //用于识别的label
                 items: [//点击标签会跳转至link的markdown文件生成的页面
+                    { text: 'nodeJs', link: '/nodeJs/' },
                     { text: 'JQuery', link: '/jQuery/' },
                     { text: 'JavaScript', link: '/javaScript/' },
                     { text: 'TypeScript', link: '/typeScript/' },

@@ -6,21 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
+        div {
+            height: 600px;
+        }
+
+        #box1 {
+            background-color: red;
+        }
+
+        #box2 {
+            background-color: pink;
+        }
     </style>
 </head>
 
 <body>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <script>
-        const s5 = new Set(['a', 'b', 'c']);
-        s5.forEach(value => {
-            console.log(value);//a  b   c
-        })
-    </script>
+    <a href="#box1">我跳到box1</a>
+    <a href="#box2">我跳到box2</a>
+    <div id="box1"></div>
+    <div id="box2"></div>
 </body>
 
 </html>
