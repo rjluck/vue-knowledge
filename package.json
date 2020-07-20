@@ -11,5 +11,9 @@
   "scripts": {
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs"
+  },
+  "dependencies": {
+    "art-template": "^4.13.2",
+    "bootstrap": "^4.5.0"
   }
 }

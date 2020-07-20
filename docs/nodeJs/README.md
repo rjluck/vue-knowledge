@@ -92,3 +92,4 @@
 - 官方API文档:https://nodejs.org/dist/latest-v6.x/docs/api
 - 中文文档：http://www.nodeclass.com/api/node.html
 - CNODE社区:http://cnodejs.org
+- 代码规范[JavaScript Standard Style]https://standardjs.com/

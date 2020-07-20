@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- 引入js文件 -->
+    <script src="./template-web.js"></script>
+    <script type="text/template" id="tpl">
+        大家好，我叫 {{ name }}
+        我今年 {{ age }}岁
+        我喜欢: {{each hobbies}} {{ $value }} {{/each}}
+    </script>
+    <script>
+        var ret = template('tpl', {
+            name: 'Jack',
+            age: 18,
+            hobbies: [
+                '吃', '睡', '玩'
+            ]
+        })
+        console.log(ret)
+    </script>
+</body>
+
+</html>

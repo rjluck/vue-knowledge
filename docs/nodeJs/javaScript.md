@@ -4,7 +4,7 @@
 
 - ECMAScript
     - 没有DOM和BOM
-- 核心模块
+- 核心模块(具名的核心模块)
 - 第三方模块
 - 用户自定义模块
 
@@ -18,9 +18,10 @@
 
 
 ```js
-var fs = require('fs');
+var fs = require('fs');//文件操作模块
 var os = require('os');//获取操作系统信息
 var path = require('path');//获取操作路径
+var http = require('http');//网络服务构建模块
 ```
 
 ## 用户自定义模块
@@ -30,7 +31,7 @@ var path = require('path');//获取操作路径
 - 具名的核心模块,例如fs、http
 - 用户自己编写的文件模块
 
-加载模块注意点：
+**加载模块注意点：**
 
 - 相对路径中的`./`不能省略。
 - 可以省略后缀名
@@ -51,12 +52,15 @@ console.log('b.js文件被加载执行了');
 ![image](/imgs/nodeJs/package1.png)
 
 
-### 1.模块作用域
+## 模块作用域
 
 在`Node`中,没有全局作用域,只有模块作用域
 
+- 模块完全是封闭的
 - 外部访问不到内部
 - 内部也访问不到外部
+
+模块作用域固然带来了一些好处,可以加载执行多个文件,可以完全避免变量命名冲突污染的问题。但是，某些情况下，模块与模块是需要进行通信的。
 
 eg：
 
@@ -74,7 +78,7 @@ var foo = 'bbb';
 
 node a.js ===>aaa
 
-### 2.模块与模块之间通信
+## 模块与模块之间通信
 
 既然是模块作用域，那如何让模块与模块之间进行通信。
 
@@ -87,7 +91,8 @@ node a.js ===>aaa
 
 在每个文件模块中都提供了一个对象:`exports`
 
-`exports`默认是一个空对象。
+- `exports`默认是一个空对象。
+
 
 a.js
 ```js
@@ -101,7 +106,8 @@ var foo = 'bbb';
 console.log('exports', exports);//{}
 ```
 
-把需要外部访问的成员挂载到这个`exports`对象中
+- 把需要外部访问的成员挂载到这个`exports`对象中
+- 谁`require`这个模块,谁就可以得到模块内部的`exports`接口对象
 
 eg：
 
@@ -122,6 +128,8 @@ exports.add = function (x, y) {
     return x + y;
 }
 ```
+
+
 
 
 

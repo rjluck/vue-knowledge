@@ -43,6 +43,7 @@ server.listen(3000, function () {
 - 中文操作系统默认是 `gdk`,所以乱码。
 - 解决方法就是正确的告诉浏览器我给你发的内容是什么编码的
 - 在`http`协议中,`Content-Type` 就是用来告知对方，我给你发送的数据内容是什么类型
+- 对于文本类型的数据,最好都加上编码`charset=utf-8`,目的是为了防止中文解析乱码问题
 - 参考网址:http://tool.oschina.net/   
 - 参考网址:https://tool.oschina.net/commons
 
@@ -87,6 +88,10 @@ server.listen(3000, function () {
 - 不同的资源对应的`Content-Type`是不一样的
 - 图片不需要指定编码
 - 一般只为字符数据才指定编码
+
+通过网络发送文件
+- 发送的并不是文件,本质上来讲发送的是文件的内容
+- 当浏览器收到服务器响应内容之后,就会根据你的`Content-Type`进行对应的解析处理
 
 eg：
 
@@ -152,5 +157,238 @@ server.listen(3000, function () {
 })
 ```
 
+> 除了 Content-Type 可以用来指定编码,也可以在 HTML 页面中通过 meta元数据来声明当前文本的编码格式，浏览器也会识别它。
+
+```html
+ <meta charset="UTF-8">
+```
+
+eg：简单的类似于Apache 服务软件
+
+eg:
+```js
+var http = require('http');
+var fs = require('fs');
+
+//1.创建server
+var server = http.createServer();
+var wwwDir = './www'
+//2.监听request请求事件,设置请求处理函数
+server.on('request', function (req, res) {
+    var url = req.url;
+    var filePath = '/index.html';
+    console.log('url: ', url);
+    if (url !== '/') {
+        filePath = url
+    }
+
+    fs.readFile(wwwDir + filePath, function (err, data) {
+        if (err) {
+            //return有两个作用 1.方法返回值  2.阻止代码继续往后执行
+            return res.end('404');
+        }
+        res.end(data)
+    })
+    //Apache 服务软件,默认有一个 www 目录,所有存放在 www目录中的资源都可以通过网址来浏览
+    //127.0.0.1:80/index.html
+});
+
+
+//3.绑定端口号，启动服务器
+server.listen(3000, function () {
+    console.log('服务器启动成功了,可以通过http://loacalhost:3000/ 来进行访问')
+})
+```
+
+## 读取文件目录
+
+- 如何得到目录列表中的文件名和目录名 `fs.readdir`
+- 如何将得到的文件名和目录名替换你到 `xxx.html`中,通过模板引擎
+    - `xxx.html`中，需要替换的位置预留一个特殊的标记(就像以前使用模板引擎的标记一样)
+    - 根据`files`生成需要的HTML内容
+
+
+eg:
+```js
+var http = require('http');
+var fs = require('fs');
+
+//1.创建server
+var server = http.createServer();
+var wwwDir = './www'
+//2.监听request请求事件,设置请求处理函数
+server.on('request', function (req, res) {
+    var url = req.url;
+    var filePath = '/index.html';
+    fs.readFile(wwwDir + filePath, function (err, data) {
+        if (err) {
+            return res.end('404');
+        }
+        //1.读取目录
+        fs.readdir(wwwDir, function (err, files) {
+            if (err) {
+                return console.log('目录不存在')
+            }
+            console.log(files);//[ 'a.txt', 'apple', 'index.html' ]
+            //生成需要替换的内容
+            var content = '';
+            files.forEach(function (item) {
+                content += `
+                <tr>
+                <td>${item}</td>
+                <td></td>
+                <td></td>
+            </tr>
+                `
+            });
+
+            //替换
+            data = data.toString();
+            data = data.replace('^_^', content);//就是普通的字符串解析替换，浏览器看到的效果就不一样了
+            res.end(data);//发送解析替换后的响应数据
+        })
+
+        // res.end(data)
+    })
+});
+
+//3.绑定端口号，启动服务器
+server.listen(3000, function () {
+    console.log('服务器启动成功了,可以通过http://loacalhost:3000/ 来进行访问')
+})
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>名称</tr>
+            <tr>大小</tr>
+            <tr>修改日期</tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>^_^</td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
+```
+
+
+
+## 请求对象 Request
+
+
+
+
+## 响应对象 Response
+
+## 在 Node 中使用模块引擎
+
+### 1.art-template 模板字符串
+
+- 不仅可以在浏览器中使用,也可以在node中使用
+- 安装：`npm install art-template`
+- 强调:模板引擎不关心你的字符串内容,只关心自己能认识的模板标记语法。例如`{{}}`
+
+html中使用`art-template`模板引擎
+
+eg:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- 引入js文件 -->
+    <script src="./template-web.js"></script>
+    <script type="text/template" id="tpl">
+        大家好，我叫 {{ name }}
+        我今年 {{ age }}岁
+        我喜欢: {{each hobbies}} {{ $value }} {{/each}}
+    </script>
+    <script>
+        var ret = template('tpl', {
+            name: 'Jack',
+            age: 18,
+            hobbies: [
+                '吃', '睡', '玩'
+            ]
+        })
+        console.log(ret)
+    </script>
+</body>
+</html>
+```
+
+在Node中使用`art-template`模板引擎
+
+- 模板引擎最早就是诞生于服务器领域,后来才发展到了前端
+- 安装
+- 在需要使用的文件模块中加载`art-template`
+    - 只需要使用`require`方法加载就可以了`require('art-template')`
+- 查文档,使用模板引起的api
+    - github:https://github.com/aui/art-template
+    - 官网：https://aui.github.io/art-template/zh-cn/docs/installation.html
+
+
+eg：
+```js
+var template = require('art-template');
+
+var ret = template.render('hello {{name}}', {
+    name: 'Jack'
+})
+
+console.log(ret);//hello Jack
+```
+
+
+
+
+
+## 统一处理静态资源
+
+
+
+
+
+## 服务端渲染
+
+### 含义
+
+- 说白了就是在服务端使用模板引擎
+- 模板引擎最早诞生于服务端,后来才发展到了前端
+
+### 服务端渲染和客户端渲染的的区别
+
+- 客户端渲染不利于 `SEO`搜索引擎优化
+- 服务端渲染是可以被爬虫抓取到的,客户端一部渲染是很难被爬虫抓取到的
+- 所以你会发现真正的网站既不是纯异步,也不是纯服务端渲染出来的
+- 是两者结合来做的
+- 例如京东的商品就采用的是服务端渲染,目的是为了`SEO`搜索引擎优化
+- 而它的商品评论列表为了用户体验,而且不需要`SEO`优化，所以采用客户端渲染
+
+
+
+
+
 ## 案例-发表留言
+
+
 

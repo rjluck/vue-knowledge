@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 
+        浏览器收到 HTML 响应内容之后,就要开始从上到下依此解析，
+        当在解析的过程中,如果发现：link/script/img/iframe/video/audio等具有src或者href(link)属性标签（外链资源的时候）的时候，浏览器会自动对这些资源发起新的请求
+    -->
+
+    <!-- 
+        注意：
+        在服务端中,文件中的路径就不要去写相对路径了。因为这个时候所有的资源都是通过url标识来获取的,我的服务器中开放了 /public/目录，
+        所以这里的请求路径都写成： /public/xxx
+        / 在这里就是url根路径的意思
+        浏览器在真正发请求的时候会最自动把 http://127.0.0.1:3000 拼上
+     -->
+    <link rel="stylesheet" href="../public/css/bootstrap.css">
+</head>
+
+<body>
+    <div class="header container">
+        <div class="page-header mb-4">
+            <h1>Exemple page header</h1>
+            <!-- <a href="post.html" class="btn btn-success">发表留言</a> -->
+            <a href="/post" class="btn btn-success">发表留言</a>
+        </div>
+    </div>
+
+    <div class="comments container">
+        <ul class="list-group">
+            <!-- <li class="list-group-item">111</li>
+            <li class="list-group-item">222</li>
+            <li class="list-group-item">333</li>
+            <li class="list-group-item">444</li>
+            <li class="list-group-item">555</li>
+            <li class="list-group-item">666</li> -->
+            <!-- 服务端渲染 -->
+            {{each comments}}
+            <li class="list-group-item">{{$value.name}}说：{{$value.message}}<span>{{$value.dateTime}}</span></li>
+            {{/each}}
+        </ul>
+    </div>
+</body>
+
+</html>
