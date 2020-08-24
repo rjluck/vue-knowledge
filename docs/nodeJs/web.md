@@ -390,5 +390,81 @@ console.log(ret);//hello Jack
 
 ## 案例-发表留言
 
+> demo:feedback
+
+
+### 如何解析请求路径中的查询字符串
+
+`url.parse()`
+
+### 如何在Node中实现服务器重定向
+
+`header('location')`
+
+- 301 永久重定向，浏览器会记住，下一次再请求直接走缓存
+- 302 临时重定向，浏览器不记忆
+
+### jQuery的each和原生的JavaScript方法forEach
+
+- ECMAScript5提供forEach
+    + 不兼容ie8
+- jQuery的each由jQuery的第三方库提供
+    + jQuery 2 以下的版本是兼容ie8的
+    + 它的each方法主要用来遍历jQuery实例对象(伪数组)
+    + 同时它也可以作为低版本浏览器中的forEach替代品
+    + jQuery的实例对象不能使用forEach方法，如果想要使用必须转为数组才可以使用,`[].slice.call(jQuery实例对象)`
+
+```js
+Array.prototype.mySlice = function(){
+    var start = 0;
+    var end = this.length;
+    if(arguments.length === 1){
+        start = arguments[0]
+    }else if(arguments.length === 2){
+        start = arguments[0]
+        end = arguments[1]
+    }
+
+    var tmp = [];
+    for(var i = start;i<end;i++){
+        tmp.push(this[i])
+    }
+    return tmp;
+}
+
+//维数组 
+var fakeArr = {
+    0:'abc',
+    1:'efg',
+    2:'haha',
+    3:'hihi',
+    length:4
+}
+
+[].mySlice.call(fakeArr);//转成数组
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

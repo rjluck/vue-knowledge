@@ -71,13 +71,27 @@ http
             })
         } else if (pathname === '/pinglun') {
             //注意：这个时候无论 /pinglun?xxx 之后是什么，都不用担心，因为 pathname 不包含?之后的内容
+            //一次请求对应一次响应，响应结束
             console.log('收到表单请求', parseObj.query);
-            res.end(JSON.stringify(parseObj.query))
+            // res.end(JSON.stringify(parseObj.query))
+
             //接下来
             //1.获取表单提交的数据 parseObj.query
-            //2.生成日期到数据对象中，然后存储到数组中
+            //2.将当前时间日期添加到数据对象中，然后存储到数组中
             //3.让用户重定向跳转到首页 /
-            //    当用户重新请求 / 的时候,数组中的数据已经发生变化了，所以用户看到
+            //    当用户重新请求 / 的时候,数组中的数据已经发生变化了，所以用户看到的页面
+            var comment = parseObj.query;
+            comment.dateTime = '2020-07024 17:19:00';
+            comments.push(comment);
+            //服务端这个时候已经将数据存储好了，接下来就是让用户重新请求 / 首页，就可以看到最新的留言
+            //如何通过服务器让客户端重定向?
+            //1.状态码设置为302，临时重定向   statusCode
+            //2.在响应头中通过Location告诉客户端往哪重定向  setHeader
+            //如果客户端发现收到服务器的响应的状态码是 302就会自动去响应头中找Location,然后对该地址发起新的请求
+            //所以就能看到客户端自动跳转了
+            res.statusCode = 302;
+            res.setHeader('Location', '/');
+            res.end();//结束响应
         } else {
             //其他的都处理成 404 找不到
             fs.readFile('./views/404.html', function (err, data) {
