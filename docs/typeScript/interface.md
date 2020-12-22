@@ -32,6 +32,24 @@ function printLabel(labelledObj:LabelledValue){
 }
 ```
 
+```typeScript
+interface NameInfo {
+    firstName: string,
+    lastName: string,
+}
+
+const getFullName = ({ firstName, lastName }: NameInfo): string => {
+    return `${firstName}${lastName}`
+}
+
+getFullName({
+    firstName: 'hhhh',
+    lastName: 'uuuu'
+})
+```
+
+
+
 ## 可选属性 ?
 
 非必须属性
@@ -51,7 +69,7 @@ obj2 = {name:"李四",sex:"男"}
 interface  Istate3 {
     name:string|number,//此处可用联合类型
     age?:nmber,
-    [propName:string]:any
+    [propName:string]:any // 索引签名
 }
 
 var obj3:Istate3;
@@ -128,6 +146,40 @@ interface SquareConfig{
     [propName:string]:any
 }
 ```
+##  绕开额外属性检查
+
+- 方式1：类型断言 `as`
+- 方式2：索引签名
+- 方式3：类型兼容性
+
+```typeScript
+interface Vegetable {
+    color?: string,// 可选属性？
+    readonly type: string,// 只读属性
+    [prop: string]: any // 索引签名
+}
+
+const getVegetables = ({ color, type }: Vegetable) => {
+    return `A ${color ? (color + ' ') : ' '}${type}`
+}
+
+let vegetables = getVegetables({
+    color: 'red',
+    type: 'tomato',
+    size: 2
+} as Vegetable)// 类型断言
+console.log('vegetables: ', vegetables);
+
+// 类型兼容性
+let veg = {
+    color: 'red',
+    type: 'tomato',
+    size: 2
+}
+console.log('11', getVegetables(veg));
+```
+
+
 
 ## 对class类的约束
 
@@ -182,6 +234,17 @@ mySearch = function(src:string,sub:string):boolean{
 }
 ```
 
+```typeScript
+// interface AddFunc {
+//     (num1: number, num2: number): number
+// }
+
+// 类型别名的形式
+type AddFunc = (num1: number, num2: number) => number
+
+const add: AddFunc = (n1, n2) => n1 + n2
+```
+
 ## 对数组的约束
 
 ```typeScript
@@ -210,7 +273,7 @@ showdata({name:"嘻哈",age:18})
 
 ## 接口的继承
 
-和类一样，接口也可以相互继承。 这让我们能够从一个接口里复制成员到另一个接口里，可以更灵活地将接口分割到可重用的模块里。
+和类一样，接口也可以相互继承。 这让我们能够从一个接口里复制成员到另一个接口里，可以更灵活地将接口分割到可重用的模块里,提高可复用性。
 
 ```typeScript
 interface Priter{
@@ -233,6 +296,40 @@ class HPPrinter implements ColorPrinter{
 var hp = new HPPrinter();
 hp.getmsg();
 hp.printing();
+```
+
+```typeScript
+interface Vegetables {
+    color: string
+}
+
+// interface Tomato {
+//     color: string,
+//     radius: number
+// }
+interface Tomato extends Vegetables {
+    radius: number
+}
+
+// interface carrot {
+//     color: string,
+//     length: number
+// }
+interface Carrot extends Vegetables {
+    length: number
+}
+
+// 定义对象
+const tomato: Tomato = {
+    radius: 1,
+    color: 'red'
+}
+
+const carrot: Carrot = {
+    length: 2,
+    color: 'orange'
+}
+
 ```
 
 
@@ -274,7 +371,28 @@ let myStr:string = myArray[0];//数字索引
 上面例子里，我们定义了 `StringArray` 接口，它具有索引签名。 这个索引签名表示了当用 `number` 去索引 `StringArray` 时会得到 `string` 类型的返回值。
 
 
-ypeScript 支持两种索引签名：字符串和数字。 可以同时使用两种类型的索引，但是数字索引的返回值必须是字符串索引返回值类型的子类型。 这是因为当使用 number 来索引时，JavaScript 会将它转换成string 然后再去索引对象。 也就是说用 100（一个 number）去索引等同于使用'100'（一个 string ）去索引，因此两者需要保持一致。
+```typeScript
+// interface RoleDic {
+//     [id: number]: string
+// }
+
+// const rolel: RoleDic = {
+//     0: 'super_admin'
+// }
+
+interface RoleDic {
+    [id: string]: string
+}
+
+// 当限定属性名为字符串的时候,js中会会自动把数字转为字符串
+const rolel: RoleDic = {
+    a: 'super_admin',
+    1: 'admin'
+}
+```
+
+
+typeScript 支持两种索引签名：字符串和数字。 可以同时使用两种类型的索引，但是数字索引的返回值必须是字符串索引返回值类型的子类型。 这是因为当使用 number 来索引时，JavaScript 会将它转换成string 然后再去索引对象。 也就是说用 100（一个 number）去索引等同于使用'100'（一个 string ）去索引，因此两者需要保持一致。
 
 > 数字索引和字符串索引可以同时使用的，当同时使用时数字索引返回值必须是字符串索引返回值的子类型，因为此时会将数字转为字符串array['0']
 
@@ -318,6 +436,50 @@ interface ReadonlyStringArray{
 let myArray:ReadonlyStringArray =['ww','ee']
 myArray[0]="uuu"; //error
 ```
+
+
+## 混合类型接口(ts3.1才支持混合类型接口)
+
+```typeScript
+// js计数器(方式1需要全局定义变量，有时变量可能会污染，所以该方式不是最好)
+// let count = 0;
+// const countUp = () => count++
+// countUp();
+
+// js闭包（方式2）
+// const countUp = (() => {
+//     let count = 0;
+//     return () => {
+//         count++
+//     }
+// })()
+// countUp();
+
+// js直接给函数添加属性（方式3）
+// let countUp = () => {
+//     countUp.count++
+// }
+// countUp.count = 0;
+// countUp();
+
+//
+interface Counter {
+    (): void,// 定义函数，无返回值
+    count: number
+}
+
+const getCounter = (): Counter => {
+    const c = () => { c.count++ }
+    c.count = 0;
+    return c;
+}
+
+const counter: Counter = getCounter();
+counter();
+console.log(counter.count);//1
+```
+
+
 
 ## 类实现接口（类类型）
 

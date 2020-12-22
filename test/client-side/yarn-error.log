@@ -1,0 +1,51 @@
+Arguments: 
+  D:\node\node.exe C:\Users\Administrator\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js install ts-loader -D
+
+PATH: 
+  C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\Java\jdk1.8.0_191\bin;C:\Program Files\Java\jdk1.8.0_191\jre\bin;D:\git\Git\cmd;D:\SVN\bin;D:\maven\apache-maven-3.6.0\bin;E:\studyProject\webpack\webpack-demo2\node_modules\.bin;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;D:\node\;C:\Users\Administrator\AppData\Roaming\npm;D:\node\node_global;C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps;D:\vsCode\Microsoft VS Code\bin;C:\Users\Administrator\AppData\Roaming\npm
+
+Yarn version: 
+  1.13.0
+
+Node version: 
+  12.15.0
+
+Platform: 
+  win32 x64
+
+Trace: 
+  SyntaxError: E:\studyProject\vue-knowledge\test\client-side\package.json: Unexpected token } in JSON at position 200
+      at JSON.parse (<anonymous>)
+      at C:\Users\Administrator\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (C:\Users\Administrator\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:304:30)
+      at C:\Users\Administrator\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:315:13
+
+npm manifest: 
+  {
+    "name": "client-side",
+    "version": "1.0.0",
+    "description": "source code of ts-learning",
+    "main": "./src/index.ts",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+    },
+    "keywords": [
+      "typescript",
+      "source_code",
+      "rongjia"
+    ],
+    "author": "rongjia",
+    "license": "ISC",
+    "devDependencies": {
+      "webpack": "^5.10.1",
+      "webpack-cli": "^4.2.0",
+      "webpack-dev-server": "^3.11.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

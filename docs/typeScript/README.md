@@ -77,3 +77,71 @@ npm install -g ts-node
 ```bash
 ts-node ts文件名
 ```
+
+## 搭建开发环境
+
+- 使用npm初始化项目
+
+自己编辑参数
+```
+npm init
+```
+
+
+npm默认参数
+```
+npm init -y
+```
+
+
+- 全局安装部分依赖
+  
+```
+npm install typescript tslint -g
+```
+- 使用tsc初始化配置
+
+```
+tsc --init
+```
+
+- 配置webpack
+
+webpack4 亮点：很多东西不需要配置
+```
+npm install webpack webpack-cli webpack-dev-server -D
+
+
+```
+
+
+补充
+
+- "start": "ww" //start指令不同于其他，不需要npm run 指令，直接npm start 即可
+- "start": "cross-env NODE_ENV=develoption webpack-dev-server --config ./build/webpack.config.js"
+- "start": "cross-env NODE_ENV=develoption webpack serve --open Chrome.exe --config ./build/webpack.config.js"
+- 添加开发和打包命令
+
+webpack打包编译typescript的
+```
+npm install ts-loader -D
+```
+
+通过js在平台设置不同的环境变量的工具,方便传参
+```
+npm install cross-env -D
+```
+
+清理指定的文件夹
+```
+npm install clear-webpack-plugin -D
+```
+
+指定编译模板html文件
+```
+npm install html-webpack-plugin -D
+```
+
+"webpack": "^4.29.6",
+"webpack-cli": "^3.2.3",
+"webpack-dev-server": "^3.2.1"

@@ -1,0 +1,30 @@
+{
+  "name": "client-side",
+  "version": "1.0.0",
+  "description": "source code of ts-learning",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cross-env NODE_ENV=develoption webpack-dev-server --config ./build/webpack.config.js",
+    "build": "cross-env NODE_ENV=production webpack --config ./build/webpack.config.js"
+  },
+  "keywords": [
+    "typescript",
+    "source_code",
+    "rongjia"
+  ],
+  "author": "rongjia",
+  "license": "ISC",
+  "devDependencies": {
+    "clean-webpack-plugin": "^3.0.0",
+    "cross-env": "^7.0.3",
+    "html-webpack-plugin": "^4.5.0",
+    "ts-loader": "^8.0.12",
+    "webpack": "^5.10.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "typescript": "^4.1.3"
+  }
+}
