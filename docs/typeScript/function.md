@@ -4,13 +4,13 @@
 
 ## 定义
 
-和 JavaScript 一样，TypeScript 函数可以创建有名字的函数和匿名函数。你可以随意选择适合应用程序的方式，不论是定义一系列 API 函数还是只使用一次的函数。
+和 `JavaScript` 一样，`TypeScript` 函数可以创建有名字的函数和匿名函数。你可以随意选择适合应用程序的方式，不论是定义一系列 API 函数还是只使用一次的函数。
 
 - 声明式函数
 - 匿名函数
 
 
-```typescript
+```javaScript
 //js中
 //函数声明
 function add(x,y){
@@ -36,14 +36,55 @@ let add1 = function(x,y):number{
 
 ```
 
+## 函数的类型
+
+- ES5普通函数的方式
+
+```typeScript
+function add1(arg1: number, arg2: number): number {
+    return arg1 + arg2;
+}
+```
+
+- ES6箭头函数的方式
+```typeScript
+const add2 = (arg1: number, arg2: number) => arg1 + arg2
+
+let add3: (x: number, y: number) => number // 定义一个变量 指定其函数类型
+
+add3 = (arg1: number, arg2: number) => arg1 + arg2 // 给变量赋值一个函数
+
+// 函数中如果使用函数体外的变量，变量的类型是不提现在函数的定义中的
+let arg3 = 3;
+add3 = (arg1: number, arg2: number) => arg1 + arg2 + arg3
+```
+
+- 接口定义函数类型的方式
+```typeScript
+interface Add {
+    (x: number, y: number): number
+}
+```
+- 类型别名的方式
+```typeScript
+// 上面采用 类型别名  的形式
+type Add = (x: number, y: number) => number
+
+type isString = string;// 此时isString等同于string
+
+let addFunc: Add;
+addFunc = (arg1: number, arg2: number) => arg1 + arg2
+```
+
 ## 函数的参数
 
-- 可选参数?
+- 可选参数`?`
 - 默认参数
-- 剩余参数
+- 剩余参数`...`
 
 参数必须一致
-可选参数必须跟在必须参数的后面，用?表示
+js中可选参数的位置随意，需要`undefined`占位
+ts中可选参数必须跟在必须参数的后面，用`?`表示
 ```typeScript
 function buildName(firstName:string,lastName?:string):string{
     return firstName + ' ' + lastName
@@ -51,10 +92,19 @@ function buildName(firstName:string,lastName?:string):string{
 
 let result1 = buildName('zzz')
 ```
-默认初始化参数
-如果默认值参数放到必须参数前面，调用时必须传undefined 来获取默认值
 ```typeScript
-function buildName(firstName:string,lastName =  'kkkk':string):string{
+type AddFunction = (arg1: number, arg2: number, arg3?: number) => number // 函数别名
+let addFunction: AddFunction
+addFunction = (x: number, y: number) => x + y
+addFunction = (x: number, y: number, z: number) => x + y + z
+```
+
+
+默认初始化参数
+- 如果默认值参数放到必须参数前面，调用时必须传`undefined` 来获取默认值
+- 默认值参数可省略类型定义,`ts`会根据默认值判断其类型
+```typeScript
+function buildName(firstName:string,lastName:string =  'kkkk'):string{
     return firstName + ' ' + lastName
 }
 let result1 = buildName('bbb')
@@ -64,7 +114,55 @@ function buildName(firstName='will',lastName :string):string{
 }
 let result2 = buildName(undefined ,'bbb')
 ```
+```typeScript
+// js ES6之前
+// const addFunctions = function (x, y) {
+//     y = y || 0;
+//     return x + y;
+// }
+// addFunctions(1, 2);// 3
+
+// ts
+// let addFunctions = (x: number, y: number = 3) => x + y
+let addFunctions = (x: number, y = 3) => x + y
+console.log('addFunctions(1): ', addFunctions(1));// 4
+console.log('addFunctions(1): ', addFunctions(2, 1));// 3
+```
+
+
 剩余参数
+
+- 当参数个数不一定的时候，js中ES6之前用arguments类数组对象
+```javaScript
+function handleData() {
+    // 该函数实际传入的参数的个数 arguments.length
+    if (arguments.length) {
+        if (arguments.length === 1) return arguments[0] * 2
+        else if (arguments.length === 2) return arguments[0] * arguments[1]
+        // Array.prototype.slice.apply(arguments)  类数组arguments转为数组
+        else return Array.prototype.slice.apply(arguments).join('_')
+    }
+}
+console.log('99', handleData(2));// 4
+console.log('99', handleData(2, 3));// 6
+```
+- js中ES6用操作符`...`,`...`操作符可以拆解数组或对象
+  
+```javaScript
+const handleData = (...args) => {
+    console.log('args', args);
+}
+console.log('99', handleData(2));// [2]
+console.log('99', handleData(2, 3));// [2,3]
+```
+
+- ts中
+```typeScript
+const handleData = (arg1: number, ...args: number[]) => {
+    //
+}
+```
+
 ```typescript
 function buildName(firstName:string,...restOfName:string[]):string{
     return firstName;
@@ -78,7 +176,7 @@ function add(x:number,y:number):number{
     return x+y;
 }
 
-//可选参数，可选参数放在参数后面
+//可选参数，可选参数放在必选参数后面
 function show(name:string,age?:number):void{
     console.log(name,age)
 }
@@ -102,6 +200,10 @@ console.log(sum)
 ```
 
 ## 函数的重载
+
+- ts中的定义：允许我们使用function 定义好几个函数,传入不同个数的不同参数，判断实际返回的结果
+- 函数重载只能用function来定义，不用使用接口或类型别名等定义
+
 ```typescript
 function getinfo(name:string):void;
 function getinfo(age:number):void;
@@ -112,11 +214,28 @@ function getinfo(str:any):void{
      if(typeof str=="number"){
         console.log("年龄:",str)
     }
-    
 }
 
 getinfo("张")
 ```
+```typescript
+// 函数的重载
+function handleData(x: string): string[];
+function handleData(x: number): number[];
+// 函数的实体
+function handleData(x: any): any {
+    if (typeof x === 'string') {
+        return x.split('');// 字符串转数组
+    } else {
+        return x.toString().split('').map((item) => Number(item));
+    }
+}
+
+console.log(handleData('abc'));// ["a", "b", "c"]
+console.log(handleData(123));// [1, 2, 3]
+
+```
+
 
 ## this
 
@@ -215,7 +334,7 @@ let myAdd = function(x: number, y: number): number {
 }
 ```
 
-我们可以给每个参数添加类型之后再为函数本身添加返回值类型。TypeScript 能够根据返回语句自动推断出返回值类型。
+我们可以给每个参数添加类型之后再为函数本身添加返回值类型。`TypeScript` 能够根据返回语句自动推断出返回值类型。
 
 ### 书写完整函数类型
 
@@ -325,3 +444,8 @@ function getValue(value:string|number):string|number{
 let a:number = getValue(1);
 let b:string = getValue("1");
 ```
+
+
+## 使用接口定义函数类型
+
+## 使用类型别名
