@@ -11,6 +11,7 @@ class Tab {
         this.init();
     }
 
+    //
     //0.初始化 让相关的元素绑定事件
     init() {
         this.updateNode();
