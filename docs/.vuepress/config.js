@@ -26,12 +26,21 @@
 // };
 
 let sidebar = {
+  '/html/': [
+    {
+      title: 'HTML基础', // 侧边栏名称
+      collapsable: true, // 可折叠
+      children: [
+        { title: 'HTML基础', path: '/html/base' },
+      ]
+    },
+  ],
   '/browser/': [
     {
       title: '浏览器缓存', // 侧边栏名称
       collapsable: true, // 可折叠
       children: [
-        { title: 'webStoragel', path: '/browser/cache/webStorage' },
+        { title: 'webStorage', path: '/browser/cache/webStorage' },
       ]
     },
   ],
@@ -224,6 +233,7 @@ module.exports = {
         text: '分类', //格式二：添加下拉菜单，link指向的文件路径
         ariaLabel: '分类',   //用于识别的label
         items: [//点击标签会跳转至link的markdown文件生成的页面
+          { text: 'HTML', link: '/html/' },
           { text: '浏览器', link: '/browser/' },
           { text: 'Vue', link: '/vue/' },
           { text: 'MongoDB', link: '/MongoDB/' },
