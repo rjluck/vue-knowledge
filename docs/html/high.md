@@ -261,3 +261,389 @@ placeholder  占位符
 <input type="radio" name="ral" />
 <input type="radio" name="ral" checked="checked" />(默认选中)
 ```
+
+**4)复选框/复选按钮**
+
+```html
+<input type="checkbox" name="like" />
+<input type="checkbox" name="like" disabled="disabled" /> (禁用)
+```
+
+> 当属性值与属性名相同时，属性值可以省略不写
+
+```html
+<input type="checkbox" name="like" disabled /> 
+```
+
+
+**5)下拉列表**
+
+```html
+<select name="">  
+    <optgroup   label="黑龙江">  
+        <option value="haerbin">哈尔滨</option>  
+        <option value="mudanjiang">牡丹江</option>  
+    </optgroup>  
+    <optgroup    label="北京">  
+        <option value="3">昌平</option>  
+        <option value="4">海淀</option>  
+    </optgroup>  
+</select>
+```
+
+
+下拉列表包含一个“项目组”(optgroup)，这个组是无法选择的，使用label属性标记组名，真正起作用的，还是value属性。
+
+下拉列表默认被选中selected
+
+```html
+<select name="" >
+    <option  selected >1991年</option>
+</select>
+```
+
+
+
+
+**6)多行文本框（文本域）**
+
+```html
+<textarea name="textarea" cols="字符宽度" rows="行数"  style="resize:none;">
+自我评价
+</textarea>
+```
+
+`style="resize:none;" ` 不可拖拽
+
+
+
+**7)重置按钮**
+
+```html
+<input type="reset" value="按钮内容" />
+```
+
+
+**8)提交按钮**
+
+```html
+<input type="submit" value="按钮内容" />
+```
+
+
+**9)普通按钮按钮**
+
+```html
+<input   name=""  type="button"  value=“按钮内容” />
+```
+
+区别：
+- `submit`  是提交按钮 起到提交信息的作用，
+- `reset`   重置按钮，起到重置的作用，
+- `button`  只起到跳转的作用，不进行提交,只是一个普通按钮。
+
+
+**10）上传文件**
+
+文件域：`<input type="file"  multiple/>`
+
+multiple  多选
+
+**11）图片按钮**
+
+`<input type="image" src="" />`
+
+具备提交的功能
+
+
+### 3.提示信息
+
+**1)表单字段集 **
+
+`<fieldset></fieldset>`
+
+功能：
+
+相当于一个方框，在字段集中可以包含文本和其他元素。
+
+该元素用于对表单中的元素进行分组并在文档中区别标出文本。
+
+fieldset元素可以嵌套，在其内部可以在设置多个fieldset对象。
+
+
+**2)字段集标题**
+
+`<legend></legend>`
+
+功能：
+- legend元素可以在fieldset对象绘制的方框内插入一个标题。
+- legend元素必须是fieldset内的第一个元素。
+      
+      
+```html
+<form method="get">
+     <fieldset>
+        <legend>字段集标题</legend>
+          账号：<input type="text" value="908097" name="zhanghao" /><br /><br />
+          密码：<input type="password" name="password"/><br /><br />
+          性别：<input type="radio" name="sex" value="boy"/>男<input type="radio" name="sex"/ value="girl">女<br /><br />
+          爱好：<input type="checkbox" name="like" value="youyong"/>游泳
+          <input type="checkbox" name="like"value="daima"/>打代码
+          <input type="checkbox" name="like" value="run"/>跑步<br /><br />
+          <input type="submit" />
+          <input type="reset" />
+    </fieldset>
+</form>
+```
+
+
+**3)提示信息标签**
+
+```html
+<label for="绑定控件id名"></label>
+```
+
+功能：
+
+label元素起到了一个关联的作用(点击姓名，会触发输入框焦点)。
+要将label元素绑定到其他的控件上，可以将label元素的for属性设置为与该控件的id属性值相同。
+
+显式：
+```html
+<label for="czm">姓名:</label>
+<input type="text" name="name" id="czm" />
+```
+
+第一个标记是以显式形式将文本 "姓名:" 和表单的文本输入控件联系起来，它的 for 属性的值和控件的 id 一样，都是 czm。
+
+隐式：
+```html
+<label>姓名: <input type="text" name="name" /></label>
+```
+
+第二个标记 ("姓名:") 不需要 for 属性，它的相关控件也不需要 id 属性，它们是通过在 <label> 标签中放入 <input> 标签来隐式地连接起来的。
+
+
+## 数据表格高级
+
+表格的作用：显示数据
+
+### 1.关于表格的CSS属性
+
+**1)单元格间距(该属性必须给table添加) border-spacing**
+
+border-spacing:50px;（同时写时border-spacing权限较大）
+
+与cellspacing的区别：
+- 区别在于border-spacing是CSS属性，cellspacing是table标签HTML属性
+
+
+```css
+table{
+    border:1px solid #ccc;
+    width:600px;
+    height:400px;
+    border-spacing:0px; //边框与边框之间的距离
+}
+
+td{
+    border:1px solid #ccc; 
+}
+```
+
+**2)合并相邻单元格边框 border-collapse**
+
+> 同时写时border-collapse权限大，也就是说一旦边框合并了，你写了border-spacing也是无效的）
+
+- border-collapse:separate(边框分开)/collapse(边框合并)；
+- collapse(边框合并)，可以使边框合并为一个像素；
+
+
+
+**3)无内容单元格显示、隐藏 empty-cells**
+
+`empty-cells:show/hide`
+
+- 默认是显示show
+- 空格不识别，&nbsp;识别；
+- 不能和边框合并一起用
+
+
+
+**4)表格布局算法(加快表格的加载速度) table-layout**
+
+当宽度
+
+`table-layout:auto/fixed`(固定宽度，不会随内容多少改变单元格宽度)
+
+a 定义和用法
+- table-Layout 属性用来显示表格单元格、行、列的算法规则。
+
+b 固定表格布局：
+- 固定表格布局与自动表格布局相比，允许浏览器更快地对表格进行布局。
+
+c 自动表格布局：
+- 在自动表格布局中，列的宽度是由列单元格中没有折行的最宽的内容设定的。
+- 此算法有时会较慢，这是由于它需要在确定最终的布局之前访问表格中所有的内容
+
+
+
+### 2.关于表格的html新特性
+
+**1)表格标题**
+
+```html
+<caption>标题内容</caption> 
+```
+此标签写在table标签内，必须是标签内第一个标签
+ 
+caption:表格标题
+
+表格标题位置：`caption-side:top/right/bottom/left   `
+
+此属性写给table和caption哪个标签都可以
+
+说明：
+- left,right位置只有火狐识别，top,bottom
+- IE6以上版本支持，ie6以下版本不支持其它属性值，只识别top;
+
+```html
+<table>
+    <caption>表格标题</caption>
+    <tr>
+        <td></td>
+    </tr>
+</table>
+```
+
+
+**2)表格布局元素**
+
+表格基本组成
+- table（表格）  
+- tr（行）  
+- td（列——单元格）
+- th:表格列标题（放在tr里，相当于一个特殊的td,默认加粗居中等标题样式）
+
+html属性
+- colspan="value"    合并列
+- rowspan="value"   和并行
+- valign="top/bottom/middle" 垂直对齐方式   align=“left/center/right”
+- rules="groups/rows/cols/all/none"    添加组分隔线
+
+
+说明：
+- rows:位于行之间的线条
+- cols:位于列之间的线条
+- all:位于行和列之间的线条
+- none:没有线条
+- groups:位于行组和列组之间的线条（前提是你对该表格已经进行了分组）
+
+补充：
+
+css     -------------    html
+text-align  ----  align
+vertical-align ---- valign
+
+
+```css
+td{
+    text-align:center;
+    vertical-align:top;
+}
+```
+
+```html
+<table>
+    <tr>
+        <td align="center"></td>
+        <td valign="center"></td>
+    </tr>
+</table>
+```
+
+
+**3)表格行分组**
+
+```html
+<thead></thead>      表头    
+<tbody></tbody>      表体
+<tfoot></tfoot>      表尾
+```
+
+说明：
+- 默认表头表尾细小，表体宽大；
+- 只起到了一个分组的作用，不会对文本的样式造成影响
+- 写这些标签时，不用改动原有的tr和td
+
+
+
+**4)表格列分组**
+```html
+<colgroup span="value"></colgroup>
+```
+
+该标签写在table内，不包含tr和td；
+
+说明：
+- colgroup元素会根据从左到右的顺序依次对数据表格进行分组,想分几组就写几个标签。
+- span属性显示指定相邻几列组成一组，span属性值默认为1，默认时仅定义一列为一组。
+- 可以通过给table添加rules="groups"属性来给分组列添加组分割线，方可看得出。
+- 权重较弱，没办法覆盖前面已有的样式；color改变的是组分割线的颜色；
+
+```html
+<table>
+    <colgroup span="1"></colgroup>
+    <colgroup span="1"></colgroup>
+    <tr>
+        <td align="center"></td>
+        <td valign="center"></td>
+    </tr>
+     <tr>
+        <td align="center"></td>
+        <td valign="center"></td>
+    </tr>
+</table>
+```
+
+
+
+
+
+==补充==：
+
+1)老版本细线表格写法
+
+```html
+<table border="0" width="500" height="400" cellpadding="0" cellspacing="#000" >
+<tr>
+    <td bgcolor="#fff"></td>
+    <td bgcolor="#fff"></td>
+    <td bgcolor="#fff"></td>
+    <td bgcolor="#fff"></td>
+</tr>
+<tr>
+   <td bgcolor="#fff"></td>
+   <td bgcolor="#fff"></td>
+   <td bgcolor="#fff"></td>
+   <td bgcolor="#fff"></td>
+</tr>
+</table>
+```
+缺点：表格不是透明的
+
+2)html新特性写法
+
+```css
+tabld{
+   border:1px solid #ccc;
+   width:600px;
+   height:400px;
+   border-spacing:0px;
+   border-collapse:collapse;
+}
+
+td{
+    border:1px solid #ccc;
+}
+```

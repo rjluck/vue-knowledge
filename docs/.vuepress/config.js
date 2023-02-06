@@ -32,6 +32,7 @@ let sidebar = {
       collapsable: true, // 可折叠
       children: [
         { title: 'HTML基础', path: '/html/base' },
+        { title: 'HTML进阶', path: '/html/high' },
       ]
     },
   ],
@@ -203,9 +204,7 @@ let sidebar = {
       title: 'JavaScript', // 侧边栏名称
       collapsable: true, // 可折叠
       children: [
-        '',  // ''空字符串代表主页，显示README.md中的内容
-        '/webInterview/js/',
-        '/webInterview/first'
+        '/webInterview/js',
       ]
     },
   ]
