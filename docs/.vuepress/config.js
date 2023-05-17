@@ -207,6 +207,15 @@ let sidebar = {
         '/webInterview/js',
       ]
     },
+  ],
+  '/webpack/': [
+    {
+      title: 'webpack基础', // 侧边栏名称
+      collapsable: true, // 可折叠
+      children: [
+        '/webpack/base',
+      ]
+    },
   ]
 }
 
@@ -240,7 +249,8 @@ module.exports = {
           { text: 'JQuery', link: '/jQuery/' },
           { text: 'JavaScript', link: '/javaScript/' },
           { text: 'TypeScript', link: '/typeScript/' },
-          { text: 'Web面试题', link: '/webInterview/' }
+          { text: 'Web面试题', link: '/webInterview/' },
+          { text: 'Webpack', link: '/webpack/' }
         ]
       },
       { text: '关于', link: '/about/' },
