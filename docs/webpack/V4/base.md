@@ -69,7 +69,7 @@ import img2 from '../img/img2.png'
 - `babel-loader`
   - 官网：https://www.webpackjs.com/loaders/babel-loader/#root
   - 安装：`npm install -D babel-loader @babel/core @babel/preset-env webpack`
-  - 用处：将`ES6/ES7`的代码来转换成我们普通浏览器能运行的`ES5`的代码
+  - 用处：将`ES6/ES7`的代码来转换成我们普通浏览器能运行的`ES5`的代码,即打包处理 webpack 无法处理的高级JS语法
 eg:
 ```js
 const path = require('path');
@@ -416,7 +416,37 @@ eg:使用配置
 ```
 
 eg:完整文件
+
+`template.html`
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <title>Document</title> -->
+    <title>
+        <%= htmlWebpackPlugin.options.title %>
+    </title>
+
+    <!-- js文件不需要打包进去，但是还想用，可以在此引入 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.js"></script>
+</head>
+
+<body>
+    <div id="good">
+        123333
+    </div>
+</body>
+
+</html>
+```
+
+
 ```js
+//webpack.config.js
 const path = require('path');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const webpack = require('webpack')
@@ -599,6 +629,7 @@ module.exports = {
 }
 ```
 
+> 其他的插件用法也大致如此，如果你需要更多满足你需要的 plugins，可以到这个[官方列表](https://webpack.js.org/plugins/)中进行搜索
 
 ### 配置文件 
 `webpack.config.js`用于存储webpack配置信息
@@ -843,8 +874,8 @@ import '../css/demo.css'
 - 再根据报错，升级对应的插件
 
 css相关loader
-- style-loader
-- css-loader
+- style-loader:负责将样式添加到DOM中
+- css-loader:负责将css文件进行加载
 - postcss-loader
 
 
