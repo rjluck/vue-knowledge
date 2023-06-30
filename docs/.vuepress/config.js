@@ -210,10 +210,17 @@ let sidebar = {
   ],
   '/webpack/': [
     {
-      title: 'webpack基础', // 侧边栏名称
+      title: 'webpackV4', // 侧边栏名称
       collapsable: true, // 可折叠
       children: [
-        '/webpack/base',
+        '/webpack/V4/base',
+      ]
+    },
+    {
+      title: 'webpackV5', // 侧边栏名称
+      collapsable: true, // 可折叠
+      children: [
+        '/webpack/V5/base',
       ]
     },
   ]
