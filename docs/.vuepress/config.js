@@ -217,7 +217,7 @@ let sidebar = {
       ]
     },
     {
-      title: 'webpackV5', // 侧边栏名称
+      title: 'webpackV5-1', // 侧边栏名称
       collapsable: true, // 可折叠
       children: [
         '/webpack/V5/base',
