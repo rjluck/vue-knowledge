@@ -54,7 +54,9 @@ let sidebar = {
         '/vue/vue2/base',
         '/vue/vue2/component',
         '/vue/vue2/route',
-        '/vue/vue2/vuex'
+        '/vue/vue2/vuex',
+        '/vue/vue2/ajax',
+        '/vue/vue2/core'
       ]
     },
     {
