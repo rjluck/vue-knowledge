@@ -78,7 +78,8 @@ let sidebar = {
       sidebarDepth: 1,    //  设置侧边导航自动提取markdown文件标题的层级，默认1为h2层级
       children: [
         // ''空字符串代表主页，显示README.md中的内容
-        ['', 'TypeScript简介']//使用数组为侧边栏起别名，前边是md名称，后边是链接显示的文字
+        ['', 'TypeScript简介'],//使用数组为侧边栏起别名，前边是md名称，后边是链接显示的文字
+        ['tsVSjs', 'TypeScript Vs JavaScript']//使用数组为侧边栏起别名，前边是md名称，后边是链接显示的文字
       ]
     },
     {

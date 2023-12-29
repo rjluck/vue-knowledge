@@ -22,6 +22,15 @@ typescript  就是比 javascript  更 java的script
 - TypeScript拥有活跃的社区
 
 
+为什么TypeScript能提供更好的代码维护性？
+
+TypeScript的静态类型检查可以在早期阶段捕捉错误，减少运行时出错的可能，同时也方便了代码阅读和维护。
+
+
+TypeScript和JavaScript可以混用吗？
+
+是的，TypeScript是JavaScript的超集，因此你可以在TypeScript项目中直接使用JavaScript代码。
+
 ## 安装
 
 命令行运行如下命令，全局安装 TypeScript：
