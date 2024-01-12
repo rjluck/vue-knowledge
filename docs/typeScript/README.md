@@ -151,6 +151,8 @@ npm install clear-webpack-plugin -D
 npm install html-webpack-plugin -D
 ```
 
-"webpack": "^4.29.6",
-"webpack-cli": "^3.2.3",
-"webpack-dev-server": "^3.2.1"
+- "webpack": "^4.29.6",
+- "webpack-cli": "^3.2.3",
+- "webpack-dev-server": "^3.2.1"
+
+> [使用 Webpack5 从 0 到 1 构建 Vue3 项目 + ts](https://juejin.cn/post/7321596167584808996)
