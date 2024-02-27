@@ -6,9 +6,12 @@
 ## Vue3简介
 
 - 2020年9月18日，Vue.js发布不3.0版本，代号：One Piece（海贼王）
-- 耗时2年多，2600+次提交、30+个RFC(请求修改意见稿)、600+次PR(拉取请求)、99位贡献者
+- 经历了 4800+次提交、40+个RFC(请求修改意见稿)、600+次PR(拉取请求)、300+位贡献者
 - github上的tag地址：https://github.com/vuejs/core/tree/v3.0.0
+- 截止2024年3月，最新的公开版本位：3.4.20
 
+查看某个npm包的所有发行版本号，比如vue
+> view vue versions  或 view vue versions --json
 
 ## Vue3带来了什么
 
@@ -44,7 +47,7 @@
 - 其他改变
     - 新的生命周期钩子
     - data选项应始终被声明为一个函数
-    - 移除keyCode支持作为v-on的修饰符,即移除写法`@key-up.13``
+    - 移除`keyCode`支持作为`v-on`的修饰符,即移除写法`@key-up.13`
     - ......
 
 
@@ -53,6 +56,11 @@
 ### 使用vue-cli创建
 
 官方文档：https://cli.vuejs.org/guide/installation.html
+
+vue-cli基于webpack创建的
+
+> 备注：目前vue-cli已处于维护模式，官方推荐给予vite创建项目
+
 ```js
 // 查看 @vue/cli 版本，确保@vue/cli版本在4.5.0以上
 vue --version
@@ -83,17 +91,18 @@ vite官网：https://vitejs.cn/
 
 优势如下：
 - 开发环境中，无需打包操作，可快速的冷启动。
-- 轻量快速的热重载（HMR）。
+- 轻量快速的热重载（HMR），能实现极速的服务启动。
+- 对`TypeScript`、`JSX`、`Css`等支持开箱即用。
 - 真正的按需编译，不再等待整个应用编译完成。
   
-传统构建与vite构建对比图
+传统webpack构建与vite构建对比图
 
 
 ![image](/imgs/vue3/vite1.png)
 
 ```js
 // 创建工程
-npm create vite@latest
+npm create vue@latest
 
 // 启动
 npm install
@@ -101,6 +110,11 @@ npm run dev
 ```
 
 ### 分析vue-cli工程结构
+
+- `.vscode` 默认提示安装官方推荐的插件
+- `env.d.ts`  ts中不认识`.jpg`、 `.txt`等文件，所以该文件就是起到支持ts认识这些文件的作用
+- `index.html` 入口文件。不再是`main.js`或者`main.ts`
+- `vite.config.ts` 整个工程的配置文件，比如安装插件、配置代理等。
 
 入口文件src/main.js
 ```js
