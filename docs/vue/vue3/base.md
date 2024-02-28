@@ -109,12 +109,8 @@ npm install
 npm run dev
 ```
 
-### 分析vue-cli工程结构
 
-- `.vscode` 默认提示安装官方推荐的插件
-- `env.d.ts`  ts中不认识`.jpg`、 `.txt`等文件，所以该文件就是起到支持ts认识这些文件的作用
-- `index.html` 入口文件。不再是`main.js`或者`main.ts`
-- `vite.config.ts` 整个工程的配置文件，比如安装插件、配置代理等。
+### 分析vue-cli工程结构
 
 入口文件src/main.js
 ```js
@@ -142,14 +138,63 @@ app.mount('#app');//挂载
 // createApp(App).mount('#app')
 ```
 
+
 src/App.vue
-```vue
+```
 <template>
   <!-- Vue3组件中的模板结构可以没有根标签 -->
   <img alt="vue logo" src="./assets/logo.png"/>
   <HelloWorld msg="Welocome to your Vue.js App"/>
 <template>
 ```
+
+
+### 分析vite工程结构
+
+- `.vscode` 默认提示安装官方推荐的插件
+- `env.d.ts`  ts中不认识`.jpg`、 `.txt`等文件，所以该文件就是起到支持ts认识这些文件的作用
+- `index.html` 入口文件。不再是`main.js`或者`main.ts`
+- `vite.config.ts` 整个工程的配置文件，比如安装插件、配置代理等。
+
+
+总结：
+- Vite项目中，index.html是项目的入口文件，在项目最外层。
+- 加载index.html后，Vite解析`<script type="module" src="xxx">` 指向的JavaScript.
+- Vue3中是通过createApp函数创建一个应用实例的。
+
+> Vue3向下兼容Vue2语法，且Vue3中的模板可以没有根标签。
+
+
+
+## 搭建Vite项目
+
+### 环境准备
+在搭建项目之前，先来看下我们的项目环境。
+
+系统：Window10。
+
+浏览器环境：Chrome。
+
+Nodejs：v16.13.0。
+
+开发工具：VS Code。
+
+因为我们是使用Vite来构建Vue3项目，所以对Nodejs的版本和浏览器有一定的要求。
+
+
+我们使用的Chrome浏览器在61版本以上，Nodejs的版本在12.0.0以上就可以了。
+
+### 搭建教程
+
+命令行窗口输入
+```
+npm init vite@latest
+```
+
+然后会有一些选项
+
+选择框架的时候，我们可以看到Vite支持很多框架，我们这里选择Vue
+
 
 ## 安装开发者工具
 
