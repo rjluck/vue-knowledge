@@ -198,4 +198,5 @@ npm init vite@latest
 
 ## 安装开发者工具
 
-chrome网上商店
+- 极简插件：https://chrome.zzzmh.cn/
+- chrome网上商店
