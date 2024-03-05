@@ -1654,27 +1654,78 @@ Vue.directive(指令名,回调函数)
 
 
 挂载流程
-- beforeCreate：【将要创建】
-- created：【创建完毕】
-- beforeMount：【将要挂载】
-- mounted:【挂载完毕】（重要）Vue完成模板的解析并把初始的真实dom元素放入页面后（挂载完毕）调用。
+- `beforeCreate`：【将要创建】
+- `created`：【创建完毕】
+- `beforeMount`：【将要挂载】
+- `mounted`:【挂载完毕】（重要）Vue完成模板的解析并把初始的真实dom元素放入页面后（挂载完毕）调用。
 
 更新流程
-- beforeUpdate：【将要更新】
-- updated：【更新完毕】
+- `beforeUpdate`：【将要更新】
+- `updated`：【更新完毕】
 
 销毁流程
-- beforeDestroy：【将要销毁】（重要）
-- destroyed：【销毁完毕】
+- `beforeDestroy`：【将要销毁】（重要）
+- `destroyed`：【销毁完毕】
 
 
 
 常用的生命周期钩子
-1.mounted：发送ajax请求,启动定时器、绑定自定义事件、订阅消息等初始化操作。
-2.beforeDestroy：清除定时器、解绑自定义事件、取消订阅消息等收尾工作。
+- 1.`mounted`：发送ajax请求,启动定时器、绑定自定义事件、订阅消息等初始化操作。
+- 2.`beforeDestroy`：清除定时器、解绑自定义事件、取消订阅消息等收尾工作。
+
+```html
+<script>
+  export default {
+    name:'Person',
+    data(){
+      return{
+
+      }
+    },
+    methods:{
+
+    },
+    // 创建前的钩子1
+    beforeCreate(){
+
+    },
+    // 创建完毕的钩子2
+    created(){
+
+    },
+    // 挂载前3
+    beforeMount(){
+
+    },
+    // 挂载完毕4
+    mounted(){
+
+    },
+    // 更新前
+    beforeUpdate(){
+
+    },
+    // 更新完毕
+    updated(){
+
+    },
+    // 销毁前
+    beforeDestroy(){
+
+    },
+    // 销毁完毕
+    destroyed(){
+      
+    }
+  }
+</script>
+```
 
 
-关于销毁Vue实例
+
+
+
+关于销毁`Vue`实例
 - 销毁后借助Vue开发工具看不到任何消息。
 - 销毁后自定义事件会失效，但原生DOM事件依然有效。
 - 一般不会在beforeDestroy操作数据，因为即便操作数据也不会再出发更新流程了。

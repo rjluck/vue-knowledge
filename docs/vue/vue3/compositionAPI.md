@@ -1992,6 +1992,26 @@ const props = withDefaults(defineProps<Props>(), {
 
 
 ## 生命周期
+
+
+### 概念
+概念：Vue组件实例在创建时要经历一系列的初始化步骤，在此过程中Vue会在合适的时机，调用特定的函数，从而让开发者有机会再特定阶段运行自己的代码，这些特定的函数统称为：生命周期钩子。
+
+规律：生命周期整体分为四个阶段，分别是：创建、挂载、更新、销毁，每个阶段都有两个钩子，一前一后。
+
+- vue2的生命周期
+  - 创建阶段：`beforeCreate`、`created`
+  - 挂载阶段：`beforeMount`、`mounted`
+  - 更新阶段：`beforeUpdate`、`updated`
+  - 销毁阶段：`beforeDestroy`、`destroyed`
+- vue3的生命周期
+  - 创建阶段：`setup`
+  - 挂载阶段：`onBeforeMount`、`onMounted`
+  - 更新阶段：`onBeforeUpdate`、`onUpdated`
+  - 卸载阶段：`onBeforeUnmount`、`onUnmounted`
+- 常用的钩子：`onMounted`、`onUpdated`、`onBeforeUnmount`
+
+
 - `vue3`中可以继续使用`vue2`中的生命周期钩子，但是有两个被更名
   - `beforeDestroy` 改名为 `beforeUnmount`
   - `destroyed` 改名为 `unmounted`
@@ -2006,7 +2026,7 @@ const props = withDefaults(defineProps<Props>(), {
   - `unmounted` ---> `onUnmounted`
 
 通过配置项的形式使用生命周期钩子
-- 配置项情况 beforeCreate 在 created 之前执行
+- 配置项情况 `beforeCreate` 在 `created` 之前执行
 ```vue
 <template>
  <h2>当前求和为：{{sum}}</h2>
@@ -2090,6 +2110,46 @@ export default{
 </script>
 ```
 
+vue3.2 script setup 形式使用
+```html
+<template>
+ <h2>当前求和为：{{sum}}</h2>
+ <button @click="sum++">点我+1</button>
+
+</template>
+<script lang="ts" setup>
+import {ref,onBeforeMount,onMounted,onBeforeUpdate,onUpdated,onBeforeUnmount,onUnmounted} from 'vue';
+let sum = ref(0)
+
+console.log('创建')
+
+// 通过组合式API的形式去使用生命周期钩子
+
+// 挂载前
+onBeforeMount(()=>{})
+// 挂载完毕
+onMounted(()=>{})
+
+// 更新前
+onBeforeUpdate(()=>{})
+// 更新完毕
+onUpdated(()=>{})
+
+// 卸载前
+onBeforeUnmount(()=>{
+  // 函数体
+})
+// 卸载完毕
+onUnmounted(()=>{
+  // 函数体
+})
+
+</script>
+```
+
+
+
+
 组合API生命周期可与配置项生命周期一起混用，组合API生命周期执行顺序比配置项的快点。如下：
 
 - 挂载顺序
@@ -2115,17 +2175,211 @@ export default{
 > unmounted
 
 
+### Vue父子组件生命周期执行顺序
+> 组件的调用顺序都是先父后子，渲染完成的顺序是先子后父。
+> 组件的销毁操作是先父后子，销毁完成的顺序是先子后父。
+
+- 加载渲染过程
+  - 父`beforeCreate`
+  - 父`created`
+  - 父`beforeMount`
+  - 子`beforeCreate`
+  - 子`created`
+  - 子`beforeMount`
+  - 子`mounted`
+  - 父`mounted`
+- 更新过程
+  - 父`beforeUpdate`
+  - 子`beforeUpdate`
+  - 子`updated`
+  - 父`updated`
+- 销毁过程
+  - 父`beforeDestroy`
+  - 子`beforeDestroy`
+  - 子`destroyed`
+  - 父`destroyed`
+
+### 异步请求在哪一步发起
+我们可以在钩子函数 `created`、`beforeMount`、`mounted` 中进行调用，因为在这三个钩子函数中，`data` 已经创建，可以将服务端端返回的数据进行赋值。
+
+推荐在 `created` 钩子函数中调用异步请求，因为在 `created` 钩子函数中调用异步请求有以下优点：
+- 能更快获取到服务端数据，减少页面加载时间，用户体验更好；
+- `SSR`不支持 `beforeMount` 、`mounted` 钩子函数，放在 `created` 中有助于一致性。
+
+
+
+
+
 ## 自定义hooks函数
 
 ### 什么是hook?
 
 - 什么是hook?————本质是一个函数，把`setup`函数中使用的`composition API`进行了封装。
-- 类似于`vue`中的`mixin`。
+- 类似于`vue2`中的`mixin`。就是`js`或`ts`文件。
 - 自定义`hooks`的优势：复用代码，让`setup`中的逻辑更清楚易懂。
 
 
-原本写法：
+
+### 举例1
+原本写法
+```html
+<template>
+    <div class="person">
+       <h2>当前求和为：{{ sum }}</h2>
+       <button @click="add">sum+1</button>
+       <hr>
+
+       <img v-for="(dog,index) in dogList" :src="dog" :key="index"/>
+        <br/>
+       <button @click="getDog">再来一只小狗</button>
+    </div>
+</template>
+<script lang="ts" setup name="Person">
+    import { ref,reactive } from 'vue'
+    import axios from 'axios';
+    // 数据
+    let sum = ref(0)
+    let dogList = reactive([
+        'https://images.dog.ceo/breeds/pembroke/n02113023_1785.jpg'
+    ])
+    // 方法
+    function add(){
+        sum.value +=1
+    }
+    async function  getDog(){
+        try{
+            let result = await axios.get('https://dog.ceo/api/breed/pembroke/images/random')
+            console.log('result: ', result.data);
+            dogList.push(result.data.message)
+        }catch(error){
+            alert(error)
+        }
+      
+    }
+</script>
+
+
+<style scoped>
+.person{
+    background-color:skyblue;
+    box-shadow: 0 0 10px;
+    border-radius:10px;
+    padding:20px;
+}
+img{
+   height:100px; 
+   margin-left:10px;
+}
+</style>
 ```
+
+
+hooks写法
+
+person.vue
+```html
+<template>
+    <div class="person">
+       <h2>当前求和为：{{ sum }},放大10倍后：{{ bigSum }}</h2>
+       <button @click="add">sum+1</button>
+       <hr>
+
+       <img v-for="(dog,index) in dogList" :src="dog" :key="index"/>
+        <br/>
+       <button @click="getDog">再来一只小狗</button>
+    </div>
+</template>
+<script lang="ts" setup name="Person">
+    import useSum from '@/hooks/useSum'
+    import useDog from '@/hooks/useDog'
+
+    const {sum,add,bigSum} = useSum()
+    const {dogList,getDog} = useDog()
+</script>
+
+
+<style scoped>
+.person{
+    background-color:skyblue;
+    box-shadow: 0 0 10px;
+    border-radius:10px;
+    padding:20px;
+}
+img{
+   height:100px; 
+   margin-left:10px;
+}
+</style>
+```
+
+useSum.ts
+```ts
+import { ref, onMounted, computed } from 'vue'
+
+export default function () {
+    // 数据
+    let sum = ref(0)
+    let bigSum = computed(() => {
+        return sum.value * 10
+    })
+    // 方法
+    function add() {
+        sum.value += 1
+    }
+
+    // 钩子
+    onMounted(() => {
+        add()
+    })
+
+    // 向外部提供东西
+    return {
+        sum,
+        add,
+        bigSum
+    }
+}
+```
+
+useDog.ts
+```ts
+import { reactive, onMounted } from 'vue'
+import axios from 'axios';
+
+export default function () {
+    // 数据
+    let dogList = reactive([
+        'https://images.dog.ceo/breeds/pembroke/n02113023_1785.jpg'
+    ])
+    // 方法
+    async function getDog() {
+        try {
+            let result = await axios.get('https://dog.ceo/api/breed/pembroke/images/random')
+            console.log('result: ', result.data);
+            dogList.push(result.data.message)
+        } catch (error) {
+            alert(error)
+        }
+    }
+
+    // 钩子
+    onMounted(() => {
+        getDog()
+    })
+
+    // 向外部提供东西
+    return {
+        dogList,
+        getDog
+    }
+}
+```
+
+
+### 举例2
+
+原本写法：
+```html
 <template>
   <button @click="sum++">点我+1</button>
   <hr/>
@@ -2170,7 +2424,7 @@ export default{
 
 
 hooks写法:
-```
+```html
 <template>
   <button @click="sum++">点我+1</button>
   <hr/>
@@ -2214,7 +2468,7 @@ function savePoint(){
 
     // 挂载完毕
     onMounted(()=>{
-      window.addEventListener('click',savePoint
+      window.addEventListener('click',savePoint)
     })
 
     // 卸载前
@@ -2228,9 +2482,15 @@ function savePoint(){
 export default savePoint
 ```
 
+> 正是因为有hooks，才真正体现了compositionAPI的特点。
+
+
+
+
+
+
+
 ## toRefs与toRef
-
-
 
 ### toRefs
 - 作用：将一个响应式对象中的每一个属性，转换为`ref`对象。
