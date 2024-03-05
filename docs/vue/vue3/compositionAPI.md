@@ -1122,11 +1122,248 @@ import { ref,computed,reactive,toRefs,toRef} from 'vue'
 
 监视`reactive`定义的【对象类型】数据，且默认开启了深度监视。
 
+```html
+<template>
+    <div class="person">
+       <h2>姓名：{{ person.name }}</h2>
+       <h2>年龄：{{ person.age }}</h2>
+       <button @click="changeName">修改名字</button>
+       <button @click="changeAge">修改年龄</button>
+       <button @click="changePerson">修改整个人</button>
+    </div>
+</template>
+<script lang="ts" setup name="Person">
+    import { reactive,watch } from 'vue'
+    // 数据
+    let person = reactive({
+        name:'张三',
+        age:18
+    })
+    
+    // 方法
+    function changeName(){
+        person.name +='~'
+    }
+    function changeAge(){
+        person.age +=1
+    }
+    function changePerson(){
+        // person = {name:'丽丽',age:20} // reactive不支持整体更改对象
+        Object.assign(person,{name:'丽丽',age:20})
+    }
+
+    // 监听
+    // 参数1：监听对象
+    // 参数2：监听回调
+    // 参数3：配置对象
+
+    // 监视的是对象的地址值
+    // watch(person,(newValue,oldValue)=>{
+    //     console.log('oldValue: ', oldValue);
+    //     console.log('newValue: ', newValue);  
+    // })
+
+    // 监视reactive定义的对象类型数据，默认底层开启深度监视，这个深度监视是不可关闭的。
+    // 因为对象地址不变，所以 newValue 和 oldValue 始终相同
+    watch(person,(newValue,oldValue)=>{
+        console.log('oldValue: ', oldValue);
+        console.log('newValue: ', newValue);  
+    })
+</script>
+
+<style scoped>
+.person{
+    background-color:skyblue;
+    box-shadow: 0 0 10px;
+    border-radius:10px;
+    padding:20px;
+}
+</style>
+```
 
 
 
+#### 情况四
+
+监视`ref`或`reactive`定义的【对象类型】数据中的某个属性，注意点如下：
+- 若该属性值不是【对象类型】，需要写成函数形式。
+- 若该属性值依然是【对象类型】，可直接编辑，也可写成函数，不过建议写成函数。
+
+结论：监视的要是对象里的属性，那么最好写成函数式。注意点：若是对象监视的是地址值，若要关注对象内部，需要手动关注深度监视。
+
+```html
+<template>
+    <div class="person">
+       <h2>姓名：{{ person.name }}</h2>
+       <h2>年龄：{{ person.age }}</h2>
+       <h2>汽车：{{ person.car.c1 }} 、{{ person.car.c2 }}</h2>
+       <button @click="changeName">修改名字</button>
+       <button @click="changeAge">修改年龄</button>
+       <button @click="changeC1">修改第一台车</button>
+       <button @click="changeC2">修改第二台车</button>
+       <button @click="changeCar">修改整个车</button>
+    </div>
+</template>
+<script lang="ts" setup name="Person">
+    import { reactive,watch } from 'vue'
+    // 数据
+    let person = reactive({
+        name:'张三',
+        age:18,
+        car:{
+            c1:'奔驰',
+            c2:'宝马'
+        }
+    })
+    
+    // 方法
+    function changeName(){
+        person.name +='~'
+    }
+    function changeAge(){
+        person.age +=1
+    }
+    function changeC1(){
+       person.car.c1 = '奥迪'
+    }
+    function changeC2(){
+        person.car.c2 = '大众'
+    }
+    function changeCar(){
+        person.car = {
+            c1:'雅迪',
+            c2:'爱玛',
+        }
+    }
+
+    // 监听
+    // 参数1：监听对象
+    // 参数2：监听回调
+    // 参数3：配置对象
 
 
+    // （1）监视的属性值不是【对象类型】，需要写成函数形式
+    // getter函数：一个函数，返回一个值
+    // watch(()=>{return person.name},(newValue,oldValue)=>{
+    //     console.log('oldValue: ', oldValue);
+    //     console.log('newValue: ', newValue);  
+    // })
+
+    // 简写
+    watch(()=>person.name,(newValue,oldValue)=>{
+        console.log('oldValue: ', oldValue);
+        console.log('newValue: ', newValue);  
+    })
+
+
+    // (2)监视的数值是【对象类型】,
+    // 可直接编辑（修改对象里面的属性，可监听到，修改整个对象就监听不到了）
+    // 也可写成函数形式（修改对象里面的属性，不可监听到，修改整个对象可以监听到），但是加上deep:true就可以监听到对象属性的改变
+    // watch(person.car,(newValue,oldValue)=>{
+    //     console.log('oldValue: ', oldValue);
+    //     console.log('newValue: ', newValue);  
+    // })
+
+    // 也可写成函数形式，
+    // watch(()=>person.car,(newValue,oldValue)=>{
+    //     console.log('oldValue1: ', oldValue);
+    //     console.log('newValue1: ', newValue);  
+    // })
+
+    // 所以推荐写成函数形式
+    watch(()=>person.car,(newValue,oldValue)=>{
+        console.log('oldValue1: ', oldValue);
+        console.log('newValue1: ', newValue);  
+    },{deep:true})
+</script>
+
+<style scoped>
+.person{
+    background-color:skyblue;
+    box-shadow: 0 0 10px;
+    border-radius:10px;
+    padding:20px;
+}
+</style>
+```
+
+#### 情况五
+
+监视上诉的多个数据
+
+```html
+<template>
+    <div class="person">
+       <h2>姓名：{{ person.name }}</h2>
+       <h2>年龄：{{ person.age }}</h2>
+       <h2>汽车：{{ person.car.c1 }} 、{{ person.car.c2 }}</h2>
+       <button @click="changeName">修改名字</button>
+       <button @click="changeAge">修改年龄</button>
+       <button @click="changeC1">修改第一台车</button>
+       <button @click="changeC2">修改第二台车</button>
+       <button @click="changeCar">修改整个车</button>
+    </div>
+</template>
+<script lang="ts" setup name="Person">
+    import { reactive,watch } from 'vue'
+    // 数据
+    let person = reactive({
+        name:'张三',
+        age:18,
+        car:{
+            c1:'奔驰',
+            c2:'宝马'
+        }
+    })
+    
+    // 方法
+    function changeName(){
+        person.name +='~'
+    }
+    function changeAge(){
+        person.age +=1
+    }
+    function changeC1(){
+       person.car.c1 = '奥迪'
+    }
+    function changeC2(){
+        person.car.c2 = '大众'
+    }
+    function changeCar(){
+        person.car = {
+            c1:'雅迪',
+            c2:'爱玛',
+        }
+    }
+
+    // 监听
+    // 参数1：监听对象
+    // 参数2：监听回调
+    // 参数3：配置对象
+
+    // 监听name和c1
+    watch([()=>person.name,()=>person.car.c1],(newValue,oldValue)=>{
+        console.log('oldValue: ', oldValue);
+        console.log('newValue: ', newValue);
+    })
+
+    // 监听age和car
+    watch([()=>person.age,person.car],(newValue,oldValue)=>{
+        console.log('oldValue: ', oldValue);
+        console.log('newValue: ', newValue);
+    })
+
+</script>
+
+<style scoped>
+.person{
+    background-color:skyblue;
+    box-shadow: 0 0 10px;
+    border-radius:10px;
+    padding:20px;
+}
+</style>
+```
 
 
 
@@ -1286,13 +1523,24 @@ export default{
 
 
 ###  watchEffect函数
+
 - `watch`的套路是：既要指明监视的属性，也要指明监视的回调。
 - `watchEffect`的套路是：不用指明监视哪个属性，监视的回调中用到哪个属性，那就监视哪个属性。
 - `watchEffect`有点像`computed`
   - 但`computed`注重的计算出来的值（回调函数的返回值），所以必须要写返回值。
   - 而`watchEffect`更注重的是过程（回调函数的函数体），所以不用写返回值。
 
-```vue
+官网：立即运行一个函数，同时响应式地追踪其依赖，并在依赖更改是重新执行该函数。
+
+`watch` 对比 `watchEffect`
+- 都能监听响应式数据的变化，不同的是监听数据变化的方式不同。
+- `watch`:要明确指出监视的数据
+- `watchEffect`:不用明确指出监视的数据（函数中用到哪些属性,那就监视哪些属性）
+
+
+
+
+```html
 <template>
  <h2>当前求和为：{{sum}}</h2>
  <button @click="sum++">点我+1</button>
@@ -1347,6 +1595,397 @@ export default{
 }
 </script>
 ```
+
+
+
+```html
+<template>
+    <div class="person">
+     <h2>需求：当水温达到60 或 水位达到80，给服务器发请求</h2>
+     <h2>当前水温：{{ temp }}</h2>
+     <h2>当前水位：{{ height }}</h2>
+     <button @click="changeTemp">水温+10</button>
+     <button @click="changeHeight">水位+10</button>
+    </div>
+</template>
+<script lang="ts" setup name="Person">
+import { ref,watch,watchEffect } from 'vue'
+    // 数据
+    let temp = ref(0)
+    let height = ref(0)
+
+    // 方法
+    function changeTemp(){
+        temp.value+=10
+    }
+    function changeHeight(){
+        height.value+=10
+    }
+
+    // watch监视
+    // watch([temp,height],(newValue,oldValue)=>{
+    //     console.log('newValue,oldValue: ', newValue,oldValue);
+    //     let [newTemp,newHeight] = newValue;
+    //     if(newTemp>=60 || newHeight>=80){
+    //         console.log('发请求');
+    //     }
+    // })
+
+    // 上面若是监听的属性很多，都写就很麻烦，所以引入watchEffect
+    // watchEffect监视
+    watchEffect(()=>{
+        console.log('一上来就执行')
+        if(temp.value>=60 || height.value>=80){
+          console.log('发请求');
+        }
+    })
+</script>
+
+<style scoped>
+.person{
+    background-color:skyblue;
+    box-shadow: 0 0 10px;
+    border-radius:10px;
+    padding:20px;
+}
+</style>
+```
+
+
+## 标签的ref属性
+
+作用：用于注册模板引用
+- 用在普通的`DOM`标签上，获取的是`DOM`节点
+- 用在组件标签上，获取的是组件实例对象
+
+> 当父组件要通过ref获取子组件中的内容，此时子组件必须借助 `defineExpose` 方法进行导出，否则父组件获取不到。
+
+app.vue
+```html
+<template>
+<div class="app">
+    <h1>你好啊</h1>
+    <button @click="showLog">www</button>
+    <Person ref="ren"></Person>
+</div>
+</template>
+<script lang="ts" setup name="App">
+    import { ref } from 'vue'
+    import Person from './components/Person.vue'
+
+    let ren = ref()
+
+    function showLog(){
+        // 获取组件实例
+        console.log('1111',ren.value);
+    }
+
+</script>
+<style>
+.app{
+    background-color: aquamarine;
+    box-shadow: 0 0 10px;
+    border-radius:10px;
+    padding: 20px;
+}
+</style>
+```
+
+person.vue
+```html
+<template>
+    <div class="person">
+        <h1>中国</h1>
+        <h2 id="title2" ref="beijing">北京</h2>
+        <h3>大连</h3>
+        <button @click="showLog">点我输出h2这个元素</button>
+    </div>
+</template>
+<script lang="ts" setup name="Person">
+import { ref,defineExpose } from 'vue'
+
+    // 数据
+    // 创建一个beijing,用于存储ref标记的内容
+    let beijing = ref()
+
+
+    let a = ref(0)
+    let b = ref(1)
+    let c = ref(2)
+
+    // 方法
+    function showLog(){
+        // 原生获取dom元素
+        console.log(document.getElementById('title2')) // 
+        // vue3中写法,获取dom元素
+        console.log(beijing.value)
+    }
+
+    // 导出之后，可以让父组件看到变量a,b,c,都则父组件看不到
+    defineExpose({a,b,c})
+</script>
+
+
+<style scoped>
+.person{
+    background-color:skyblue;
+    box-shadow: 0 0 10px;
+    border-radius:10px;
+    padding:20px;
+}
+</style>
+```
+
+## props
+
+- 一个组件需要显式声明它所接受的 props，这样 Vue 才能知道外部传入的哪些是 props，哪些是透传 attribute
+- Vue3相较于Vue2，Props传递的变化很大，并且结合ts后，写法有些怪异。
+
+### props声明
+
+（1）在使用 `<script setup>` 的单文件组件中，`props` 可以使用 `defineProps()` 宏来声明：
+```html
+<script lang="ts" setup>
+    const props = defineProps(['foo'])
+
+    console.log(props.foo)
+</script>
+```
+```html
+<script lang="ts" setup>
+    const props = defineProps({
+      title:String,
+      likes:Number
+    })
+
+    console.log(props.title)
+</script>
+```
+
+（2）在没有使用 `<script setup>` 的组件中，`prop` 可以使用 `props` 选项来声明：
+```js
+export default{
+  props:['foo'],
+  setup(props){
+    // setup() 接收props作为第一个参数
+    console.log(props.foo)
+  }
+}
+```
+
+```js
+export default{
+  props:{
+    title:String,
+    likes:Number
+  },
+  setup(props){
+    // setup() 接收props作为第一个参数
+    console.log(props.title)
+  }
+}
+```
+
+注意：
+- 注意传递给 `defineProps()` 的参数和提供给 `props` 选项的值是相同的，两种声明方式背后其实使用的都是 `prop` 选项。
+
+（3）如果你正在搭配 `TypeScript` 使用 `<script setup>`，也可以使用类型标注来声明 `props`
+```html
+<script lang="ts" setup>
+  defineProps<{
+    title?:string,
+    likes?:number
+  }>
+</script>
+```
+
+### props校验
+- Vue 组件可以更细致地声明对传入的 props 的校验要求
+
+（1）js版本
+```js
+defineProps({
+  propA:Number,
+  propB:[String,Number],
+  propC:{
+    type:String,
+    required:true
+  },
+  propD:{
+    type:String,
+    default:100
+  },
+  propE:{
+    type:Object,
+    default:(rawProps){
+      // 对象或数组的默认值,必须从一个工厂函数返回。
+      // 该函数接收组件所接收到的原始 prop 作为参数。
+      return {message:'222'}
+    }
+  }，
+  // 自定义类型校验函数
+  propsF:{
+    validator(value){
+      return ['success','warning','danger'].includes(value)
+    }
+  },
+  // 函数类型的默认值
+  propsG:{
+    type:Function,
+    // 不像对象或者数组的默认，这不是一个工厂函数。这会是一个用来作为默认值的函数。
+    default(){
+      return '111'
+    }
+  }
+})
+```
+
+> defineProps() 宏中的参数不可以访问 `<script setup>` 中定义的其他变量，因为在编译时整个表达式都会被移到外部的函数中。
+
+
+
+（2）`ts`版本
+这个时候的写法可能就很不习惯了。
+
+(2.1) 使用`ts`进行类型约束
+```html
+<script setup lang="ts">
+defineProps<{
+  title?: string
+  likes?: number
+}>()
+</script>
+```
+拆分开来，其实等价于：
+```html
+<script setup lang="ts">
+interface Props {
+  title?: string
+  likes?: number
+}
+ 
+const props = defineProps<Props>()
+</script>
+```
+（2.2）使用`ts`时`props`的默认值
+
+> 当使用基于类型的声明时，我们失去了为 `props` 声明默认值的能力。
+> 
+> 如果是对象写法，可以约定默认值，但是使用`ts`进行类型约束后，就做不到了。这个时候可以通过 `withDefaults` 来解决：
+
+```ts
+export interface Props {
+  msg?: string
+  labels?: string[]
+}
+ 
+const props = withDefaults(defineProps<Props>(), {
+  msg: 'hello',
+  labels: () => ['one', 'two']
+})
+```
+
+相当于是将整个之前的`defineProps`作为参数传给了`withDefaults`。
+
+
+
+
+注意：
+- 所有`prop`默认都是可选的，除非声明了`required:true`
+- 除了`Boolean`外的未传递的可选`prop`将会有一个默认值`undefined`
+- `Boolean` 类型的未传递 `prop` 将被转换为 `false`。这可以通过为它设置 `default` 来更改——例如：设置为 `default: undefined` 将与非布尔类型的 `prop` 的行为保持一致。
+- 如果声明了 `default` 值，那么在 `prop` 的值被解析为 `undefined` 时，无论 `prop` 是未被传递还是显式指明的 `undefined`，都会改为 `default` 值。
+- 当 `prop` 的校验失败后，`Vue` 会抛出一个控制台警告 (在开发模式下)
+
+### 结合ts的默认值及声明
+
+父组件
+```html
+<template>
+<div class="app">
+    <Person a="哈哈哈" b="嘻嘻嘻" :list="personList"></Person>
+</div>
+</template>
+<script lang="ts" setup name="App">
+    import { reactive,ref } from 'vue'
+    import Person from './components/Person.vue'
+    import { type Persons } from './types';
+    // 数据
+    // reactive 直接传泛型
+    let personList= reactive<Persons>([
+        {id:'aa1',name:'红红',age:18},
+        {id:'aa2',name:'丽丽',age:19},
+        {id:'aa3',name:'欣欣',age:20,x:9},
+    ])
+
+</script>
+<style>
+.app{
+    background-color: aquamarine;
+    box-shadow: 0 0 10px;
+    border-radius:10px;
+    padding: 20px;
+}
+</style>
+```
+
+
+子组件
+```html
+<template>
+    <div class="person">
+        <ul>
+            <li v-for="item in list"  :key="item.id">
+                {{ item.name }}-{{ item.age }}
+            </li>
+        </ul>
+    </div>
+</template>
+<script lang="ts" setup name="Person">
+    import { defineProps,withDefaults } from 'vue'
+    import { type Persons } from '../types';
+    // 接收a
+    // defineProps(['a'])
+
+    // 接收a,同时将props保存起来
+    // let x = defineProps(['a','b','list'])
+    // console.log('x: ', x);
+    // console.log('x.list: ', x.list);
+
+    // 只接收list
+    // defineProps(['list'])
+
+    // 接收list + 限制类型
+    // defineProps<{list:Persons}>()
+
+    // 接收list + 限制类型 + 限制必要性 + 指定默认值
+    withDefaults(defineProps<{list?:Persons}>(),{
+        list:()=>{
+            return [
+                {id:'bbb1',name:'ww',age:23}
+            ]
+        }
+    })
+    
+</script>
+
+
+<style scoped>
+.person{
+    background-color:skyblue;
+    box-shadow: 0 0 10px;
+    border-radius:10px;
+    padding:20px;
+}
+</style>
+```
+
+
+
+> define... 在vue3中属于宏函数，不用引入也不报错，eg:defineProps可直接使用，无需引入
+> 
+> Vue3中只要是define开头的api，不需要从vue中引入。
+
 
 
 
