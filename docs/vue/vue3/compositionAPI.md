@@ -2217,7 +2217,7 @@ onUnmounted(()=>{
 - 什么是hook?————本质是一个函数，把`setup`函数中使用的`composition API`进行了封装。
 - 类似于`vue2`中的`mixin`。就是`js`或`ts`文件。
 - 自定义`hooks`的优势：复用代码，让`setup`中的逻辑更清楚易懂。
-
+- hooks文件规范命名use...
 
 
 ### 举例1

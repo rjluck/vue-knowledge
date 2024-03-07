@@ -67,6 +67,7 @@ let sidebar = {
         '/vue/vue3/compositionAPI',
         '/vue/vue3/otherComAPI',
         '/vue/vue3/component',
+        '/vue/vue3/route',
         '/vue/vue3/other',
       ]
     },
