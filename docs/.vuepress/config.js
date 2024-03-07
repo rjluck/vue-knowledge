@@ -69,6 +69,7 @@ let sidebar = {
         '/vue/vue3/component',
         '/vue/vue3/route',
         '/vue/vue3/other',
+        '/vue/vue3/pinia',
       ]
     },
   ],

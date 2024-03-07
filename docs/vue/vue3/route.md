@@ -404,6 +404,283 @@ let { query } = toRefs(route);
 ### params
 
 
+#### 传递参数
+
+（1）写法1：to的字符串写法
+```html
+<router-link :to="`/news/detail/${item.id}/${item.title}/${item.content}`">{{item.title}}</router-link>
+```
+
+（2）写法2：to的对象写法
+
+```html
+<!-- 通过name跳转 -->
+<router-link :to="{
+  name:'xiang',
+  params:{
+    id:item.id,
+    title:item.title,
+    content:item.content,
+  }
+}">{{item.title}}</router-link>
+```
+
+> 注意：
+> - 传递params参数时，若使用to的对象写法，必须使用name配置项，不能用path。
+> - 传递params参数时，需要提前在路由规则中定位。
+> - 传递params参数时， 不能传属性值为数组的数据
+
+如下就会报错
+```html
+<router-link :to="{
+  name:'xiang',
+  params:{
+        list:[1,2,3]
+  }
+}">{{item.title}}</router-link>
+```
+
+index.ts  路由占位
+```ts
+// 创建一个路由器，并暴露出去
+
+// 第一步：引入createRouter
+import { createRouter, createWebHistory } from "vue-router";
+// 引入一个个可能要呈现的组件
+import Home from "@/pages/Home.vue";
+import News from "@/pages/News.vue";
+import About from "@/pages/About.vue";
+import Detail from "@/pages/Detail.vue";
+
+// 第二步：创建路由器
+const router = createRouter({
+    history: createWebHistory(), // 路由器的工作模式
+    routes: [
+        {
+            name: 'zhuye',
+            path: '/home',
+            component: Home
+        },
+        {
+            name: 'xinwen',
+            path: '/news',
+            component: News,
+            children: [
+                {
+                    name: 'xiang',
+                    path: 'detail/:id/:title/:content', // 子级路由不需要写/,params传参必须在此处占位
+                    component: Detail,
+                }
+            ]
+        },
+        {
+            name: 'guanyu',
+            path: '/about',
+            component: About
+        }
+    ]
+})
+
+// 第三步：交出去
+export default router;
+```
+
+当参数可传可不传的时候，占位时在参数后面加`?`即可
+```js
+ path: 'detail/:id/:title?/:content?', // params传参必须在此处占位
+```
+
+
+#### 接收参数
+```html
+<template>
+  <ul class="news-list">
+    <!-- <li>编号：{{route.params.id}}</li>
+    <li>标题：{{route.params.title}}</li>
+    <li>内容：{{route.params.content}}</li>-->
+
+    <li>编号：{{params.id}}</li>
+    <li>标题：{{params.title}}</li>
+    <li>内容：{{params.content}}</li>
+  </ul>
+</template>
+<script setup lang="ts" >
+import { useRoute } from 'vue-router';
+import { toRefs } from 'vue';
+let route = useRoute();
+console.log('route: ', route.params);
+// 注意：从响应式身上直接解构属性，那个属性至此就失去响应式了，如下
+// let { params} = route
+
+// 所以，需要用到toRefs
+let { params } = toRefs(route);
+</script>
+```
+
+
+## 路由的props配置
+
+作用：让路由组件更方便的收到参数（可以将路由参数作为`props`传给组件）
+
+### 布尔值写法
+```js
+        {
+            name: 'xinwen',
+            path: '/news',
+            component: News,
+            children: [
+                {
+                    name: 'xiang',
+                    path: 'detail/:id/:title/:content?', // 子级路由不需要写/,params传参必须在此处占位
+                    component: Detail,
+                    // 第一种写法：布尔值写法，将路由收到的所有params参数作为props传递给路由组件
+                    props: true   // 只能和params打配合
+                }
+            ]
+        },
+```
+
+### 函数写法
+```js
+        {
+            name: 'xinwen',
+            path: '/news',
+            component: News,
+            children: [
+                {
+                    name: 'xiang',
+                    path: 'detail/:id/:title/:content?', // 子级路由不需要写/,params传参必须在此处占位
+                    component: Detail,
+                    // 第二种写法：函数写法，可以自己决定将什么作为props给路由组件
+                    props(route) {
+                        // return{
+                        //     x:1
+                        // }
+                        return route.query
+                    }
+                }
+            ]
+        },
+```
+
+
+### 对象写法
+```js
+        {
+            name: 'xinwen',
+            path: '/news',
+            component: News,
+            children: [
+                {
+                    name: 'xiang',
+                    path: 'detail/:id/:title/:content?', // 子级路由不需要写/,params传参必须在此处占位
+                    component: Detail,
+                    // 第三种写法：对象写法，可以自己决定将什么作为props给路由组件
+                    // 用的比较少，因为是写死的
+                    props:{
+                        id:'100',
+                        content:'内容'
+                    }
+                }
+            ]
+        },
+```
+
+
+
+
+注意：
+
+- 不写props，相当于：
+```
+<Detail/>
+```
+
+- 写上props，相当于：
+```
+<Detail id=?? title=?? content=??/>
+```
+
+
+路由组件 Detail.vue 接收
+```html
+<template>
+  <ul class="news-list">
+    <li>编号：{{id}}</li>
+    <li>标题：{{title}}</li>
+    <li>内容：{{content}}</li>
+  </ul>
+</template>
+<script setup lang="ts" >
+defineProps(['id', 'title', 'content']);
+</script>
+<style scoped>
+li {
+  list-style: none;
+}
+</style>
+```
+
+
+## 路由的replace属性
+
+- 作用：控制路由跳转时操作浏览器历史记录的模式。
+- 浏览器的历史记录有两种写入方式：分别为`push`和`replace`
+  - `push`是追加历史记录（默认值）
+  - `replace`是替换当前记录
+- 开启`replace`模式(只需要在`router-link`标签上写上属性`replace`)
+```html
+<RouterLink replace></RouterLink>
+```
+
+
+
+## 编程时导航
+
+- 编程式路由导航：脱离`<RouterLink>`实现路由跳转
+- 路由组件的两个重要的属性：`$route`和`$router`变成了两个`hooks`
+
+
+> 编程式写法`push`或`replace`同`<RouterLink>`上的`to`属性写法一致
+
+### 字符串写法
+```ts
+import {useRoute,useRouter} from 'vue-router'
+
+const useRouter = useRouter()
+
+// 编程式
+useRouter.push('/news')
+```
+
+
+### 对象写法
+```ts
+import {useRoute,useRouter} from 'vue-router'
+
+const useRouter = useRouter()
+
+// 编程式
+useRouter.push({
+  name:'xiang',
+  query:{
+    id:'xxxx'
+  }
+})
+```
+
+
+## 重定向
+
+一级路由规则最后加上
+```ts
+{
+  path:'/',
+  redirect:'/home'
+}
+```
+
+
 
 
 
