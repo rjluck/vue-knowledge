@@ -1,7 +1,7 @@
 ---
 home: true
 heroImage: /img.jpg
-heroText: 荣佳的前端记录
+heroText: 荣佳佳的前端记录
 tagline: 一点一滴都是进步
 actionText: 马上进入 →
 actionLink: /pages/catalog.md

@@ -207,6 +207,20 @@ let sidebar = {
         '/webInterview/js',
       ]
     },
+  ],
+  '/applet/': [
+    {
+      title: '微信小程序', // 侧边栏名称
+      collapsable: true, // 可折叠
+      children: [
+        '/applet/wx/base',
+        '/applet/wx/component',
+        '/applet/wx/API',
+        '/applet/wx/grammar',
+        '/applet/wx/plugin',
+        '/applet/wx/case',
+      ]
+    },
   ]
 }
 
@@ -240,7 +254,8 @@ module.exports = {
           { text: 'JQuery', link: '/jQuery/' },
           { text: 'JavaScript', link: '/javaScript/' },
           { text: 'TypeScript', link: '/typeScript/' },
-          { text: 'Web面试题', link: '/webInterview/' }
+          { text: 'Web面试题', link: '/webInterview/' },
+          { text: '小程序', link: '/applet/' }
         ]
       },
       { text: '关于', link: '/about/' },
