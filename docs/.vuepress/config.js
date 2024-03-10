@@ -54,7 +54,9 @@ let sidebar = {
         '/vue/vue2/base',
         '/vue/vue2/component',
         '/vue/vue2/route',
-        '/vue/vue2/vuex'
+        '/vue/vue2/vuex',
+        '/vue/vue2/ajax',
+        '/vue/vue2/core'
       ]
     },
     {
@@ -65,7 +67,9 @@ let sidebar = {
         '/vue/vue3/compositionAPI',
         '/vue/vue3/otherComAPI',
         '/vue/vue3/component',
+        '/vue/vue3/route',
         '/vue/vue3/other',
+        '/vue/vue3/pinia',
       ]
     },
   ],
@@ -76,7 +80,8 @@ let sidebar = {
       sidebarDepth: 1,    //  设置侧边导航自动提取markdown文件标题的层级，默认1为h2层级
       children: [
         // ''空字符串代表主页，显示README.md中的内容
-        ['', 'TypeScript简介']//使用数组为侧边栏起别名，前边是md名称，后边是链接显示的文字
+        ['', 'TypeScript简介'],//使用数组为侧边栏起别名，前边是md名称，后边是链接显示的文字
+        ['tsVSjs', 'TypeScript Vs JavaScript']//使用数组为侧边栏起别名，前边是md名称，后边是链接显示的文字
       ]
     },
     {
@@ -221,6 +226,22 @@ let sidebar = {
         '/applet/wx/case',
       ]
     },
+  ],
+  '/webpack/': [
+    {
+      title: 'webpackV4', // 侧边栏名称
+      collapsable: true, // 可折叠
+      children: [
+        '/webpack/V4/base',
+      ]
+    },
+    {
+      title: 'webpackV5-测试1', // 侧边栏名称
+      collapsable: true, // 可折叠
+      children: [
+        '/webpack/V5/base',
+      ]
+    },
   ]
 }
 
@@ -255,7 +276,8 @@ module.exports = {
           { text: 'JavaScript', link: '/javaScript/' },
           { text: 'TypeScript', link: '/typeScript/' },
           { text: 'Web面试题', link: '/webInterview/' },
-          { text: '小程序', link: '/applet/' }
+          { text: '小程序', link: '/applet/' },
+          { text: 'Webpack', link: '/webpack/' }
         ]
       },
       { text: '关于', link: '/about/' },
