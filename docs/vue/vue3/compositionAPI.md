@@ -2933,6 +2933,8 @@ onUnmounted(() => {
 ### v-model
 
 
+#### 原理
+
 test.vue
 ```html
 <template>
@@ -2971,6 +2973,7 @@ let username = ref('zhangsan')
 </style>
 ```
 
+rjInput.vue
 ```html
 <template>
   <input type="text"
@@ -2995,22 +2998,457 @@ input {
 ```
 
 
+> `$event`到底是啥？啥时候能`.target`?
+>
+> - 对于原生事件，`$event`就是事件对象(能`.target`)
+> - 对于自定义事件，`$event`就是触发事件时，所传递的数据(不能`.target`)
 
+
+
+#### 更换modelValue
+
+- `modelValue`可以更换命名，比如`qwe`等
+- 既然可以重新命名`modelValue`,所以就可以在组件标签上多次使用`v-model`
+
+test.vue
+```html
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+    <rj-input v-model:qwe="username" v-model:asd="password"></rj-input>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import rjInput from './rjInput.vue'
+// 数据
+let username = ref('zhangsan')
+let password = ref('123456')
+</script>
+
+<style scoped>
+.father {
+  background-color: pink;
+  padding: 10px 30px;
+}
+</style>
+```
+
+
+
+rjInput.vue
+```html
+<template>
+  <input type="text"
+         :value="qwe"
+         @input="emit('update:qwe',$event.target.value)">
+  <input type="text"
+         :value="asd"
+         @input="emit('update:asd',$event.target.value)">
+</template>
+
+<script  setup lang="ts">
+defineProps(['qwe','asd'])
+
+const emit = defineEmits(['update:qwe','update:asd'])
+</script>
+<style scoped>
+input {
+  border: 2px solid black;
+  background-image: linear-gradient(445deg, red, yellow, green);
+  height: 30px;
+  font-size: 20px;
+  color: white;
+}
+</style>
+```
 
 
 
 
 ### $attrs
 
+- 概述：`$attrs`用于实现当前组件的父组件，向当前组件的子组件通信（祖-->孙）
+- 具体说明：`$attrs`是一个对象，包含所有父组件传入的标签属性。
+- 若要实现孙-->祖，只需在父组件传递一个函数，孙组件接收函数并调用即可
+
+> 注意：`$attrs`会自动排除`props`中声明的属性（可以认为声明过的`props`被子组件自己“消费”了）
+
+
+父组件Father.vue
+```html
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+    <h4>a:{{a}}</h4>
+    <h4>b:{{b}}</h4>
+    <h4>c:{{c}}</h4>
+    <h4>d:{{d}}</h4>
+    <Child :a="a" :b="b" :c="c" :d="d" v-bind="{x:100,y:200}" :updateB="updateB"/>
+
+    <!-- <Child v-bind="{x:100,y:200}"/> -->
+    <!-- 相当于 -->
+     <!-- <Child :x="100" :y="200"/> -->
+  </div>
+</template>
+
+<script setup lang="ts">
+import Child from './Child.vue'
+import { ref } from 'vue'
+// 数据
+let a = ref(1)
+let b = ref(2)
+let c = ref(3)
+let d = ref(4)
+
+// 方法
+function updateB(val){
+  b.value +=val
+}
+</script>
+
+<style scoped>
+.father {
+  background-color: pink;
+  padding: 10px 30px;
+}
+</style>
+```
+
+
+
+子组件 Child.vue
+```html
+<template>
+  <div class="child">
+    <h3>子组件</h3>
+    <h4>a:{{a}}</h4>
+    <h4>其他:{{ $attrs }}</h4>
+    <GrandChild v-bind="$attrs"/>
+  </div>
+</template>
+
+<script setup lang="ts">
+import GrandChild from './GrandChild.vue'
+import { ref } from 'vue'
+
+defineProps(['a'])
+// 数据
+</script>
+
+<style scoped>
+.child {
+  background-color: yellow;
+  padding: 10px 30px;
+}
+</style>
+```
+
+
+
+
+孙组件 GrandChild.vue
+```html
+<template>
+  <div class="grand-child">
+    <h3>孙组件</h3>
+    <h4>b:{{ b }}</h4>
+    <h4>c:{{ c }}</h4>
+    <h4>其他:{{ $attrs }}</h4>
+    <button @click="updateB(6)">点我将爷爷的b更新</button>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+defineProps(['b','c','updateB'])
+// 数据
+</script>
+
+<style scoped>
+.grand-child {
+  background-color: red;
+  padding: 10px 30px;
+}
+</style>
+```
+
+
+
 ### $refs与$parent
+
+- 概述：
+  - `$refs`用于：父 ---> 子
+  - `$parent`用于：子 ---> 父
+- 原理如下：
+  - `$refs`:值为对象，包含所有被`ref`属性标识的`DOM`元素或组件实例。
+  - `$parent`:值为对象，当前组件的父组件实例对象。
+
+eg:
+
+> 需求：父组件更改子组件Child1的玩具，更改子组件Child2的电脑。
+
+父组件Father.vue
+```html
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+    <h4>房产：{{ house }}</h4>
+
+
+    <button @click="changeToy">修改Child1的玩具</button>
+    <button @click="changeComputer">修改Child2的电脑</button>
+
+    <button @click="getAllChild($refs)">获取所有的子组件对象，并将其书籍变多</button>
+
+    <Child1 ref="c1"/>
+    <Child2 ref="c2"/>
+  </div>
+</template>
+
+<script setup lang="ts">
+import Child1 from './Child1.vue'
+import Child2 from './Child1.vue'
+import { ref } from 'vue'
+
+let c1 = ref()
+let c2 = ref()
+
+// 数据
+let house = ref(4)
+
+// 方法
+function changeToy(){
+  console.log('c1',c1.value)
+  c1.value.toy = '小猪佩奇'
+}
+
+function changeComputer(){
+  c2.value.computer = '华为'
+}
+
+function getAllChild(refs:{[key:string]:any}){
+  console.log('refs',refs)
+  for(let key in refs){
+    refs[key].book +=3;
+  }
+}
+
+
+// 把数据交给外部
+defineExpose({house})
+
+</script>
+
+<style scoped>
+.father {
+  background-color: pink;
+  padding: 10px 30px;
+}
+</style>
+```
+
+
+子组件Child1.vue
+```html
+<template>
+  <div class="child1">
+    <h3>子组件1</h3>
+    <h4>玩具：{{ toy }}</h4>
+    <h4>书籍：{{ book }}</h4>
+
+    <button @click="minusHouse($parent)">干掉父亲的一套房产</button>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+// 数据
+let toy = ref('奥特曼')
+let book = ref(3)
+
+// 方法
+function minusHouse(parent:any){
+  console.log('parent',parent) // 父组件实例
+  parent.house -=1
+}
+
+// 把数据交给外部
+defineExpose({toy,book})
+</script>
+
+<style scoped>
+.child1 {
+  background-color: skyblue;
+  padding: 10px 30px;
+}
+</style>
+```
+
+
+子组件Child2.vue
+```html
+<template>
+  <div class="child2">
+    <h3>子组件2</h3>
+    <h4>电脑：{{ computer }}</h4>
+    <h4>书籍：{{ book }}</h4>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+// 数据
+let computer = ref('联想')
+let book = ref(6)
+
+// 把数据交给外部
+defineExpose({computer,book})
+</script>
+
+<style scoped>
+.child2 {
+  background-color:orange;
+  padding: 10px 30px;
+}
+</style>
+```
+
 
 
 ### provide/inject
 
+- 概述：实现祖孙组件直接通信
+- 具体使用：
+  - 在祖先组件中通过`provide`配置向后代组件提供数据
+  - 在后代组件中通过`inject`配置来声明接收数据
+- 具体编码
+
+
+父组件Father.vue
+```html
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+    <h4>银子:{{money}}</h4>
+    <h4>车子:一辆{{car.brand}}车，价值{{car.price}}万元</h4>
+    <Child/>
+  </div>
+</template>
+
+<script setup lang="ts">
+import Child from './Child.vue'
+import { ref,reactive,provide } from 'vue'
+// 数据
+let money = ref(100)
+let car = reactive({
+  brand:'奔驰',
+  price:100
+})
+
+// 方法
+function updateMoney(val){
+  money.value += val
+}
+
+// provide函数有两个参数
+// 第一个参数：名字
+// 第二个参数：具体的值
+
+// 向后代提供数据
+provide('qian',{money,updateMoney})
+provide('che',car)
+
+</script>
+
+<style scoped>
+.father {
+  background-color: pink;
+  padding: 10px 30px;
+}
+</style>
+```
+
+
+
+子组件 Child.vue
+```html
+<template>
+  <div class="child">
+    <h3>子组件</h3>
+    <GrandChild />
+  </div>
+</template>
+
+<script setup lang="ts">
+import GrandChild from './GrandChild.vue'
+
+</script>
+
+<style scoped>
+.child {
+  background-color: yellow;
+  padding: 10px 30px;
+}
+</style>
+```
+
+
+
+
+孙组件 GrandChild.vue
+```html
+<template>
+  <div class="grand-child">
+    <h3>孙组件</h3>
+    <h4>银子:{{ x }}</h4>
+    <h4>车子:一辆{{car.brand}}车，价值{{car.price}}万元</h4>
+
+    <button @click="updateMoney(6)"></button>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { inject } from 'vue'
+
+// 数据
+
+// inject函数有两个参数
+// 第一个参数：名字
+// 第二个参数：默认值
+
+
+let {money,updateMoney} = inject('qian',{money:0,updateMoney:(x:number)=>{}})
+let car = inject('che',{brand:'未知',price:0})
+
+</script>
+
+<style scoped>
+.grand-child {
+  background-color: red;
+  padding: 10px 30px;
+}
+</style>
+```
+
+
+
+
+
+
 
 ## 插槽slot
 
+### 默认插槽
 
+
+### 具名插槽
+
+
+### 作用域插槽
 
 
 
