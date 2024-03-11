@@ -2656,6 +2656,365 @@ export default{
 
 
 
+
+## 组件通信
+
+
+### props
+
+概述：`props`是使用频率最高的一种通信方式，常用与：父子通信
+- 父传子：属性值是非函数
+- 子传父：属性值是函数
+
+父组件
+```html
+<template>
+  <div class="father">
+    <h3>父组件1</h3>
+    <div>汽车：{{car}}</div>
+    <div>子给父的玩具：{{toy}}</div>
+    <Child :myCar="car"
+           :sendToy="getToy" />
+  </div>
+</template>
+
+<script setup lang="ts">
+import Child from './Child.vue'
+import { ref } from 'vue'
+// 数据
+let car = ref('奔驰')
+let toy = ref('')
+
+// 方法
+function getToy(value) {
+  console.log('value', value)
+  toy.value = value
+}
+</script>
+
+<style scoped>
+.father {
+  background-color: pink;
+  padding: 10px 30px;
+}
+</style>
+```
+
+子组件
+```html
+<template>
+  <div class="child">
+    <h3>子组件</h3>
+    <div>玩具：{{toy}}</div>
+    <div>父给子的车：{{myCar}}</div>
+    <button @click="sendToy(toy)">把玩具给父亲</button>
+  </div>
+</template>
+<script setup lang="ts">
+import { ref } from 'vue'
+// 数据
+let toy = ref('奥特曼')
+
+// 声明接收props
+defineProps(['myCar', 'sendToy'])
+
+// 方法
+function sendFun() {}
+</script>
+
+<style scoped>
+.child {
+  background-color: aqua;
+}
+</style>
+```
+
+
+
+### 自定义事件
+
+- 子传父
+
+注意：
+- 调用函数不传参数的时候，默认接收的是事件对象`event`
+- 当传递参数的时候，若想接收事件对象，则可以通过传递特殊占位符`$event`获取事件对象。
+
+
+父组件
+```html
+<template>
+  <div class="father">
+    <h3>父组件1</h3>
+    <div>接收到的子组件传来的玩具：{{toy}}</div>
+    <Child @abc="hahaFun" />
+  </div>
+</template>
+
+<script setup lang="ts">
+import Child from './Child.vue'
+import { ref } from 'vue'
+// 数据
+let toy = ref('')
+
+// 方法
+function hahaFun(val) {
+  console.log('val', val)
+  toy.value = val
+}
+</script>
+
+<style scoped>
+.father {
+  background-color: pink;
+  padding: 10px 30px;
+}
+</style>
+```
+
+子组件
+```html
+<template>
+  <div class="child">
+    <h3>子组件</h3>
+    <div>玩具：{{toy}}</div>
+    <button @click="sendToy(toy)">把玩具给父亲</button>
+  </div>
+</template>
+<script setup lang="ts">
+import { ref } from 'vue'
+// 数据
+let toy = ref('奥特曼')
+
+// 声明事件
+const emit = defineEmits(['abc'])
+
+// 方法
+function sendToy() {
+  emit('abc', toy.value)
+}
+</script>
+
+<style scoped>
+.child {
+  background-color: aqua;
+}
+</style>
+```
+
+
+
+### mitt
+
+- 任意组件通信
+
+
+`pubsub`
+`$bus`
+`mitt`
+
+接收数据的：提前绑好事件（提前订阅消息）
+提供数据的：在合适的时候触发事件（发布消息）
+
+
+安装依赖`mitt`:
+
+```js
+yarn add mitt
+```
+
+
+
+
+eg:
+
+- 子组件1提供数据
+- 子组件2接收数据
+
+父组件
+```html
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+
+    <Child1 />
+    <Child2 />
+  </div>
+</template>
+
+<script setup lang="ts">
+import Child1 from './Child1.vue'
+import Child2 from './Child2.vue'
+import { ref } from 'vue'
+// 数据
+</script>
+
+<style scoped>
+.father {
+  background-color: pink;
+  padding: 10px 30px;
+}
+</style>
+```
+
+子组件1
+```html
+<template>
+  <div class="child1">
+    <h3>子组件1</h3>
+    <h4>玩具：{{toy}}</h4>
+    <button @click="sendFun">玩具给子组件2</button>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { emitter } from '@utils/emitter.ts'
+// 数据
+let toy = ref('奥特曼')
+
+function sendFun() {
+  emitter.emit('send-toy', toy.value)
+}
+</script>
+
+<style scoped>
+.child1 {
+  background-color: pink;
+  padding: 10px 30px;
+}
+</style>
+```
+
+
+子组件2
+```html
+<template>
+  <div class="child2">
+    <!-- 接收数据 -->
+    <h3>子组件2</h3>
+    <h4>电脑：{{computer}}</h4>
+    <h4>子组件1给的玩具：{{toy}}</h4>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onUnmounted } from 'vue'
+import { emitter } from '@utils/emitter.ts'
+// 数据
+let computer = ref('联想')
+let toy = ref('')
+
+// 给emitter绑定send-toy事件
+emitter.on('send-toy', (val) => {
+  console.log('send-toy', val)
+  toy.value = val
+})
+
+// 卸载
+// 在组件卸载时解绑send-toy事件
+onUnmounted(() => {
+  emitter.off('send-toy')
+})
+</script>
+
+<style scoped>
+.child1 {
+  background-color: pink;
+  padding: 10px 30px;
+}
+</style>
+```
+
+
+
+
+
+
+### v-model
+
+
+test.vue
+```html
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+    <!-- (1)v-model用在html标签上 -->
+    <!-- <input type="text"
+           v-model="username"> -->
+    <!-- v-model底层原理 -->
+    <!-- <input type="text"
+           :value="username"
+           @input="username = $event.target.value"> -->
+
+    <!-- (2)v-model用在组件标签上 -->
+    <rj-input v-model="username"></rj-input>
+    <!-- vue2原理 -->
+    <!-- value 和 input -->
+    <!-- vue3底层原理 -->
+    <!-- <rj-input :modelValue="username"
+              @update:modelValue="username = $event"></rj-input> -->
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import rjInput from './rjInput.vue'
+// 数据
+let username = ref('zhangsan')
+</script>
+
+<style scoped>
+.father {
+  background-color: pink;
+  padding: 10px 30px;
+}
+</style>
+```
+
+```html
+<template>
+  <input type="text"
+         :value="modelValue"
+         @input="emit('update:modelValue',$event.target.value)">
+</template>
+
+<script  setup lang="ts">
+defineProps(['modelValue'])
+
+const emit = defineEmits(['update:modelValue'])
+</script>
+<style scoped>
+input {
+  border: 2px solid black;
+  background-image: linear-gradient(445deg, red, yellow, green);
+  height: 30px;
+  font-size: 20px;
+  color: white;
+}
+</style>
+```
+
+
+
+
+
+
+
+### $attrs
+
+### $refs与$parent
+
+
+### provide/inject
+
+
+## 插槽slot
+
+
+
+
+
+
 ## Composition API的优势
 
 ### Options API 存在的问题
