@@ -3,13 +3,75 @@
 [[toc]]
 
 ## shallowReactive 与 shallowRef
-- `shallowReactive`：只处理对象最外层属性的响应式（浅响应式）。
-- `shallowRef`：只处理基本数据类型的响应式，不进行对象的响应式处理。
+
+- `shallowRef`
+  - 作用：创建一个响应式数据，但只对顶层属性进行响应式处理。
+  - 用法：`let data = shallowRRef(initialValue)`
+  - 特点：
+    - 只跟踪引用值的变化，不关心值内部的属性变化。
+    - 只处理基本数据类型的响应式，不进行对象的响应式处理（因为 `shallowRef`只处理第一层数据）。
+- `shallowReactive`
+  - 作用：创建一个浅层响应式对象，只会使对象的最顶层属性变成响应式的，对象内部的嵌套属性则不会变成响应式的。
+  - 用法：`const myObj = shallowReactive({...}) `
+  - 特点：
+    - 对象的顶层属性是响应式的，但嵌套对象的属性不是。
+    - 只处理对象最外层属性的响应式（浅响应式）。
+
+
 - 什么时候使用？
   - 如果有一个对象数据，结构比较深，但变化时只是外层属性的变化 ====》用`shallowReactive`。
   - 如果有一个对象数据，后续功能不会修改该对象中的属性，而是生成新的对象来替换===》用`shallowRef`。
+  
 
-```vue
+> 通过使用`shallowRef`和`shallowReactive`来绕开深度响应式，浅层式API创建的状态只在其
+
+
+`shallowRef`举例说明
+```html
+<template>
+ <h2>求和：{{sum}}</h2>
+ <h2>姓名：{{name}}</h2>
+ <h2>年龄：{{age}}</h2>
+ <button @click="changeSum">sum+1</button>
+ <button @click="changeName">修改名字</button>
+ <button @click="changeAge">修改年龄</button>
+ <button @click="changePerson">修改整个人</button>
+</template>
+<script setup lang="ts">
+import { shallowRef } from 'vue'
+
+let sum = shallowRef(0)
+let person = shallowRef({
+  name:'小李',
+  age:18
+})
+
+
+// 好用
+function changeSum(){
+  sum.value += 1
+}
+
+// 不好用
+function changeName(){
+  person.name.value = '小赵'
+}
+
+// 不好用
+function changeAge(){
+  person.age.value  +=1
+}
+
+// 好用
+function changePerson(){
+  person.value = {name:'小王',age:100}
+}
+</script>
+```
+
+
+
+```html
 <template>
  <h2>姓名：{{name}}</h2>
  <h2>年龄：{{age}}</h2>
