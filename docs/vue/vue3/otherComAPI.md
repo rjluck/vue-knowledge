@@ -23,8 +23,6 @@
   - 如果有一个对象数据，后续功能不会修改该对象中的属性，而是生成新的对象来替换===》用`shallowRef`。
   
 
-> 通过使用`shallowRef`和`shallowReactive`来绕开深度响应式，浅层式API创建的状态只在其
-
 
 `shallowRef`举例说明
 ```html
@@ -38,7 +36,7 @@
  <button @click="changePerson">修改整个人</button>
 </template>
 <script setup lang="ts">
-import { shallowRef } from 'vue'
+import { ref,shallowRef } from 'vue'
 
 let sum = shallowRef(0)
 let person = shallowRef({
@@ -47,28 +45,84 @@ let person = shallowRef({
 })
 
 
-// 好用
+// ref 好用!!!
+// shallowRef 好用!!!
 function changeSum(){
   sum.value += 1
 }
 
-// 不好用
+// ref 好用!!!
+// shallowRef 不好用
 function changeName(){
   person.name.value = '小赵'
 }
 
-// 不好用
+// ref 好用!!!
+// shallowRef 不好用
 function changeAge(){
   person.age.value  +=1
 }
 
-// 好用
+// ref 好用!!!
+// shallowRef 好用!!!
 function changePerson(){
   person.value = {name:'小王',age:100}
 }
 </script>
 ```
 
+
+
+`shallowReactive`举例说明
+```html
+<template>
+ <h2>汽车为：{{car}}</h2>
+ <button @click="changeBrand">修改品牌</button>
+ <button @click="changeColor">修改颜色</button>
+ <button @click="changeEngine">修改发动机</button>
+ <button @click="changeCar">修改整个车</button>
+</template>
+<script setup lang="ts">
+import { reactive,shallowReactive } from 'vue'
+
+let car = shallowReactive({
+ brand:'奔驰',
+ options:{
+  color:'红色',
+  engine:'V8'
+ }
+})
+
+
+// reactive 好用!!!
+// shallowReactive 好用!!!
+function changeBrand(){
+  car.brand = '宝马'
+}
+
+// reactive 好用!!!
+// shallowReactive 不好用
+function changeColor(){
+  car.options.color = '白色'
+}
+
+// reactive 好用!!!
+// shallowReactive 不好用
+function changeEngine(){
+   car.options.engine = 'V12'
+}
+
+// reactive 好用!!!
+function changeCar(){
+  // car = {}   // reactive 定义的数据不能直接修改
+  // 非要修改可以写成如下
+  // Object.assign(car,{})
+}
+</script>
+```
+
+
+> 通过使用`shallowRef`和`shallowReactive`来绕开深度响应式，浅层式API创建的状态只在其顶层是响应式的，对所有深层的对象不会做任何处理，避免了对每一个内部属性做响应式所带来的性能成本，这使得属性的访问变得 更快，可提升性能。
 
 
 ```html
@@ -109,9 +163,42 @@ export default{
 
 
 ## readonly 与 shallowReadonly
-- `readonly`：让一个响应式数据变为只读的（深只读）。
-- `shallowReadonly`：让一个响应式数据变为只读的（浅只读）。
-- 应用场景：不希望数据被修改时。
+
+- `readonly`
+  - 作用：用于创建一个对象的深只读副本。
+  - 用法：
+```js
+  const original = reactive({...});
+  const readOnlyCopy = readonly(original)
+
+  const original2 = ref(0)
+  const readOnlyCopy2 = readonly(original2)
+```
+- 特点：
+  - 对象的所有嵌套属性都将变为只读。
+  - 任何尝试修改这个对象的操作都会被阻止（在开发模式下，还会再控制台中发出警告）。
+  - 让一个响应式数据变为只读的（深只读）。
+- 应用场景：
+  - 创建不可变的状态快照。
+  - 保护全局状态或配置不被修改。
+
+
+- `shallowReadonly`
+  - 作用：与`readonly`类似，但只作用于对象的顶层属性。
+  - 用法：
+```js
+  const original = reactive({...});
+  const readOnlyCopy = shallowReadonly(original)
+
+  const original2 = ref(0)
+  const readOnlyCopy2 = shallowReadonly  (original2)
+```
+  - 特点：
+    - 只将对象的顶层属性设置为只读，对象内部的嵌套属性仍然是可变的。
+    - 让一个响应式数据变为只读的（浅只读）。
+  - 应用场景：
+    - 适用于只需要保护对象顶层属性的数据。
+
 
 ```vue
 <template>
@@ -161,13 +248,46 @@ export default{
 
 ## toRaw 与 markRaw
 - `toRaw`
-  - 作用：将一个`reactive`生成的响应式对象转为普通对象。
+  - 作用：
+    - 将一个`reactive`生成的响应式对象转为普通对象。
+    - 用于获取一个响应式对象的原始对象，`toRow`返回的对象不再是响应式的，不会触发视图更新。
   - 使用场景：用于读取响应式对象对应的普通对象，对这个普通对象的所有操作，不会引起页面更新。
+  - 具体编码：
+```ts
+import {reactive,toRaw} from 'vue'
+
+// 响应式对象
+let person = reactive({name:'tony',age:18})
+
+// 原始对象
+let rowPerson = toRaw(person)
+```
+
+> 官方描述：这是一个可以用于临时读取而不引起代理访问/跟踪开销，或是写入而不触发更改的特殊方法。不建议保存对原始对象的持久引用，请谨慎使用。
+
+
+> 何时使用？ 在需要响应式对象传递给非Vue的库或外部系统时，使用`toRaw`可以确保它们收到的是普通对象。
+
+
+
 - `markRaw`
   - 作用：标记一个对象，使其永远不会再成为响应式对象。
+> 例如使用 `mockjs` 时,为了防止误把`mockjs`变为响应式对象，可以使用`markRaw`去标记`mockjs`
   - 应用场景：
     - 有些值不应被设置为响应式，例如复杂的第三方类库等。
     - 当渲染具有不可变数据源的大列表时，跳过响应式转换可以提高性能。
+   - 具体编码：
+```ts
+import {reactive,markRaw} from 'vue'
+
+// 响应式对象
+let person = {name:'tony',age:18}
+let person1 = reactive(person) // 可以将person变为响应式对象
+
+let car = markRaw({brand:'奔驰',price:180})
+let car1 =  reactive(car) // 不起作用，car不会变成响应式对象了
+```
+
 
 ```vue
 <template>
@@ -238,9 +358,143 @@ export default{
 
 ## customRef
 
-- 作用：创建一个自定义的`ref`,并对其依赖项跟踪和更新触发进行显式控制。
-- 实现防抖效果：
+使用Vue提供的默认`ref`定义响应式数据，数据一变，页面就更新。若想要等1s后页面再更新用`ref`就实现不了，所以有`customRef`。
 
+
+- 作用：创建一个自定义的`ref`,并对其依赖项跟踪和更新触发进行逻辑控制。
+- 具体编码：
+```html
+<template>
+ <div class="app">
+    <h2>{{msg}}</h2>
+    <input type="text" v-model="msg">
+ </div>
+</template>
+<script setup lang="ts">
+import {ref,customRef} from 'vue';
+
+// 使用Vue提供的默认`ref`定义响应式数据，数据一变，页面就更新
+// let msg = ref('你好')
+
+
+// 使用Vue提供的默认`customRef`定义响应式数据，数据一变，页面就更新
+let initValue = '你好'
+/**
+ * track 跟踪
+ * trigger 触发
+*/
+let msg = customRef((track,trigger)=>{
+  return {
+    // msg被读取时调用
+    get(){
+      track() // 告诉Vue数据msg很重要，你要对msg进行持续关注，一旦msg变化就去更新。
+      return initValue
+    },
+    // msg被调用时调用
+    set(value){
+      initValue = value;
+      trigger() // 通知Vue一下，数据msg变化了
+    }
+  }
+})
+</script>
+```
+
+- 需求1：等1s后，页面更新
+
+app.vue
+```html
+<template>
+ <div class="app">
+    <h2>{{msg}}</h2>
+    <input type="text" v-model="msg">
+ </div>
+</template>
+<script setup lang="ts">
+import {ref,customRef} from 'vue';
+// 使用Vue提供的默认`customRef`定义响应式数据，数据一变，页面就更新
+let initValue = '你好'
+let timer:number;
+/**
+ * track 跟踪
+ * trigger 触发
+*/
+let msg = customRef((track,trigger)=>{
+  return {
+    // msg被读取时调用
+    get(){
+      track() // 告诉Vue数据msg很重要，你要对msg进行持续关注，一旦msg变化就去更新。
+      return initValue
+    },
+    // msg被调用时调用
+    set(value){
+      clearTimeout('timer')
+      timer = setTimeOut(()=>{
+        initValue = value;
+        trigger() // 通知Vue一下，数据msg变化了
+      },1000)
+    }
+  }
+})
+</script>
+```
+
+> 项目中用到customRef，通常会封装成hooks,所以下面简单封装成hooks
+
+自定义`hooks`:useMsgRef.ts
+```ts
+import {customRef} from 'vue';
+export default function(initValue:string,delay:number){
+    // 使用Vue提供的默认`customRef`定义响应式数据，数据一变，页面就更新
+    let timer:number;
+    /**
+     * track 跟踪
+     * trigger 触发
+    */
+    let msg = customRef((track,trigger)=>{
+      return {
+        // msg被读取时调用
+        get(){
+          track() // 告诉Vue数据msg很重要，你要对msg进行持续关注，一旦msg变化就去更新。
+          return initValue
+        },
+        // msg被调用时调用
+        set(value){
+          clearTimeout('timer')
+          timer = setTimeOut(()=>{
+            initValue = value;
+            trigger() // 通知Vue一下，数据msg变化了
+          },delay)
+        }
+      }
+    })
+
+    return { msg }
+}
+```
+
+app.vue
+```html
+<template>
+ <div class="app">
+    <h2>{{msg}}</h2>
+    <input type="text" v-model="msg">
+ </div>
+</template>
+<script setup lang="ts">
+  import {ref} from 'vue';
+import useMsgRef from './useMsgRef.ts';
+// 使用Vue提供的默认`customRef`定义响应式数据，数据一变，页面就更新
+// let msg = ref('你好')
+// 使用useMsgRef来定义一个响应式数据且有延迟效果
+let {msg} = useMsgRef('你好',2000)
+</script>
+```
+
+
+
+
+- 需求2：实现防抖效果：
 ```vue
 <template>
   <input type="text" v-model="keyWord">
@@ -268,7 +522,6 @@ export default{
                 value =  newValue;
                 trigger();// 通知vue去重新解析模板
               },delay)
-
             }
           }
         })
@@ -286,7 +539,6 @@ export default{
   }
 </script>
 ```
-
 
 
 

@@ -11,7 +11,7 @@
 
 ## Teleport
 
-- `Teleport`是一种能够将我们的组件html结构移动到指定位置的技术。
+- `Teleport`是一种能够将我们的**组件`html`结构** 移动到指定位置的技术。
 
 ```js
  <teleport to="移动位置">
