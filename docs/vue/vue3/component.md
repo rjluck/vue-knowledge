@@ -19,6 +19,13 @@
  </teleport>
 ```
 
+- `to`里面对应的值可以是元素标签，也可以是元素选择器class或id。
+```js
+ <teleport to="#app">
+
+ </teleport>
+```
+
 eg：
 ```vue
 <template>
@@ -74,21 +81,93 @@ export default{
 
 
 
+eg：
+
+App.vue
+```html
+<template>
+  <div class="outer">
+    <h2>我是App组件</h2>
+
+    <Modal/>
+  </div>
+</template>
+<script lang="ts" setup>
+  import Modal from './Modal.vue';
+
+</script>
+<style scoped>
+.outer{
+  background-color:#ddd;
+  border-radius:10px;
+  padding:5px;
+  box-shadow:0 0 10px;
+  width:400px;
+  height:400px;
+  /* 色彩饱和度，当写上该属性，弹窗就不参考屏幕了，所以有了 teleport */
+  filter:saturate(0%);
+}
+</style>
+```
+
+
+
+Modal.vue
+```html
+<template>
+  <button @click="isShow = true">展示弹窗</button>
+  <teleport to="body">
+    <div class="modal" v-show="isShow">
+        <h2>我是弹窗的标题</h2>
+        <p>我是弹窗的内容</p>
+        <button @click="isShow = false">关闭弹窗</button>
+    </div>
+  </teleport>
+</template>
+<script lang="ts" setup>
+  import {vue} from 'vue';
+  let isShow = ref(false)
+</script>
+<style scoped>
+.modal{
+  width:200px;
+  height:150px;
+  background-color:skyblue;
+  border-radius:10px;
+  padding:5px;
+  box-shadow:0 0 5px;
+  text-align：center;
+  position:fixed;
+  left:50%;
+  margin-left:-100px;
+  top:20px;
+}
+</style>
+```
+
+
+
+
+
+
+
 
 ## Suspense
 
 > 该组件处于试验阶段
 
-- 等待异步组件时渲染一些后备内容，获得更好的用户体验
+- 等待异步组件时渲染一些额外内容，获得更好的用户体验
 - 使用步骤：
   - 引入异步组件
   ```js
-  import {defineAsyncComponent} from 'vue'
+  import {defineAsyncComponent,Suspense} from 'vue'
   const child = defineAsyncComponent(()=>import('./components/Child.vue'))
   ```
+
   - 使用`Suspense`包裹组件。并配置好`default`和`fallback`
   - `Suspense`通过插槽实现的
-  ```vue
+
+```vue
 <template>
   <div class="app">
     <h3>我是App组件</h3>
@@ -102,7 +181,7 @@ export default{
     </Suspense> 
   </div>
 </template>
-  ```
+```
 
 eg:异步组件
 
@@ -124,7 +203,7 @@ eg:异步组件
     components:{Child}
   }
 </script>
-  ```
+```
 
 
   当父组件用异步组件引入的，子组件setup可以返回promise对象,让子组件等一等加载
@@ -163,4 +242,71 @@ eg:异步组件
     }
   }
 </script>
+```
+
+
+>在子组件中使用了异步任务，并且异步任务提供的数据还是你页面中需要的，想让其网速慢的时候也能呈现一些东西，这个时候就可以用到`Suspense`
+
+eg：
+
+父组件 App.vue
+```html
+<template>
+    <div class="app">
+      <h2>我是App组件</h2>
+      <Suspense>
+        <!-- 异步任务完成时出现 -->
+        <template v-slot:default>
+            <Child/>
+        </template>
+        <!-- 异步任务未完成时出现 -->
+        <template v-slot:fallback>
+            <Child/>
+        </template>
+      </Suspense>
+    
+    </div>
+</template>
+<script lang="ts" setup>
+  import Child from './Child.vue'
+  import {Suspense} from 'vue';
+
+</script>
+<style scoped>
+.app{
+  background-color:skyblue;
+  border-radius:10px;
+  padding:5px;
+  box-shadow:0 0 10px;
+}
+</style>
+```
+
+
+
+子组件 Child.vue
+```html
+<template>
+    <div class="child">
+        <h2>我是Child组件</h2>
+        <p>当前求和为：{{sum}}</p>
+    </div>
+</template>
+<script lang="ts" setup>
+  import {vue} from 'vue';
+  import axios  from 'axios';
+  let sum = ref(0);
+  // 底层有async
+  let {data:{content}} = await axios.get('https://api.uomg.com/api/rand.qinghua?format=json')
+  console.log('content: ', content);
+
+</script>
+<style scoped>
+.app{
+  background-color:skyblue;
+  border-radius:10px;
+  padding:5px;
+  box-shadow:0 0 10px;
+}
+</style>
 ```
