@@ -17,7 +17,7 @@
 
 ## 常用的视图容器组件
 
-（1）`view`
+**（1）`view`**
 - 普通视图区域
 - 类似于HTML中的div,是一个块级元素
 - 常用来实现页面的布局效果
@@ -28,7 +28,7 @@
 ![image](/imgs/applet/wx/wx17.png)
 
 
-（2）`scroll-view`
+**（2）`scroll-view`**
 - 可滚动的视图区域
 - 常用来实现滚动列表效果
 
@@ -39,7 +39,7 @@
 ![image](/imgs/applet/wx/wx18.png)
 
 
-（3）`swiper`和`swiper-item`
+**（3）`swiper`和`swiper-item`**
 - 轮播图容器组件和轮播图item组件
 
 
@@ -57,7 +57,7 @@ swiper组件的常用属性
 
 ## 常用的基础内容组件
 
-（1）`text`
+**（1）`text`**
 - 文本组件
 - 类似于`HTML`中的`span`标签，是一个行内元素
 
@@ -68,7 +68,7 @@ swiper组件的常用属性
 ![image](/imgs/applet/wx/wx21.png)
 
 
-（2）`rich-text`
+**（2）`rich-text`**
 - 富文本组件
 - 支持把`HTML`字符串渲染为`WXML`结构
 
@@ -82,7 +82,7 @@ swiper组件的常用属性
 
 ## 其它常用组件
 
-（1）button
+**（1）`button`**
 - 按钮组件
 - 功能比`HTML`中的`button`按钮丰富
 - 通过`open-type`属性可以调用微信提供的各种功能（客服、转发、获取用户授权、获取用户信息等）
@@ -92,7 +92,7 @@ swiper组件的常用属性
 
 
 
-（2）image
+**（2）`image`**
 - 图片组件
 - `image`组件默认宽度约300px、高度约240px
 
@@ -109,10 +109,12 @@ eg:
 <image src="/images/1.png" mode="aspectFit"></image>
 ```
 
-（3）navigator
+**（3）`navigator`**
 - 页面导航组件
 - 类似于`HTML`中的`a`链接
 
+
+## 字体图标
 
 
 ## 自定义小程序组件

@@ -242,6 +242,15 @@ let sidebar = {
         '/webpack/V5/base',
       ]
     },
+  ],
+  '/uniApp/': [
+    {
+      title: 'uniApp', // 侧边栏名称
+      collapsable: true, // 可折叠
+      children: [
+        '/uniApp/base',
+      ]
+    }
   ]
 }
 
@@ -277,7 +286,8 @@ module.exports = {
           { text: 'TypeScript', link: '/typeScript/' },
           { text: 'Web面试题', link: '/webInterview/' },
           { text: '小程序', link: '/applet/' },
-          { text: 'Webpack', link: '/webpack/' }
+          { text: 'Webpack', link: '/webpack/' },
+          { text: 'uniApp', link: '/uniApp/base' },
         ]
       },
       { text: '关于', link: '/about/' },
