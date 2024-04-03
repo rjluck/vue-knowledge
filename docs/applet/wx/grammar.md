@@ -11,10 +11,13 @@
 
 ### 数据绑定
 
+
+
 **在data中定义页面的数据**
+
 在页面对应`.js`文件中，把数据定义到`data`对象中即可：
 ```js
-pages({
+Pages({
   data:{
     info:'init data',// 字符串类似的数据
     msgList:[{msg:'hello'},{msg:'world'}]// 数组类型的数据
@@ -24,6 +27,7 @@ pages({
 
 
 **Mustance语法的格式**
+
 把data中的数据绑定到页面中渲染，使用**Mustance**语法（双大括号）将变量包起来即可。语法格式为
 ```wxml
 <view>{{ 要绑定的数据名称 }}</view>
@@ -31,35 +35,231 @@ pages({
 
 
 **Mustache语法的应用场景**
+
 Mustache语法的主要应用场景如下：
 - 绑定内容
 - 绑定属性
 - 运算（三元运算、算术运算等）
 
+> 注意事项：在双大括号语法中，只能写表达式，不能写语句，也不能调用js相关的方法。
 
 
-**动态绑定内容**
+
+**（1）动态绑定内容**
+
 ![image](/imgs/applet/wx/wx37.png)
 
 
 
 
-**动态绑定属性**
+**（2）动态绑定属性**
 ![image](/imgs/applet/wx/wx38.png)
 
 
-> 注意：`vue`中动态绑定属性用`v-bind`，而小程序中用`{{ }}`动态绑定属性
+> 注意：`vue`中动态绑定属性用`v-bind`，而小程序中用 双大括号`{{ }}`动态绑定属性
 
 
 
 
-**三元运算**
+**（3）三元运算**
 ![image](/imgs/applet/wx/wx39.png)
 
 
 
-**算数运算**
+**（4）算数运算**
 ![image](/imgs/applet/wx/wx40.png)
+
+
+### 修改数据
+
+小程序中修改数据不推荐通过赋值的方式进行修改，通过赋值的方式修改数据无法改变页面的数据。而是要通过调用`setData()`方法进行修改，`setData()`方法接收对象作为参数，`key`是需要修改的数据，`value`是最新的值。
+
+`setData()`方法有两个作用：
+- 更新数据
+- 驱动视图更新
+
+**（1）基础用法**
+
+通过调用`this.setData(dataObject)`方法，可以给页面data中的数据重新赋值，示例如下：
+
+![image](/imgs/applet/wx/wx47.png)
+
+
+**（2）修改对象类型数据**
+
+
+新增 单个/多个属性
+
+```js
+// 如果给对象新增属性，可以将key写成数据路径的方式 a.b.c
+this.setData({
+  'userInfo.name':'tom',
+  'userInfo.age':18,
+})
+```
+
+
+修改 单个/多个属性
+
+```js
+// 如果需要修改对象属性，可以将key写成数据路径的方式 a.b.c
+this.setData({
+  'userInfo.name':'jerry',
+  'userInfo.age':28,
+})
+```
+
+> 使用数据路径，如果新增和修改的数据量比较小，还可以，如果修改的数据量很多，每次都写数据路径，就太麻烦了。
+>
+> 可以使用ES6提供的展开运算符 和 `Object.assign()`
+
+```js
+// 使用ES6提供的展开运算符,将对象中的属性赋值给另一个对象，后面的属性会覆盖前面的属性
+const userInfo = {
+  ...this.data.suerInfo,
+  name:'jerry',
+  age:18
+}
+
+this.setData({
+  userInfo
+})
+```
+
+```js
+// 使用 Object.assign() 将多个对象合并为一个对象
+const userInfo = Object.assign(this.data.userInfo,{name:'jerry'},{age:18})
+
+this.setData({
+  userInfo
+})
+```
+
+删除 单个/多个属性
+
+```js
+// 删除单个属性
+
+// delete this.data.userInfo.age  // 该方法只在数据层面删除了，页面展示的没有变化
+
+delete this.data.userInfo.age
+
+this.setData({
+  userInfo:this.data.userInfo
+})
+```
+
+```js
+// 删除多个属性
+
+// 用Es6提供的 rest 剩余参数
+
+const {age,test,...rest} = this.data.userInfo
+
+this.setData({
+  userInfo:rest
+})
+```
+
+**（2）修改数组类型数据**
+
+```js
+Page({
+  data:{
+    list:[1,2,3]
+  }
+})
+```
+
+新增数组元素
+
+```js
+// this.data.list.push(4)  // 如果直接使用push方法，可以直接更新data,但是不能更新页面中的数据
+
+// 方法1：
+this.data.list.push(4)
+this.setData({
+  list:this.data.list
+})
+
+
+// 方法2
+const newList = this.data.list.concat(4)
+this.setData({
+  list:newList
+})
+
+
+// 方法3
+const newList = [...this.data.list,4]
+this.setData({
+  list:newList
+})
+```
+
+
+
+修改数组元素
+```js
+this.setData({
+  'list[1]':6
+})
+
+this.setData({
+  'list1[0].name':'jerry'
+})
+```
+
+
+
+删除数组元素
+
+```js
+
+// 方法1
+this.data.list.splice(1,1)
+this.setData({
+  list:this.data.list
+})
+
+
+// 方法2
+const newList = this.data.list.filter(item => item !== 2)
+this.setData({
+  list:newList
+})
+```
+
+### 简易双向数据绑定
+
+ 在`WXML`中，普通属性的绑定是单向的，例如：
+ ```js
+ <input value="{{value}}" />
+ ```
+ 即：数据能够影响页面，但是页面更新不会影响到数据。
+
+如果希望用户输入数据的同时改变`data`中的数据，可以借助简易双向绑定机制。在对应属性之前添加`model:`前缀即可：例如
+```js
+<input model:value="{{value}}"/>
+```
+
+
+> 注意事项：简易双向绑定的属性值如下限制
+> - 只能是一个单一字段的绑定。例如，错误用法：
+```js
+<input model:value="值为{{value}}"/>
+``` 
+> - 尚不能写`data`路径，也就是不支持数组和对象，例如，错误用法：
+```js
+<input model:value="{{a.b}}"/>`
+```
+
+
+
+
+
+
+
 
 
 
@@ -120,11 +320,6 @@ Mustache语法的主要应用场景如下：
 
 
 
-#### 在事件处理函数中为data中的数据赋值
-
-通过调用`this.setData(dataObject)`方法，可以给页面data中的数据重新赋值，示例如下：
-
-![image](/imgs/applet/wx/wx47.png)
 
 
 #### 实现文本框和data之间的数据同步
@@ -168,17 +363,46 @@ vue中会这么写：
 
 ### 条件渲染
 
+条件渲染主要用来控制页面结构的展示和隐藏，在微信小程序中实现渲染有两种方式：
+- 使用`wx:if`、`wx:elif`、`wx:else`属性组
+- 使用`hidden`属性
+
+
+
+
 #### wx:if
 
-在小程序中，使用`wx:if="{{condition}}"`来判断是否需要渲染该代码块：
-![image](/imgs/applet/wx/wx57.png)
+在小程序中，使用`wx:if="{{condition}}"`来判断是否需要渲染该代码块
+
 也可用`wx:elif`和`wx:else`来添加`else`判断
-![image](/imgs/applet/wx/wx58.png)
+- `wx:elif`和`wx:else` 不能单独使用，必须结合`wx:if`一起使用。
+
+```js
+Page({
+  data:{
+    num:1
+  }
+})
+```
+```html
+<view wx:if="{{num === 1}}">num等于 {{ num }}</view>
+<view wx:elif="{{num === 2}}">num等于 {{ num }}</view>
+<view wx:else>num大于2，目前num等于 {{ num }}</view>
+```
+
 
 
 #### 结合`<block>`使用`wx:if`
+
 如果要一次性控制多个组件的展示与隐藏，可以使用一个`<block></block>`标签将多个组件包装起来，并在`<block>`标签上使用`wx:if`控制属性，示例如下：
-![image](/imgs/applet/wx/wx59.png)
+
+
+```html
+<block wx:if="{{true}}">
+  <view> view1 </view>
+  <view> view2 </view>
+</block>
+```
 
 > 注意：`<block>`并不是一个组件，它只是一个包裹性质的容器，不会在页面中做任何渲染。
 
@@ -186,7 +410,21 @@ vue中会这么写：
 #### hidden
 
 在小程序中，直接使用`hidden="{{condition}}"`也能控制元素的显示与隐藏：
-![image](/imgs/applet/wx/wx60.png)
+
+
+```js
+Page({
+  data:{
+    isFlag:true
+  }
+})
+```
+```html
+<view hidden="{{!isFlag}}"> 条件为true隐藏，条件为false显示 </view>
+```
+
+
+
 
 
 #### wx:if与hidden对比
@@ -195,31 +433,133 @@ vue中会这么写：
 - `wx:if`以**动态创建和移除元素**的方式，控制元素的展示与隐藏
 - `hidden`以**切换样式**的方式（`display:none/block`），控制元素的显示与隐藏
 
+
 （2）使用建议
 - 频繁切换时，建议使用`hidden`
 - 控制条件复杂时，建议使用`wx:if`搭配`wx:elif`、`wx:else`进行展示与隐藏的切换
 
 
+
+
+
+
 ### 列表渲染
+
+列表渲染就是指通过循环遍历一个数组或对象，将其中的每个元素渲染到页面上。
+
+
+在组件上使用`wx:for`属性绑定一个数组或对象，即可使用每一项数据重复渲染当前组件。
+
+
+
 
 #### wx:for
 通过`wx:for`可以根据指定的数组，循环渲染重复的组件结构，语法示例如下：
-![image](/imgs/applet/wx/wx61.png)
+
+```html
+<view wx:for="{{array}}">
+  索引是:{{index}},当前项是：{{item}}
+</view>
+```
 
 默认情况下，当前循环项的**索引**用`index`表示；当前**循环项**用`item`表示。
+
 
 
 #### 手动指定索引和当前项的变量名
 - 使用`wx:for-index`可以指定**当前循环项的索引**的变量名
 - 使用`wx:for-item`可以指定当前项的变量名
-![image](/imgs/applet/wx/wx62.png)
 
+```html
+<view wx:for="{{array}}" wx:for-index="idx"  wx:for-item="itemName">
+  索引是:{{idx}},当前项是：{{itemName}}
+</view>
+
+
+<view wx:for="{{obj}}" wx:for-index="key"  wx:for-item="value">
+  {{key}}-{{value}}
+</view>
+```
 
 
 #### wx:key的使用
+
+
+在使用`wx:for`进行遍历的时候，建议加上`wx:key`属性，`wx:key`的值以两种形式提供：
+- 字符串：代表需要遍历的`array`中`item`的某个属性，该属性的值需要时列表中唯一的字符串或数字，且不能动态改变。
+- 保留关键字：`*this`代表在`for`循环中的`item`本身，当`item`本身是一个唯一的字符串或者数字时可以使用。
+
+
 类似于Vue列表渲染中的`:key`,小程序在实现列表渲染时，也建议为渲染出来的列表项指定唯一的`key`值，从而提高渲染啊效率，示例代码如下：
 
-![image](/imgs/applet/wx/wx63.png)
+
+```js
+data:{
+  numberList:[1,2,3],
+  userList:[
+    {id:1,name:'红红'},
+    {id:2,name:'黄黄'},
+    {id:3,name:'白白'}
+  ],
+  obj:{
+    name:'tom',
+    age:18
+  }
+}
+```
+
+```html
+<!-- 如果渲染的是数组，item:数组的每一项，index:下标 -->
+<view wx:for="{{userList}}" wx:key="id">
+  {{item.name}}
+</view>
+
+
+<view wx:for="{{numberList}}" wx:key="*this">
+  {{item}}
+</view>
+
+<!-- 如果渲染的是对象，item: 对象属性的值，index:对象属性-->
+<view wx:for="{{obj}}" wx:key="index">
+  {{item}}
+</view>
+```
+
+> 注意事项：
+> - 如果不加`wx:key`,会报一个`warning`，如果明确知道该列表是静态，即以后数据不会改变，或者不必关注其顺序，可以选择忽略。
+> - 在给`wx:key`添加属性值的时候，不需要使用双大括号语法，直接使用遍历的`array`中`item`的某个属性。
+
+
+
+
+#### `wx:for`用在block标签上
+
+将`wx:for`用在`<block/>`标签上，以渲染一个包含多个节点的结构块
+- `<block/>`并不是一个组件，它仅仅是一个包装元素，不会在页面中做任何渲染，只接受控制属性。
+- `<block/>`标签在`wxml`中可以用于组织代码结构，支持列表渲染，条件渲染等。
+
+
+```html
+<view wx:for="{{fruitList}}" wx:key="id">
+  <view>名字：{{item.name}}</view>
+  <view>价格：{{item.price}}</view>
+</view>
+```
+
+
+```html
+<block wx:for="{{fruitList}}" wx:key="id">
+  <view>名字：{{item.name}}</view>
+  <view>价格：{{item.price}}</view>
+</block>
+```
+
+
+
+
+
+
+
 
 
 
@@ -467,6 +807,154 @@ tabBar是移动端应用常见的页面效果，用于实现多页面的快速�
 
 
 
+
+## 事件系统
+
+### 事件绑定和事件对象
+
+小程序中绑定事件与网页开发中绑定事件几乎一致，只不过在小程序中不能通过`on`的方式绑定事件，也没有`click`等事件，**小程序中绑定事件使用`bind`方法，`click`事件也需要使用`tap`事件来进行代替**，绑定事件的方式有两种：
+- 第一种方式：`bind:`事件名，bind后面需要跟上冒号，冒号后面跟上事件名，例如：`<view bind:tap="fnName"></view>`
+- 第二种方式：`bind:`事件名，bind后面直接跟上事件名，例如：`<view bindtap="fnName"></view>`
+
+
+事件处理函数需要写到`.js`文件中，在`.js`文件中需要调用小程序提供的`Page`方法来注册小程序的页面，我们可以直接在`Page`方法中创建事件处理函数。
+
+
+eg：
+
+cate.wxml
+```html
+<!-- 第一种绑定事件的方式 bind:事件名-->
+<button type="primary" bind:tap="handler">绑定事件</button>
+
+<!-- 第二种绑定事件的方式 bind 事件名-->
+<button type="warn" bindtap="handler">绑定事件</button>
+
+<!--  在小程序中，input输入框默认没有边框，需要自己添加样式 -->
+<input type="text" bindinput="getInputValue"/>
+```
+
+cate.js
+```js
+Page({
+    // 事件处理函数需要写到Page()方法中才可以
+    handler(event){
+        console.log('事件触发',event)
+    },
+
+    getInputValue(event){
+        // event.detail.value  输入的值
+        console.log('事件对象',event)
+    },
+})
+```
+
+### 事件分类
+
+事件分为**冒泡事件**和**非冒泡事件**：
+- 冒泡事件：当一个组件的事件被触发后，该事件会向父节点传递
+- 非冒泡事件：当一个组件的事件被触发后，该事件不会向父节点传递
+
+> 使用`bind`绑定的事件，会触发事件冒泡，如果想阻止冒泡，可以使用`catch`来绑定事件。
+
+```html
+<view bind:tap="parentHandler">
+  <button bind:tap="btnHandler">按钮</button>
+</view>
+```
+
+```html
+<view bind:tap="parentHandler">
+  <button catch:tap="btnHandler">按钮</button>
+</view>
+```
+
+
+### 事件传参
+
+（1）`data-`
+
+定义：在触发事件时，将一些数据作为参数传递给事件处理函数的过程，就是事件传参。
+
+在微信小程序中，我们经常会在组件上添加一些自定义数据，然后在事件处理函数中获取这些自定义数据，从而完成业务逻辑的开发
+
+在组件上**通过`data-*`的方式**定义需要传递的数据，其中`*`是自定义的属性，例如：`<view data-id="100" bindtap="handler"/>`，然后通过事件对象进行获取自定义数据。
+
+
+```html
+<view>
+  <button bind:tap="btnHandler" data-id="1" data-name="tom">按钮</button>
+</view>
+```
+
+```js
+Page({
+    btnHandler(event){
+      // currentTarget 事件绑定者，也就是指：哪个组件绑定了当前事件处理函数
+      // target 事件触发者，也就是指：哪个组件触发了当前事件处理函数
+      // 目前currentTarget和target都是按钮，因为按钮绑定的事件处理函数，同时点按钮触发事件处理函数，这时候通过谁来获取数据都可。
+        console.log('事件对象',event)
+        console.log('currentTarget',event.currentTarget.dataset.id)  // 1
+        console.log('target',event.target.dataset.name) // tom
+    }
+})
+```
+
+> 注意：
+> - `event.currentTarget` 事件绑定者， `event.target` 事件触发者
+> - 使用`data-`方法传递参数的时候，如果自定义属性是多个单词，单词与单词直接使用中划线`-`进行连接，在事件对象中会被转换为小驼峰写法。
+> - 使用`data-`方法传递参数的时候，如果自定义属性是多个单词,单词如果使用的是小驼峰写法，在事件对象中会被转为全部小写的
+
+
+（2）`mark:`
+
+小程序进行传参的时候，除了使用`data-*`属性传递参数外，还可以使用`mark`标记传递参数。
+
+`mark`是一种自定义属性，可以在组价上添加，用于来识别具体触发事件的`target`节点。同时`mark`还可以用于承载一些自定义数据。
+
+
+在组件上使用`mark:`自定义属性的方式将数据传递给事件处理函数，例如：`<view mark:id="100" bindtap="handler"></view>`，然后通过事件对象获取自定义数据。
+
+
+```html
+<view>
+  <button bind:tap="btnHandler" mark:id="1" mark:name="tom">按钮</button>
+</view>
+```
+
+```js
+Page({
+    btnHandler(event){
+        console.log('事件对象',event)
+        console.log('id',event.mark.id)  // 1
+        console.log('name',event.mark.name) // tom
+    }
+})
+```
+
+> 通过事件对象获取到的是 触发事件的节点和绑定事件所有身上的mark数据
+
+`mark`和`data-*`很相似，主要区别在于：
+- `mark`包含从触发事件的节点到根节点上所有的`mark:`属性值。
+- `currentTarget.dataset`或者`target.dataset`只包含事件绑定者或者事件触发者那一个节点的`data-*`值。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## 网络数据请求
 
 
@@ -706,9 +1194,78 @@ tabBar页面指的是被配置为tabBar的页面。
 
 
 
-### 生命周期
+## 小程序机制
+
+### 小程序运行机制
+![image](/imgs/applet/wx/wx57.png)
+
+小程序启动可以分为两种情况，一种是冷启动，一种是热启动。
+- 冷启动：如果用户首次打开，或小程序销毁后被用户再次打开，此时小程序需要重新加载启动。
+- 热启动：如果用户已经打开过某小程序，然后在一定时间内再次打开该小程序，此时小程序未被销毁，只是从后台状态进入前台状态。
+
+前台和后台状态
+- 前台状态：小程序启动后，界面被展示给用户，此时小程序处于前台状态。
+- 后台状态：当用户关闭小程序时，小程序并没有真正被关闭，而是进入了后台状态，当用户再次进入微信并打开小程序，小程序又会重新进入前台状态。
+
+
+挂起
+- 小程序进入后台状态一段时间后（5s），微信停止小程序JS线程执行，小程序进入挂起状态，当开发者使用了后台播放音乐、后台地理位置等能力时，小程序可以在后台持续运行，不会进入到挂起状态。
+
+
+销毁
+- 如果用户很久没有使用小程序，或者系统资源紧张，小程序会被销毁，即完全终止运行。
+- 当小程序进入后台并被挂起后，如果很长时间（目前是30分钟）都未再次进入前台，小程序会被销毁。
+- 当小程序占用系统资源过高，可能会被系统销毁会被微信客户端主动回收。
+
+### 小程序更新机制
+
+在访问小程序时，微信会将小程序代码包缓存到本地。
+
+开发者在发布了新的小程序版本以后，微信客户端会检查本地缓存的小程序有没有新版本，并进行小程序代码包的更新。
+
+小程序的更新机制有两种：
+- 启动时同步更新：微信运行时，会定期检查最近使用的小程序是否有更新。如果有更新，下次小程序启动时会同步进行更新，更新到最新版本后再打开小程序。如果用户长时间未使用小程序时，会强制同步检查版本更新。
+- 启动时异步更新：在启动前没有发现更新，小程序每次冷启动时，都会异步检查是否有更新版本。如果发现有新版本，将会异步下载新版本的代码包，将新版本的小程序在下一次冷启动进行使用，当前访问使用的依然是本地的旧版本代码。
+
+
+在启动时异步更新的情况下，如果开发者希望立刻进行版本更新，可以使用`wx.getUpdateManager`API进行处理。在有新版本时提示用户重启小程序更新新版本。
+```js
+App({
+  // onLaunch是小程序的钩子函数，在冷启动是肯定会执行的。
+  // 当小程序冷启动时，会自动微信后台请求新版本的信息，如果有新版本，会立即进行下载。
+  onLaunch(){
+    // 使用wx.getUpdateManager 方法监听下载的状态
+    const updateManager = wx.getUpdateManager();
+
+    // 当下载完成新版本以后，会触发 onUpdateReady 回调函数
+    updateManager.onUpdateReady(function(){
+      wx.showModal({
+        title:'更新提示',
+        content:'新版本已经准备好，是否重启应用？',
+        success(res){
+          if(res.confirm){
+            // 强制当前小程序使用新版本并且会重启当前小程序
+            updateManager.applyUpdate()
+          }
+        }
+      })
+    })
+  }
+})
+
+```
+
+
+
+
+## 生命周期
 
 生命周期（Life Cycle）是指一个对象从创建->运行->销毁的整个阶段，强调的是一个时间段。
+- 应用生命周期是指应用程序进程从创建到消亡的整个过程。
+- 小程序的生命周期指的是小程序从启动到销毁的整个过程。
+
+
+
 
 我们可以把每个小程序运行的过程，也概括为生命周期：
 - 小程序的启动，表示生命周期的开始
@@ -716,7 +1273,12 @@ tabBar页面指的是被配置为tabBar的页面。
 - 中间小程序运行的过程，就是小程序的生命周期
 
 
-#### 生命周期分类
+
+
+### 生命周期分类
+
+一个小程序完整的生命周期由**应用生命周期**、**页面生命周期**和**组件生命周期**三部分来组成。
+
 
 在小程序中，生命周期分为两类，分别是：
 - 应用生命周期
@@ -725,10 +1287,11 @@ tabBar页面指的是被配置为tabBar的页面。
   - 特指小程序中，每个页面的加载->渲染->销毁的过程
 
 其中，页面的生命周期范围较小，应用程序的生命周期范围较大，如图：
+
 ![image](/imgs/applet/wx/wx109.png)
 
 
-#### 生命周期函数
+### 生命周期函数
 
 生命周期函数：是由小程序框架提供的内置函数，会伴随着生命周期，自动按次序执行。
 
@@ -739,7 +1302,7 @@ tabBar页面指的是被配置为tabBar的页面。
 
 
 
-#### 生命周期函数分类
+### 生命周期函数分类
 
 在小程序中，生命周期函数分为两类，分别是：
 - 应用生命周期函数
@@ -750,25 +1313,163 @@ tabBar页面指的是被配置为tabBar的页面。
 
 
 
-**应用的生命周期函数**
+**（1）应用的生命周期函数**
+
+应用生命周期伴随着一些函数，我们称为**应用生命周期函数**，应用生命周期函数需要再`app.js`文件的`App()`方法中进行定义，`App()`方法必须在`app.js`中进行调用，主要用来注册小程序。
+
+应用生命周期函数有：
+- `onLaunch`：小程序初始化完成时，执行此函数，全局值触发一次。可以做一些初始化的工作。
+- `onShow`：小程序启动或从后台进入前台显示时触发。
+- `onHide`：小程序从前台进入后台时触发。
+
+
 小程序的应用生命周期函数需要在`app.js`中进行声明，示例代码如下：
+
+
+app.js
+```js
+App({
+
+  /**
+   * 当小程序初始化完成时，会触发 onLaunch（全局只触发一次）
+   */
+  onLaunch: function () {
+    // 当进行冷启动时，才会触发onLaunch
+  },
+
+  /**
+   * 当小程序启动，或从后台进入前台显示，会触发 onShow
+   */
+  onShow: function (options) {
+    
+  },
+
+  /**
+   * 当小程序从前台进入后台，会触发 onHide
+   */
+  onHide: function () {
+    
+  },
+
+  /**
+   * 当小程序发生脚本错误，或者 api 调用失败时，会触发 onError 并带上错误信息
+   */
+  onError: function (msg) {
+    
+  }
+})
+
+```
+
+> 从小程序生命周期的角度来看，我们一般讲的【启动】专指冷启动，热启动一般被称为后台切前台。
+
+
+
+**（2）页面的生命周期函数**
+
+页面生命周期伴随着一些函数，我们称为**页面生命周期函数**，页面生命周期函数需要在`Page()`方法进行定义。
+
 ![image](/imgs/applet/wx/wx110.png)
 
-- `onLaunch`
-- `onShow`
-- `onHide`
+redirect 销毁当前页面，跳转到下一个页面，所以：会执行 `onUnload`
+```html
+<navigator url="/pages/list/list" open-type="redirect"> 跳转到列表页面 </navigator>
+```
+
+navigate 隐藏当前页面（不销毁当前页面），跳转到下一个页面，所以：会执行 `onHide`
+```html
+<navigator url="/pages/list/list" open-type="navigate"> 跳转到列表页面 </navigator>
+```
 
 
 
-**页面的生命周期函数**
-小程序的页面生命周期函数需要在页面的`.js`中进行声明，示例代码如下：
-![image](/imgs/applet/wx/wx111.png)
-
+页面生命周期函数有：
 - `onLoad` 监听页面加载，一个页面只调用1次（常用）
 - `onShow` 监听页面显示
 - `onReady` 监听页面初次渲染完成，一个页面只调用1次（常用）
 - `onHide` 监听页面隐藏
-- `onUnload` 监听页面呢卸载，一个页面只调用1次
+- `onUnload` 监听页面卸载，一个页面只调用1次
+
+
+小程序的页面生命周期函数需要在页面的`.js`中进行声明，示例代码如下：
+
+页面的`.js`
+```js
+Page({
+
+  /**
+   * 页面的初始数据
+   */
+  data: {
+    
+  },
+
+  /**
+   * 生命周期函数--监听页面加载
+   */
+  onLoad: function (options) {
+    
+  },
+
+  /**
+   * 生命周期函数--监听页面初次渲染完成
+   * 代表页面已经准备妥当，可以和视图层进行交互
+   */
+  onReady: function () {
+    
+  },
+
+  /**
+   * 生命周期函数--监听页面显示
+   * 页面在前台展示的时候
+   */
+  onShow: function () {
+    
+  },
+
+  /**
+   * 生命周期函数--监听页面隐藏
+   */
+  onHide: function () {
+    
+  },
+
+  /**
+   * 生命周期函数--监听页面卸载
+   */
+  onUnload: function () {
+    
+  },
+
+  /**
+   * 页面相关事件处理函数--监听用户下拉动作
+   */
+  onPullDownRefresh: function () {
+    
+  },
+
+  /**
+   * 页面上拉触底事件的处理函数
+   */
+  onReachBottom: function () {
+    
+  },
+
+  /**
+   * 用户点击右上角分享
+   */
+  onShareAppMessage: function () {
+    
+  }
+})
+```
+
+
+
+> 注意事项：
+> - `tabBar`页面之间相互切换，页面不会被销毁。
+> - 点击左上角，返回上一个页面，会销毁当前页面。
+
 
 
 

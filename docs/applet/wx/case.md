@@ -151,4 +151,240 @@
 
 > 注意事项：
 > - 小程序的`background-image`不支持本地路径！需要使用网络图片，或者`base64`,或者使用`<image/>`组件
+```css
+.bg-image{
+  height:400px;
+  /* 小程序背景图地址不能写本地路径 */
+  /* background-image:url(../../assets/bgImage.png) */
+}
+```
 
+案例代码
+
+index/index.wxml
+```html
+
+<!-- 轮播图区 -->
+<view class="swiper">
+<swiper 
+    autoplay="true" 
+    interval="2000" 
+    indicator-dots="true" 
+    indicator-color="#fff"
+    indicator-active-color="#f3514f"
+    circular
+>
+    <swiper-item>
+        <image src="../../assets/index/1.png" mode=""/>
+    </swiper-item>
+    <swiper-item>
+        <image src="../../assets/index/2.png" mode=""/>
+    </swiper-item>
+    <swiper-item>
+        <image src="../../assets/index/3.png" mode=""/>
+    </swiper-item>
+</swiper>
+</view>
+
+<!-- 公司信息 -->
+<view class="info">
+    <text><text class="iconfont icon-haoping"></text>同城配送</text>
+    <text><text class="iconfont icon-bukexuanzuo"></text>行业龙头</text>
+    <text><text class="iconfont icon-wuliupeisong"></text>半小时送达</text>
+    <text><text class="iconfont icon-navicon-psf"></text>100% 好评</text>
+</view>
+
+
+<!-- 商品导航 -->
+<view class="good-nav">
+    <view>
+        <navigator url="/pages/list/list">
+            <image src="../../assets/index/flower.png" mode=""/>
+            <text>鲜花玫瑰</text>
+        </navigator>
+    </view>
+    <view>
+        <navigator url="/pages/list/list">
+            <image src="../../assets/index/flower.png" mode=""/>
+            <text>鲜花玫瑰</text>
+        </navigator>
+    </view>
+    <view>
+        <navigator url="/pages/list/list">
+            <image src="../../assets/index/flower.png" mode=""/>
+            <text>鲜花玫瑰</text>
+        </navigator>
+    </view>
+    <view>
+        <navigator url="/pages/list/list">
+            <image src="../../assets/index/flower.png" mode=""/>
+            <text>鲜花玫瑰</text>
+        </navigator>
+    </view>
+    <view>
+        <navigator url="/pages/list/list">
+            <image src="../../assets/index/flower.png" mode=""/>
+            <text>鲜花玫瑰</text>
+        </navigator>
+    </view>
+</view>
+
+
+<!-- 推荐商品 -->
+<view class="good-hot">
+    <scroll-view scroll-x class="scroll-x">
+        <view>
+            <view class="good-item">
+                <image src="../../assets/index/cate1.png" mode=""/>
+                <text>鲜花玫瑰</text>
+                <text>66</text>
+            </view>
+        </view>
+        <view>
+            <view class="good-item">
+                <image src="../../assets/index/cate2.png" mode=""/>
+                <text>鲜花玫瑰</text>
+                <text>77</text>
+            </view>
+        </view>
+        <view>
+            <view class="good-item">
+                <image src="../../assets/index/cate3.png" mode=""/>
+                <text>鲜花玫瑰</text>
+                <text>88</text>
+            </view>
+        </view>
+        <view>
+            <view class="good-item">
+                <image src="../../assets/index/cate4.png" mode=""/>
+                <text>鲜花玫瑰</text>
+                <text>99</text>
+            </view>
+        </view>
+        <view>
+            <view class="good-item">
+                <image src="../../assets/index/cate5.png" mode=""/>
+                <text>鲜花玫瑰</text>
+                <text>100</text>
+            </view>
+        </view>
+    </scroll-view>
+</view>
+```
+
+index/index.scss
+```scss
+page{
+    height:100vh;
+    background-color: #efefef;
+    display: flex;
+    flex-direction: column;
+    padding:16rpx;
+    box-sizing: border-box;
+    > view{
+        &:nth-child(n+2){
+            margin-top: 16rpx;
+        }
+    }
+}
+
+// 轮播图区域样式
+.swiper{
+    border-radius: 10rpx;
+    overflow: hidden;
+    swiper{
+        height:360rpx;
+        background-color: skyblue;
+        swiper-item{
+
+            image{
+                width:100%;
+                height:100%;
+                border-radius: 10rpx;
+            }
+            // &:first-child{
+            //     background-color: yellow;
+            // }
+            // &:last-child{
+            //     background-color: lightgreen;
+            // }
+        }
+    }
+}
+
+// 公司信息样式
+.info{
+    display: flex;
+    justify-content: space-between;
+    background-color: #fff;
+    padding: 20rpx;
+    border-radius: 10rpx;
+    font-size: 24rpx;
+    .iconfont{
+        font-size: 24rpx;
+    }
+}
+
+// 商品导航区域
+.good-nav{
+    display: flex;
+    justify-content: space-between;
+    background-color: #fff;
+    padding: 20rpx 16rpx;
+    border-radius: 10rpx;
+    view{
+      
+        navigator{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        image{
+            width:80rpx;
+            height:80rpx;
+        }
+        text{
+            font-size: 24rpx;
+            margin-top: 12rpx;
+        }
+    }
+}
+
+
+// 推荐商品区域
+.good-hot{
+    background-color: #fff;
+    padding: 16rpx;
+    border-radius: 10rpx;
+    font-size: 24rpx;
+    .scroll-x{
+        width: 100%;
+        white-space: nowrap;
+
+        view{
+            display: inline-block;
+            width:320rpx;
+            height:440rpx;
+            margin-right: 16rpx;
+            &:last-child{
+                margin-right:0;
+            }
+            .good-item{
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                text{
+                    &:nth-of-type(1){
+                        font-weight: bold;
+                    }
+                }
+            }
+            image{
+                width:100%;
+                height:320rpx;
+            }
+        }
+    }
+}
+
+```
