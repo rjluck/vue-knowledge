@@ -220,6 +220,7 @@ let sidebar = {
       children: [
         '/applet/wx/base',
         '/applet/wx/component',
+        '/applet/wx/customComponent',
         '/applet/wx/API',
         '/applet/wx/grammar',
         '/applet/wx/plugin',

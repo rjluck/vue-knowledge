@@ -543,11 +543,60 @@ Page({
 
 pages/profile/profile.wxml
 ```html
+<scroll-view 
+  scroll-y 
+  class="scroll-y"
+  lower-threshold="100"
+  bindscrolltolower="getMore"
+  enable-back-to-top
 
+
+  refresher-enabled
+  refresher-default-style="black"
+  refresher-background="#f7f7f8"
+  bindrefresherrefresh="refreshHandler"
+  refresher-triggered="{{isTriggered}}"
+>
+    <view wx:for="{{ numList }}" wx:key="*this">{{item}}</view>
+</scroll-view>
 ```
 
 
+pages/profile/profile.js
+```js
+Page({
+    data:{
+        numList:[1,2,3],
+        isTriggered:false // 允许自动弹回
+    },
+    // scroll-view 上拉加载更多事件的事件处理函数
+    getMore(){
+        console.log('监听用户上拉加载')
+        wx.showLoading({
+          title: '数据加载中...',
+        })
 
+        setTimeout(()=>{
+            let numList = this.data.numList.slice(-1)
+            let arr = [numList[0]+1,numList[0]+2,numList[0]+3]
+            this.setData({
+                numList:[...this.data.numList,...arr]
+            })
+
+            wx.hideLoading()
+        },1500)
+    },
+    //
+    refreshHandler(){
+        console.log('监听下拉刷新')
+        this.setData({
+            numList:[1,2,3],
+            isTriggered:false
+        })
+
+    }
+})
+```
 
 
 
