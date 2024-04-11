@@ -223,7 +223,7 @@ let sidebar = {
         '/applet/wx/customComponent',
         '/applet/wx/API',
         '/applet/wx/grammar',
-        '/applet/wx/plugin',
+        '/applet/wx/other',
         '/applet/wx/case',
       ]
     },

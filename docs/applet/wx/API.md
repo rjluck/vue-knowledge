@@ -645,3 +645,58 @@ promisifyAll(wx,wxp)
 
 
 
+## 框架接口getApp()
+
+在小程序中，可以通过`getApp()`方法获取到小程序全局唯一的App实例。因此，在`App()`方法中添加全局共享的数据、方法，从而实现页面、组件的数据传值。
+
+
+app.js
+```js
+App({
+  // 全局共享的数据
+  globalData:{
+      token:''
+  },
+  // 全局共享的方法
+  setToken(token){
+    // 如果想获取token,可以使用 this 的方式进行获取
+    // this.globalData.token
+    this.globalData.token = token
+  },
+})
+```
+
+
+profile.html
+```html
+<button type="primary" plain bind:tap="login">登录</button>
+```
+
+profile.js
+```js
+
+// getApp() 用来获取全局的唯一的App 实例
+const appInstance = getApp()
+
+Page({
+     login(){
+        console.log('appInstance',appInstance)
+        appInstance.setToken('dddddddddddddffffff')
+        console.log('appInstance',appInstance.globalData.token)
+    }
+})
+```
+
+
+> 注意事项：
+> - 不要在`App()`方法中使用`getApp()`,使用`this`就可以拿到`app`实例
+> - 通过`getApp()`获取实例之后，不要私自调用生命周期函数
+
+
+
+## 页面间通信 eventChannel
+
+
+
+
+

@@ -1,4 +1,4 @@
-# 插件
+# 其他
 
 [[toc]]
 
@@ -466,11 +466,373 @@ app.json
 
 
 #### 配置分包预下载
-**预下载分包的行为，会在进入指定的页面时触发**。在`app.json`中，使用`preloadRule`节点定义分包的预下载规则，示例代码如下：
+**预下载分包的行为，会在进入指定的页面时触发**。在`app.json`中，使用`preloadRule`字段定义分包的预下载规则，示例代码如下：
 
 ![image](/imgs/applet/wx/wx176.png)
+
+
+
+preloadRule是一个对象，对象的`key`表示访问那个路径时进行预下载，`value`是进入此页面的预下载配置，具有两个配置项：
+- `packages`：进入页面后预下载分包的`root`或`name`,`__APP__`表示主包
+- `netWork`：在指定网络下预下载，可选值为：`all`(不限网络)、`wifi`(仅wifi下预下载)
+
+
+
+app.json
+
+packages 写分包别名
+```json
+  "preloadRule": {
+      "pages/index/index":{
+          "network": "all",
+          "packages": ["goodModule"]
+      }
+  }
+```
+
+packages 也可以写分包路径
+```json
+  "preloadRule": {
+      "pages/index/index":{
+          "network": "all",
+          "packages": ["modules/goodModule"]
+      },
+      "modules/marketModule/pages/market/market":{
+        "network": "all",
+        "packages": ["__APP__"]  
+    }
+  }
+```
+
+访问独立分包时，预下载主包，`__APP__`代表主包
+```json
+  "preloadRule": {
+      "modules/marketModule/pages/market/market":{
+        "network": "all",
+        "packages": ["__APP__"]  
+    }
+  }
+```
+
+
+完整代码
+```json
+{
+  "entryPagePath": "pages/index/index",
+  "pages": [
+    "pages/index/index",
+    "pages/cate/cate",
+    "pages/cart/cart",
+    "pages/profile/profile",
+    "pages/market/market",
+    "pages/list/list",
+    "pages/detail/detail"
+  ],
+  "window": {
+    "navigationBarTitleText": "嘟嘟",
+    "navigationBarBackgroundColor": "#f3514f",
+    "enablePullDownRefresh": false,
+    "backgroundColor": "#efefef",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "selectedColor": "#f3514f",
+    "color": "#666",
+    "backgroundColor": "#efefef",
+    "borderStyle": "black",
+    "position": "bottom",
+    "list": [
+      {
+        "text": "首页",
+        "pagePath": "pages/index/index",
+        "iconPath": "/assets/tabbar/index.png",
+        "selectedIconPath": "/assets/tabbar/index-active.png"
+      },
+      {
+        "text": "分类",
+        "pagePath": "pages/cate/cate",
+        "iconPath": "/assets/tabbar/cate.png",
+        "selectedIconPath": "/assets/tabbar/cate-active.png"
+      },
+      {
+        "text": "购物车",
+        "pagePath": "pages/cart/cart",
+        "iconPath": "/assets/tabbar/cart.png",
+        "selectedIconPath": "/assets/tabbar/cart-active.png"
+      },
+      {
+        "text": "促销",
+        "pagePath": "pages/market/market",
+        "iconPath": "/assets/tabbar/profile.png",
+        "selectedIconPath": "/assets/tabbar/profile-active.png"
+      },
+      {
+        "text": "我的",
+        "pagePath": "pages/profile/profile",
+        "iconPath": "/assets/tabbar/profile.png",
+        "selectedIconPath": "/assets/tabbar/profile-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "usingComponents": {
+    "custom-checkbox": "./components/custom-checkbox/custom-checkbox",
+    "van-button": "@vant/weapp/button/index"
+  },
+  "subPackages": [
+      {
+        "root": "modules/goodModule",
+        "name": "goodModule",
+        "pages": [
+            "pages/list/list",
+            "pages/detail/detail"
+        ]
+      },
+      {
+        "root": "modules/marketModule",
+        "name": "marketModule",
+        "pages": [
+            "pages/market/market"
+        ],
+        "independent":true
+      }
+  ],
+  "preloadRule": {
+      "pages/index/index":{
+          "network": "all",
+          "packages": ["goodModule"]
+      },
+      "modules/marketModule/pages/market/market":{
+        "network": "all",
+        "packages": ["__APP__"]  
+    }
+  }
+}
+```
+
+
+
+
+
+
+
 
 
 #### 分包预下载的限制
 同一个分包中的页面享有**共同的预下载大小限额2M**，例如：
 ![image](/imgs/applet/wx/wx177.png)
+
+
+## 开发能力
+
+
+### 获取微信头像
+
+当小程序需要让用户完善个人资料时，我们可以通过微信提供的头像、昵称填写能力快速完善。
+
+![image](/imgs/applet/wx/wx187.png)
+
+想使用微信提供的头像填写能力，需要两步：
+- 将`button`组件`open-type`的值设置为`chooseAvatar`
+- 通过`bindchooseavatar`事件回调获取到头像信息的临时路径
+
+
+
+index.wxml
+```html
+<view>
+    <button class="btn" open-type="chooseAvatar" bindchooseavatar="chooseavatar">
+        <image class="avatar" src="{{avatarUrl}}" mode=""/>
+    </button>
+</view>
+```
+
+index.js
+```js
+Page({
+    /**
+   * 页面的初始数据
+   */
+  data: {
+    avatarUrl:'../../assets/index/1.png'
+  },
+
+  // 获取微信头像
+  chooseavatar(event){
+    console.log('event',event);
+    // 目前获取的微信头像是临时路径，临时路径是有失效时间的，在实际开发中，需要将临时路径上传到公司的服务器
+    console.log('222',event.detail.avatarUrl);
+    this.setData({
+        avatarUrl:event.detail.avatarUrl
+    })
+  }
+})
+```
+
+
+### 获取微信昵称
+
+当小程序需要让用户完善个人资料时，我们可以通过微信提供的头像、昵称填写能力快速完善。
+
+![image](/imgs/applet/wx/wx188.png)
+
+想使用微信提供的昵称填写能力，需要三步：
+- 通过`form`组件中包裹住`input`以及`form-type`为`submit`的`button`组件
+- 需要将`input`组件`type`的值设置为`nickname`，当用户输入框输入时，键盘上方会展示微信昵称
+- 给`form`绑定`submit`事件，在事件处理函数中通过事件对象获取用户昵称
+
+
+index.wxml
+```html
+<form bindsubmit="submitFun">
+    <!-- 如果添加了name属性，form组件就会自动收集带有name属性的表单元素的值 -->
+    <input  type="nickname" name="nickname" placeholder="请输入昵称"/>
+    <!-- 如果将 form-type="submit" ，就将按钮变为提交按钮，在点击提交按钮的时候，会触发表单的提交事件bindsubmit-->
+    <button type="primary" plain form-type="submit">点击获取昵称</button>
+</form>
+```
+
+index.js
+```js
+Page({
+  // 获取微信昵称
+  submitFun(event){
+    console.log('event',event);
+    console.log('event',event.detail.value.nickname);
+  }
+})
+```
+
+
+
+### 转发功能
+
+转发功能，主要帮助用户更流畅地与好友分享内容和服务
+
+![image](/imgs/applet/wx/wx189.png)
+
+实现转发功能，有两种方式：
+- 方式1：页面js文件必须声明`onShareAppMessage`事件监听函数，并自定义转发内容。只有定义了此事件处理函数，右上角菜单才会显示“转发”按钮。
+```js
+Page({
+  /**
+   * 用户点击右上角分享
+   */
+  onShareAppMessage() {
+
+  }
+})
+```
+- 方式2：通过给`button`组件设置属性`open-type="share"`,可以在用户点击按钮后触发`Page.onShareAppMessage`事件监听函数。
+  
+```js
+Page({
+  /**
+   * 监听页面按钮的转发
+   */
+  onShareAppMessage(obj) {
+    console.log(obj)
+    // 形参 obj.from 转发来源，from为menu时，target为undefined，否则 target 有值
+
+    // 可以自定义返回内容，在转发时展示
+    return {
+      title:'这是一个非常神奇的页面',
+      path:'/pages/cate/cate',
+      imageUrl:'../../assets/index/2.png'
+    }
+  }
+})
+```
+
+### 分享到朋友圈
+
+小程序页面默认不能被分享到朋友圈，开发者需主动设置“分享到朋友圈”才可以，实现分享到朋友圈需满足两个条件：
+- 页面必须设置允许“发送给朋友”，页面js文件声明`onShareAppMessage`事件监听函数
+- 页面必须设置允许“分享到朋友圈”，页面js文件声明`onShareTimeline`事件监听函数
+
+
+![image](/imgs/applet/wx/wx190.png)
+
+```js
+Page({
+    /**
+   * 用户点击右上角分享
+   */
+  onShareAppMessage() {
+    return {
+        title:'这是一个非常神奇的页面',
+        path:'/pages/cate/cate',
+        imageUrl:'../../assets/index/2.png'
+      }
+  },
+
+  // 监听右上角 分享到朋友圈 按钮
+  onShareTimeline(){
+    // 可以自定义
+    return{
+        title:'帮我砍一下',
+        query:'id=1',
+        imageUrl:'../../assets/index/3.png'
+    }
+  }
+})
+```
+
+
+### 手机号验证组件
+
+手机号验证组件，用于帮助开发者向用户发起手机号申请，必须经过用户同意后，才能获得由平台验证后的手机号，进而为用户提供相应服务。
+
+手机号验证组件分为两种：
+- 手机号快速验证组件：微信平台会对号码进行验证，但不保证实时验证
+```html
+<button open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">手机号快速验证组件</button>
+```
+- 手机号实时验证组件：在每次请求时，平台均会对用户选择的手机号进行实时验证
+```html
+<button open-type="getRealtimePhoneNumber" bindgetrealtimephonenumber="getrealtimephonenumber">手机号实时验证组件</button>
+```
+
+> 注意事项：
+> - 目前该接口针对非个人开发者，且完成了认证的小程序开放（不包含海外主体）
+> - 两种验证组件需要付费使用，每个小程序账号将有1000次体验额度
+
+```js
+Page({
+  getPhoneNumber(event){
+    // 通过事件对象，可以看到，在event.detail 中可以获取到 code
+    // code 动态令牌，可以使用code换取用户的手机号
+    // 真正开发中，需要将code发送给后端，后端在接收到code以后，也需要调用API，换取用户的真正手机号，在换取成功以后，会将手机号返回给前端。
+    console.log('event',event);
+  },
+  getrealtimephonenumber(event){
+    console.log('event',event);
+  },
+})
+```
+
+
+### 客服功能
+
+小程序为开发者提供了客服能力，同时为客服人员提供移动端、网页端客服工作台便于及时处理消息
+
+
+使用方式：
+- 需要将`button`组件`open-type`的值设置为`contact`,当用户点击后就会进入客服会话
+- 在微信公众后台，绑定后的客户账号，可以登录 网页端客服 或 移动端小程序客服 进行接收、发送客服消息
+
+
+![image](/imgs/applet/wx/wx191.png)
+
+```html
+<button open-type="contact">联系客服</button>
+```
+
+
+
+## 
+
+
+
