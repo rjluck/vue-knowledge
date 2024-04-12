@@ -696,6 +696,192 @@ Page({
 
 ## 页面间通信 eventChannel
 
+如果一个页面通过`wx.navigateTo`打开一个新页面，这两个页面将建议一条数据通道。
+
+- 在`wx.navigateTo`的`success`回调中通过`EventChannel`对象发射事件
+- 被打开的页面可以通过`this.getOpenerEventChannel()`方法来获得一个`EventChannel`对象，进行监听、发射事件
+- `wx.navigateTo`方法中可以定义`events`配置项接收被打开页面发射的事件
+![image](/imgs/applet/wx/wx192.png)
+
+index.html
+```html
+<button type="warn" plain bind:tap="handler">跳转到列表页面</button>
+```
+
+index.js
+```js
+Page({
+    handler(){
+        wx.navigateTo({
+          url: '/pages/list/list',
+          events:{
+            // key:被打开页面通过eventChannel发射的事件
+            // value：回调函数，为事件添加一个监听器，获取到被打开页面传递给当前页面的数据
+            currentevent:(res)=>{
+               console.log('3333',res)  // {age: 18}
+            }
+          },
+          success(res){
+              console.log('res',res)
+            //   通过success 回调函数的形参，可以获取`eventChannel`对象
+            //  `eventChannel`对象提供了emit方法，可以发射事件，同时携带参数
+            res.eventChannel.emit('myevent',{name:'Tom'})
+          }
+        })
+    }
+})
+```
+
+
+list.js
+```js
+Page({
+  /**
+   * 生命周期函数--监听页面加载
+   */
+  onLoad(options) {
+    // console.log('options',options)
+
+    // 通过`this.getOpenerEventChannel()`方法
+    const EventChannel = this.getOpenerEventChannel()
+
+    // 通过EventChannel 提供的 on 方法监听页面发射的自定义事件
+    EventChannel.on('myevent',(res)=>{
+        console.log('2222',res) // {name: "Tom"}
+    })
+
+    // 通过EventChannel 提供的 emit 方法，也可以向上一级页面传递数据
+    EventChannel.emit('currentevent',{age:18})
+  }
+})
+```
+
+
+## 组件通信-事件总线
+
+
+随着项目功能的增加，业务逻辑也会变得很复杂，一个页面可能是由多个组件进行构成，并且这些组件之间需要进行数据的传递。这时候如果使用之前学习的组件传值方式进行数据的传递，就会比较麻烦
+
+![image](/imgs/applet/wx/wx193.png)
+
+
+事件总线是对发布-订阅模式的一种实现，是一种集中式事件处理机制，允许不同的组件之间进行彼此通信，常用于两个非父子关系组件和兄弟组件之间通讯。我们可以借助第三方的 发布订阅 JS 包，来实现事件总线的功能，[`PubSubJs`](https://github.com/mroderick/PubSubJS)
+
+
+父组件 pages/list/list..wxml
+```html
+<view class="parent">
+    <view class="title">f父组件，子组件a 和 子组件b 是兄弟关系</view>
+
+    <view class="container">
+        <custom01></custom01>
+        <custom02></custom02>
+    </view>
+</view>
+```
+
+ 父组件  pages/list/list.wxss
+ ```scss
+ .parent{
+    background-color: pink;
+    padding:20rpx;
+}
+ ```
+
+子组件a  components/custom01/custom01.wxml
+```html
+<view class="child1">
+    <text>子组件a</text>
+    <button bind:tap="sendData">传递数据给兄弟</button>
+</view>
+```
+
+
+
+子组件a  components/custom01/custom01.js
+```js
+import PubSub from 'pubsub-js'
+Component({
+  /**
+   * 组件的初始数据
+   */
+  data: {
+    name:'Tom'
+  },
+
+  /**
+   * 组件的方法列表
+   */
+  methods: {
+    sendData(){
+        /**
+         * publish 发布、发射自定义事件
+         * 1.自定义事件的名称
+         * 2.需要传递的数据
+         */
+        PubSub.publish('myevent',this.data.name)
+    }
+  }
+})
+```
+
+子组件b  components/custom02/custom02.wxml
+```html
+<view class="child2">
+    <text>子组件b</text>
+    <text>兄弟组件a 传过来的值：{{name}}</text>
+</view>
+```
+
+
+子组件b components/custom02/custom02.js
+```js
+import PubSub from 'pubsub-js'
+Component({
+  /**
+   * 组件的初始数据
+   */
+  data: {
+    name:''
+  },
+  lifetimes:{
+    attached(){
+        // subscribe 订阅、监听自定义的事件
+        // 1.需要订阅、监听的事件名称
+        // 2.回调函数，回调函数有两个参数：
+        //  - msg:自定义事件的名称
+        //  - data:传递过来的数据
+        PubSub.subscribe('myevent',(msg,data)=>{
+            console.log('msg',msg);
+            console.log('data',data);
+            this.setData({
+                name:data
+            })
+        })
+    }
+  }
+})
+```
+
+
+
+
+## 自定义导航栏
+
+小程序默认的导航栏与`APP`一样都位于顶部固定位置。但是默认导航栏可能会影响小程序的整体风格，且无法满足特定的设计需求，这时候就需要自定义导航栏。
+
+- 在`app.json`或者`page.json`中，配置`navigationStyle`属性为`custom`,即可自定义导航栏。
+- 在设置以后，就会移除默认的导航栏，只保留右上角胶囊按钮。
+
+
+![image](/imgs/applet/wx/wx194.png)
+
+
+
+
+
+
+
 
 
 
