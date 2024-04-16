@@ -832,7 +832,571 @@ Page({
 
 
 
-## 
+## VsCode 开发小程序项目
+
+在进行项目开发的时候，有人可能不习惯微信开发者工具进行开发，而是习惯使用`VsCode`等编辑器。但是VsCode对小程序开发支持的不是很友好，如果想通过`Vscode`开发小程序项目，需要安装以下插件：
+- `WXML-Language Service`，针对wxml文件，自动补全，高亮等效果
+- `prettier`，代码格式化
+- 微信小程序开发工具，提供小程序预览、打包上传，代码补全，语法高亮，项目模板等功能
+- 微信小程序助手-Y，快速创建/删除page和component文件结构
+- 小程序开发助手（overtrue,可选），代码提示，语法高亮
+- 其他...
+
+> 使用VsCode开发小程序项目时，如果需要预览、调式小程序，依然需要借助微信开发者工具
+
+
+局部配置（只对当前项目生效）：
+- 在项目根目录下新建`.vscode`文件夹
+- 在`.vscode`文件夹中新建`settings.json`文件
+- 在项目根目录下新建`.prettierrd`文件，用于格式化
+
+全局配置
+- 设置---> settings ---> open File
+
+
+> 注意事项：
+> 项目根目录`.vscode`文件夹中`settings.json`文件只对当前项目生效
+>
+> 如果想配置项生效，还需要注意：
+> 在`VaCode`中只能打开当前一个小程序项目，不能同时打开多个小程序项目，且项目目录请勿嵌套打开！
+
+## 通用模块封装
+
+### 为什么进行模块封装
+
+在进行项目开发的时候，我们经常的会频繁的使用到一些API。例如：`wx.showToast()`、`wx.showModal`等消息提示API，这些API的使用方法如下：
+```js
+wx.showToast({
+  title:'微信提示框', // 提示的内容
+  icon:'success', // 提示图标
+  duration:2000, // 提示的延迟时间
+  mask:true  // 是否显示透明蒙层，防止触摸穿透
+})
+
+
+wx.showModal({
+  title:'提示', // 提示的标题
+  content:'您确定执行该操作吗？', // 提示的内容
+  confirmColor:'#f3514f', // 确定按钮的样式
+  // 接口调用结束的回调函数（调用成功、失败都会执行）
+  complete({confirm,cancel}){
+    if(confirm){
+      console.log('用户点击了确定')
+      return;
+    }
+    if(cancel){
+      console.log('用户点击了取消')
+      return;
+    }
+  }
+})
+```
+
+
+如果每次使用的时候，都直接调用这些`API`，会导致代码冗余，为了减少代码冗余，我们需要将这些`API`封装成公共方法，封装后的使用方式如下：
+```js
+// wx.showToast() 封装后的调用方式
+toast()
+toast({title:'数据加载失败...',mask:true})
+
+
+// wx.showModal() 封装后的调用方式
+const res = await modal({
+  title:'提示',
+  content:'鉴权失败，请重新登录'
+})
+
+// 用户点击了确定
+if(res){
+  // ...
+}else{
+  // ...
+}
+```
+
+### 消息提示模块封装
+
+基本使用：
+- `wx.showToast()` 消息提示框是在项目中频繁使用的一个小程序`API`,常用来给用户进行消息提示反馈，使用方式如下：
+```js
+wx.showToast({
+  title:'微信提示框', // 提示的内容
+  icon:'success', // 提示图标
+  duration:2000, // 提示的延迟时间
+  mask:true  // 是否显示透明蒙层，防止触摸穿透
+})
+```  
+
+
+封装思路：
+- 创建一个`toast`方法，对`wx.showToast()`方法进行封装
+- 调用该方法时，传递对象作为参数
+  - 如果没有传递任何参数，设置一个空对象`{}`作为默认参数
+  - 从对象中包含`title`、`icon`、`duration`、`mask`参数，并给参数设置默认值
+- 在需要显示弹出框的时候调用`toast`方法，并传入相关的参数，有两种参数方式：
+  - 不传递参数，使用默认值
+  - 传入部分参数，覆盖默认的参数
+
+
+调用方式：
+- 模块化的方式导入使用
+```js
+import {toast} from './extendApi'
+
+toast()
+toast({title:'数据加载失败',mask:true})
+```
+- 将封装的模块挂载到`wx`全局对象上
+```js
+wx.toast()
+wx.toast({title:'数据加载失败',mask:true})
+```
+
+实现步骤：
+- 在`utils`目录下新建`extendApi.js`文件
+- 对`wx.showToast()`方法进行封装
+
+
+落地代码：
+
+utils/extendApi.js
+```js
+
+// 在使用toast方法时，可以传入参数，也可以不传参数
+/**
+ * 如果需要传入参数，要传入对象作为参数
+ * const toast = (oprions={})=>{}
+ * 
+ * 如果用户传入了对象作为参数
+ * 在形参位置通过解构的方式获取用户传入的参数，同时设置默认值
+ * const toast = ({title='数据加载中...',icon='none',duration=2000,mask=true}={})=>{}
+ */
+
+const toast = ({title='数据加载中...',icon='none',duration=2000,mask=true}={})=>{
+    wx.showToast({
+        title, // 提示的内容
+        icon, // 提示图标
+        duration, // 提示的延迟时间
+        mask // 是否显示透明蒙层，防止触摸穿透
+      })
+}
+
+
+// 如果有很多.js文件，都需要调用toast方法
+// 每次使用都需要导入 toast，然后进行调用，太麻烦
+// 可以将toast方法挂载到wx全局对象上
+wx.toast = toast
+
+
+
+// 如果其他.js文件，需要使用toast方法
+// 需要先导入toast，然后进行调用才可以
+export {toast}
+```
+
+app.js
+```js
+// import {toast} from  './utils/extendApi'
+
+import './utils/extendApi' //执行该文件，将toast方法挂载到全局对象wx上
+
+App({
+})
+
+```
+
+
+
+### 模态对话框封装
+
+基本使用：
+- `wx.showModal()`模态对话框也是在项目中频繁使用的一个小程序API，通常用于向用户询问是否执行一些操作，例如：询问用户是都真的需要退出、是否确认删除等等。
+
+```js
+wx.showModal({
+  title:'提示', // 提示的标题
+  content:'您确定执行该操作吗？', // 提示的内容
+  confirmColor:'#f3514f',
+  // 接口调用结束的回调函数（调用成功、失败都会执行）
+  complete({confirm,cancel}){
+    confirm && console.log('点击了确定')
+    cancel && console.log('点击了取消')
+  }
+})
+```
+
+
+封装思路：
+- 对`wx.showModal()`方法进行封装，封装后的新方法叫`modal`
+- 调用该方法时，传递对象作为参数，对象的参数统`wx.showModal()`参数一致
+- 封装的`modal`方法的内部通过`Promise`返回用户执行的操作（确定和取消，都通过`resolve`返回）
+- 在需要调用模态对话框的时候调用`modal`方法，并传入相关的参数，有两种参数方式：
+  - 不传递参数，使用默认参数
+  - 传递参数，覆盖默认的参数
+
+
+调用方式：
+- 模块化的方式导入使用
+- 将封装的模块挂载到`wx`全局对象身上
+
+实现步骤：
+- 在`extendApi.js`文件中新建`modal`方法，方法内部
+- `modal`方法，方法内部用来处理封装的逻辑
+
+
+落地代码：
+
+utils/extendApi.js
+```js
+
+// 在使用toast方法时，可以传入参数，也可以不传参数
+/**
+ * 如果需要传入参数，要传入对象作为参数
+ * const toast = (oprions={})=>{}
+ * 
+ * 如果用户传入了对象作为参数
+ * 在形参位置通过解构的方式获取用户传入的参数，同时设置默认值
+ * const toast = ({title='数据加载中...',icon='none',duration=2000,mask=true}={})=>{}
+ */
+
+const toast = ({title='数据加载中...',icon='none',duration=2000,mask=true}={})=>{
+    wx.showToast({
+        title, // 提示的内容
+        icon, // 提示图标
+        duration, // 提示的延迟时间
+        mask // 是否显示透明蒙层，防止触摸穿透
+      })
+}
+
+// 在使用modal方法时，可以传入参数，也可以不传参数
+/**
+ * 如果传递参数，参数需要是一个对象，对象中的属性需要和wx.showModal 参数保持一致
+ * 如果不传递参数，默认值就是空对象
+ */
+const modal = (options={})=>{
+    // 在方法内部需要通过Promise返回用户的操作
+    // 如果用户点击了确定，需要通过 resolve 返回 true
+    // 如果用户点击了取消，需要通过 resolve 返回 false
+    return new Promise((resolve)=>{
+        // 默认的参数
+        const defaultOpt ={
+            title:'提示', // 提示的标题
+            content:'您确定执行该操作吗？', // 提示的内容
+            confirmColor:'#f3514f'
+        }
+
+        // 通过 Object.assign 方法将参数进行合并
+        const opts = Object.assign({},defaultOpt,options)
+        wx.showModal({
+            ...opts,
+            complete({confirm,cancel}){
+                confirm && resolve(true)
+                cancel && resolve(false)
+            }
+        })
+
+
+    })
+}
+
+
+
+
+// 如果有很多.js文件，都需要调用toast方法
+// 每次使用都需要导入 toast，然后进行调用，太麻烦
+// 可以将toast方法挂载到wx全局对象上
+wx.toast = toast
+wx.modal = modal
+
+
+// 如果其他.js文件，需要使用toast方法
+// 需要先导入toast，然后进行调用才可以
+export {toast,modal}
+```
+
+
+
+
+### 封装本地存储同步API
+
+思路分析：
+- 在小程序中，经常需要将一些数据存储到本地，方便多个页面的读取使用，例如：将用户的登录状态、用户的个人信息存储到本地。
+- 小程序提供了同步、异步两类API来实现本地存储操作。例如：`wx.setStorageSync、wx.setStorage`等方法
+
+```js
+try{
+  wx.setStorageSync(key,value)
+} catch(err) {
+  console.error(`存储指定${key}数据发生错误：`, err)
+}
+
+
+wx.setStorage({
+  key:'key',
+  data:'data',
+  success(res)=>{},
+  fail(err)=>{}
+})
+
+```
+
+如果直接使用这些API，会比较麻烦，通常情况下，我们需要对本地存储方法进行封装。
+
+
+
+实现步骤：
+- 在`utils`目录下，新建`storage.js`文件
+- 在该文件中，封装对本地数据进行存储、获取、删除、清除的方法
+
+
+落地代码
+```js
+/**
+ * 存储数据
+ * key 本地缓存中指定的key
+ * value 需要缓存的数据
+*/
+export const setStorage = (key,value)=>{
+  try{
+    wx.setStorageSync(key,value)
+  }catch(err){
+    console.error(`存储指定${key}数据发生错误：`, err)
+  }
+}
+
+
+/**
+ * 从本地读取对应key的数据
+*/
+export const getStorage = (key)=>{
+  try{
+    const value = wx.getStorageSync(key)
+    if(value){
+      return value
+    }
+  }catch(err){
+    console.error(`获取指定${key}数据发生错误：`, err)
+  }
+}
+
+/**
+ * 从本地移除对应key的数据
+*/
+export const removeStorage = (key)=>{
+  try{
+    wx.removeStorageSync(key)
+  }catch(err){
+    console.error(`移除指定${key}数据发生错误：`, err)
+  }
+}
+
+/**
+ * 从本地清空全部的数据
+*/
+export const clearStorage = ()=>{
+  try{
+    wx.clearStorageSync()
+  }catch(err){
+    console.error(`清空本地存储发生错误：`, err)
+  }
+}
+```
+
+
+app.js
+```js
+import {setStorage,getStorage,removeStorage,clearStorage} from './utils/storage';
+
+
+
+```
+
+
+
+### 封装本地存储异步API
+
+
+
+思路分析：
+- 使用`Promise`封装异步存储API
+
+```js
+wx.setStorage({
+  key:'key',
+  data:'data',
+  success(res){},
+  fail(err){},
+  complete(res){}
+})
+```
+
+
+
+使用方式：
+```js
+// 异步将数据存储到本地
+asyncSetStorage(key,data)
+
+// 异步从本地读取指定key的数据
+asyncGetStorage(key)
+
+// 异步从本地移除指定key的数据
+asyncRemoveStorage(key)
+
+// 异步从本地移除、清空全部的数据
+asyncClearStorage()
+```
+
+
+落地代码：
+
+utils/storage.js
+```js
+ /**  异步存储 */
+
+  /**
+   * @description 异步将数据存储到本地
+   * @param {*} key 本地缓存中指定的key
+   * @param {*} data 需要缓存的数据
+   */
+  export const asyncSetStorage = (key,data)=>{
+    return new Promise((resolve)=>{
+        wx.setStorage({
+            key,
+            data,
+            complete(res){
+                resolve(res)
+            }
+        })
+    })
+  }
+
+  /**
+   * @description 异步从本地获取指定key的数据
+   * @param {*} key 
+   */
+  export const asyncGetStorage = (key)=>{
+    return new Promise((resolve)=>{
+        wx.getStorage({
+            key,
+            complete(res){
+                resolve(res)
+            }
+        })
+    })
+  }
+
+    /**
+   * @description 异步从本地移除指定key的数据
+   * @param {*} key 
+   */
+  export const asyncRemoveStorage = (key)=>{
+    return new Promise((resolve)=>{
+        wx.removeStorage({
+            key,
+            complete(res){
+                resolve(res)
+            }
+        })
+    })
+  }
+
+
+      /**
+   * @description 异步从本地移除全部缓存的数据
+   */
+  export const asyncClearStorage = ()=>{
+    return new Promise((resolve)=>{
+        wx.clearStorage({
+            complete(res){
+                resolve(res)
+            }
+        })
+    })
+  }
+```
+
+app.js
+```js
+import {asyncSetStorage,asyncGetStorage,asyncRemoveStorage,asyncClearStorage} from './utils/storage';
+
+asyncSetStorage('name','jjj').then((res)=>{
+  console.log(res)
+})
+
+```
+
+
+
+## 网络请求封装
+
+### 为什么要封装wx.request
+
+小程序大多数API都是异步API，如`wx.request()`、`wx.login()`等。这类API接口通常都接收一个`Object`对象类型的参数，参数中可以按需指定以下字段来接收接口调用结果：
+
+| 参数名   | 类型     | 必填 | 说明                                         |
+| -------- | -------- | ---- | -------------------------------------------- |
+| success  | function | 否   | 调用成功的回调函数                           |
+| fail     | function | 否   | 调用失败的回调函数                           |
+| complete | function | 否   | 调用结束的回调函数（调用成功、失败都会执行） |
+
+
+```js
+wx.request({
+  // 接口调用成功的回调函数
+  success(){},
+
+  // 接口调用失败的回调函数
+  fail(){},
+  // 接口调用结束的回调函数（调用成功、失败都会执行）
+  complete(){}
+})
+```
+
+
+
+如果采用这种回调函数的方法接收返回的值，可能会出现多层`success`套用的情况，容易出现回调地狱问题。
+
+
+为了解决这个问题，小程序基础库从2.10.2版本起，异步API支持`callback & promise`两种调用方式。
+
+当接口参数`Object`对象中不包含`success/fail/complete`时，将默认返回`promise`,否则仍按回调方式执行，无返回值。
+
+
+但是部分接口如`downloadFile`、`request`、`uploadFile`等本身就有返回值，因此不支持`promise`调用方式，它们的`promisify`需要开发者自行封装。
+
+
+`Axios`是我们日常开发中常用的一个基于`promise`的网络请求库。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

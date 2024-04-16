@@ -422,3 +422,114 @@ page{
 
 
 ### 接口文档
+
+
+
+### 开发流程
+
+#### （1）申请开发权限
+
+在开始开发一个小程序项目之前，需要先申请开发权限。
+
+需要将自己的微信号发送给对应小程序账号的管理员，在小程序微信公众后台添加我们自己为开发者。
+
+这样我们自己开发时就可以用自己微信号登录后台获取`AppID`
+
+
+#### (2)创建项目&项目初始化
+
+创建项目
+- 在微信开发者工具的开始界面左侧检查项目类型，需要为【小程序】
+- 然后再右侧点击【+】开始新建项目
+- 最后在弹出的界面中输入项目相关的信息，点击确定即可。
+
+项目初始化
+- 重置`app.js`中的全部内容，只留`App({})`
+- 重置`app.json`中的部分选项内容，只保留如下属性
+```json
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "Weixin",
+    "navigationBarBackgroundColor": "#ffffff"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}
+```
+- 重置`app.wxss`中的代码
+- 删除`components`中的自定义组件
+- 重置`pages/index`文件夹一下的`index.js`、`index.wxml`、`index.json`、`index.wxss`文件
+- 更新`utils`下的`util.js`的文件名为`formatTime.js`
+
+
+
+#### (2)自定义构建npm & 集成Sass
+
+随着项目功能越来越多、项目越来越复杂，文件目录也变的很繁琐，为了方便进行项目的开发，开发人员通常会对目录结构进行调整优化，在慕尚花坊项目中，我们就需要将小程序源码放到`miniprogram`目录下。
+
+
+自定义构建
+- 手动新建源码目录文件夹`miniprogram`,然后将源码文件移动到该文件夹下，再根据下面进行配置
+![image](/imgs/applet/wx/wx197.png)
+- 首先在`project.config.json`配置`miniprogramRoot`选项，指定小程序源码的目录
+```json
+{
+    "miniprogramRoot": "miniprogram/",
+}
+```
+- 然后配置`project.config.json`的`setting.packNpmManually`为`true`,开启自定义`node_modules`和`miniprogram_npm`位置的构建npm方式
+- 最后配置`project.config.json`的`setting.packNpmRelationList`项，指定`packageJsonPath`和`miniprogramNpmDistDir`的位置
+```json
+ "setting": {
+    "packNpmManually": true,
+    "packNpmRelationList": [
+      {
+        "packageJsonPath": "./package.json",
+        "miniprogramNpmDistDir": "./miniprogram"
+      }
+    ]
+ }
+```
+  - `packageJsonPath`表示`node_modules`源对应的`package.json`
+  - `miniprogramNpmDistDir`表示`node_modules`的构建结果目标位置
+- npm构建`npm init -y`初始化生成`package.json`
+- 安装`vant`,`yarn add @vant/weapp`
+- 点击【工具】---> 点击【构建npm】---> 点击【清缓存】---> 点击【编译】
+
+集成Sass
+- 配置`project.config.json`的`setting.useCompilerPlugins`
+```json
+"setting": {
+    "useCompilerPlugins": [
+      "sass"
+    ]
+}
+```
+- 将`app.wxss` 改为 `app.scss`
+- 将`index.wxss` 改为 `index.scss`
+- 点击【清缓存】---> 点击【编译】
+
+
+
+
+#### (3)集成项目页面文件
+
+代码分析：
+- `app.json`中配置了`pages`、`window`、`tabBar`
+- `app.json`中对项目中会使用到的 `Vant`组件进行了全部的注册
+- `app.wxss`文件中导入了阿里巴巴使用图标库
+- `components`文件夹中定义了两个公共的组件
+- `pages`目录下存放了项目中所有的页面文件，后续我们会进行分包的处理
+
+
+
+
+
+
+
+
