@@ -1117,6 +1117,8 @@ export {toast,modal}
 
 
 
+
+
 ### 封装本地存储同步API
 
 思路分析：
@@ -1366,37 +1368,1385 @@ wx.request({
 但是部分接口如`downloadFile`、`request`、`uploadFile`等本身就有返回值，因此不支持`promise`调用方式，它们的`promisify`需要开发者自行封装。
 
 
-`Axios`是我们日常开发中常用的一个基于`promise`的网络请求库。
+`Axios`是我们日常开发中常用的一个基于`promise`的网络请求库。我们可以参考`Axios`的使用方式来封装自己的网络请求模块，咱们看一下使用的方式：
+
+[网络请求模块封装 mina-request](https://www.npmjs.com/package/mina-request)
+
+
+
+### 请求封装-request方法
+
+思路分析：在封装网络请求模块的时候，采用`Class`类来进行封装，采用类的方式封装代码更具可复用性，也方便添加新的方法和属性，提高代码的扩展性。
+
+
+我们先创建一个class类，同时定义`constructor`构造函数
+```js
+// 创建 WxRequest 类
+class WxRequest(){
+  constructor(){}
+}
+```
+
+我们在 WxRequest 类内部封装一个 `request`实例方法
+- `request`实例方法中需要使用`Promise`封装`wx.request`,也就是使用`Promise`处理`wx.request`的返回结果
+- `request`实例方法接收一个`options`对象作为形参，`options`参数和调用`wx.request`时传递的请求配置项一致
+  - 接口调用成功时，通过`resolve`返回响应数据
+  - 接口调用失败时，通过`reject`返回错误原因
+
+
+
+封装request
+
+utils/request.js
+```js
+/**
+ * 创建 WxRequest 类
+ * 通过类的方式进行封装，会让代码更加具有复用性
+ * 也可以方便添加新的属性和方法
+ */
+class WxRequest{
+    // 用于创建和初始化类的属性及方法
+    constructor(){
+
+    }
+
+    // request 实例方法接收一个对象类型的参数
+    // 属性值和wx.request 方法调用时传递参数保持一致
+    request(options){
+        // 需要使用 Promise封装wx.request 处理异步请求
+        return new Promise((resolve,reject)=>{
+            wx.request({
+                ...options,
+                // 当接口调用成功时会触发 success 回调函数
+                success:(res)=>{
+                    resolve(res)
+                },
+                // 当接口调用失败时会触发 fail 回调函数
+                fail:(err)=>{
+                    reject(err)
+                }
+            })
+        })
+    }
+}
+
+
+
+// --------------------------------- 以下时实例化的代码 -----------------------------------
+// 目前写到同一个文件中，是为了方便进行测试，以后会提取成多个文件
+
+
+//  对 WxRequest 进行实例化
+const instance = new WxRequest()
+
+//  将  WxRequest实例进行暴露出去，方便在其他文件中国进行使用
+export default instance;
+```
+
+
+
+在其他模块中引入封装后的文件后，我们期待通过`request()`方式发起请求，以`promise`的方式返回参数
+```js
+// 导入创建的实例
+import instance from '../../utils/wx-request'
+
+Page({
+
+  // 点击按钮触发 handler方法
+  // 调用方式1 async await  
+  async handler(){
+    // 通过实例调用 request 方法发送请求
+    const res = await instance.request({
+      url:'https://gmall-prod.atguigu.cn/mall-api/index/findBanner',
+      method:'GET'
+    })
+
+    console.log(res)
+  },
+
+  // 调用方式2 then
+  handler1(){
+    // 通过实例调用 request 方法发送请求
+   instance.request({
+      url:'https://gmall-prod.atguigu.cn/mall-api/index/findBanner',
+      method:'GET'
+    }).then((res)=>{
+      console.log(res)
+    })
+
+
+  }
+})
+```
 
 
 
 
 
+### 请求封装-设置请求参数
+
+思路分析：
+- 在发起网络请求时，需要配置一些请求参数，其中有一些参数我们可以设置为默认参数，例如：请求方法、超时时长等，因此我们在封装时我们要定义一些默认的参数。
+
+```js
+// 默认参数对象
+defaults = {
+  baseURL:'',
+  url:'',
+  data:null,
+  method:'GET',
+  header:{
+    'Content-type':'application/json'  // 设置数据的交互格式
+  },
+  timeout:60000
+}
+```
+
+
+但是不同项目，请求参数的设置是不同的，我们还需要允许在进行实例化的时候，传入参数，对默认的参数进行修改。例如：
+```js
+// 对WxRequest进行实例化
+const instance = new WxRequest({
+  baseURL:'',
+  timeout:10000
+})
+
+```
+
+
+在通过实例调用 request 实例方法时也会传入相关的请求参数
+```js
+const res = await instance.request({
+  url:'/index/findBanner',
+  method:'GET'
+})
+```
+
+从而得出结论：请求参数的设置有三种方式
+- 默认参数：在`WxRequest`类中添加`defaults`实例属性来设置默认值
+- 实例化时参数：在对`WxRequest`类进行实例化时传入相关的参数，需要在`constructor`构造函数形参进行接收
+- 调用实例方法时传入请求参数
+
+默认参数和自定义参数的合并操作，通常会在`constructor`中进行。
+
+因此我们就在`constructor`中将开发者传入的相关参数和`defaults`默认值进行合并，需要传入的配置项覆盖默认配置项
+
+
+request.js
+```js
+
+/**
+ * 创建 WxRequest 类
+ * 通过类的方式进行封装，会让代码更加具有复用性
+ * 也可以方便添加新的属性和方法
+ */
+class WxRequest{
+
+    // 定义实例属性，用来设置默认请求参数
+    defaults = {
+        baseURL:'', // 基准路径
+        url:'',
+        data:null,
+        method:'GET',
+        // 请求头
+        header:{
+          'Content-type':'application/json'  // 设置数据的交互格式
+        },
+        timeout:60000 // 小程序默认超时时长1min
+    }
+    // 用于创建和初始化类的属性及方法
+    // 在实例化时传入的参数，会被 constructor 形参进行接收
+    constructor(params={}){
+        this.defaults = Object.assign({},this.defaults,params)
+    }
+
+    // request 实例方法接收一个对象类型的参数
+    // 属性值和wx.request 方法调用时传递参数保持一致
+    request(options){
+        // 注意：需要先合并完整的请求地址（baseURL + url）
+        // https://gmall-prod.atguigu.cn/mall-api/index/findBanner
+        options.url = this.defaults.baseURL + options.url
+
+        // 合并请求参数
+        options = {...this.defaults,...options}
+
+        // 需要使用 Promise封装wx.request 处理异步请求
+        return new Promise((resolve,reject)=>{
+            wx.request({
+                ...options,
+                // 当接口调用成功时会触发 success 回调函数
+                success:(res)=>{
+                    resolve(res)
+                },
+                // 当接口调用失败时会触发 fail 回调函数
+                fail:(err)=>{
+                    reject(err)
+                }
+            })
+        })
+    }
+}
+
+
+
+// --------------------------------- 以下时实例化的代码 -----------------------------------
+// 目前写到同一个文件中，是为了方便进行测试，以后会提取成多个文件
+
+
+//  对 WxRequest 进行实例化
+const instance = new WxRequest({
+    baseURL:'https://gmall-prod.atguigu.cn/mall-api',
+    timeout:15000
+})
+
+//  将  WxRequest实例进行暴露出去，方便在其他文件中国进行使用
+export default instance;
+```
+
+
+index.js
+```js
+// 导入创建的实例
+import instance from '../../utils/request'
+Page({
+    async handler(){
+        const res = await instance.request({
+            url:'/index/findBanner',
+            method:'GET'
+          })
+      
+          console.log(res)
+    }
+})
+
+```
+
+
+
+### 请求封装-请求快捷方法
+
+思路分析：
+- 每次发送请求时都使用`request()`方法即可，但是项目中的接口地址有很多，不是很简洁
+```js
+const res = await instance.request({
+    url:'/index/findBanner',
+    method:'GET'
+})
+```
+
+所以我们在`request()`基础上封装一些快捷方法，简化`request()`的调用。
+
+需要封装4个快捷方法，分别是`get`、`delete`、`post`、`put`，它们的调用方式如下：
+```js
+instance.get('请求地址','请求参数','请求配置')
+instance.delete('请求地址','请求参数','请求配置')
+instance.post('请求地址','请求参数','请求配置')
+instance.put('请求地址','请求参数','请求配置')
+```
+
+这4个请求方法，都是通过实例化的方法进行调用，所以需要`Request`类中暴露出来`get`、`delete`、`post`、`put`方法。每个方法接收三个参数，分别是：接口地址、请求参数以及其他参数。
+
+
+这4个快捷方法，本质上其实还是调用`request`方法，我们只要在方法内部组织好参数，调用`request`发送请求即可。
+
+
+request.js
+```js
+class WxRequest{
+  // coding...
+
+  // 封装 GET 实例方法
+  get(url,data={},config={}){
+    return this.request(Object.assign({url,data,method:'GET'},config))
+  }
+
+  
+  // 封装 DELETE 实例方法
+  delete(url,data={},config={}){
+    return  this.request(Object.assign({url,data,method:'DELETE'},config))
+  }
+
+
+  // 封装 POST 实例方法
+  post(url,data={},config={}){
+    return  this.request(Object.assign({url,data,method:'POST'},config))
+  }
+
+  // 封装 PUT 实例方法
+  put(url,data={},config={}){
+    return  this.request(Object.assign({url,data,method:'PUT'},config))
+  }
+}
+```
+
+
+index.js
+```js
+// 导入创建的实例
+import instance from '../../utils/request'
+Page({
+    async handler(){
+        const res = await instance.get('/index/findBanner',{test:1})
+        console.log(res)
+    }
+})
+```
+
+
+> 注意事项：
+> - 在使用`wx.request`发送网络请求时，只要成功接收到服务器返回，无论`statusCode`是多少，都会进入`success`回调，开发者根据业务逻辑对返回值进行判断。
+> - 什么时候会有`fail`回调函数？ 一般只有网络出现异常、请求超时等时候才会走`fail`回调。
+
+
+
+### 请求封装-定义请求/响应拦截器
+
+思路分析：
+- 为了方便统一处理请求参数以及服务器响应结果，为`WxRequest`添加拦截器功能，拦截器包括**请求拦截器** 和 **响应拦截器**
+- **请求拦截器**本质上是在请求之前调用的函数，用来对请求参数进行新增和修改
+- **响应拦截器**本质上是在请求之后调用的函数，用来对响应数据做点什么
+
+> 注意：不管成功响应还是失败响应，都会执行响应拦截器。
+
+拦截器的使用方式：
+```js
+// 请求拦截器
+instance.interceptors.request = (config)=>{
+  // 在发送请求之前做点什么
+
+  return config
+}
+
+
+// 响应拦截器
+instance.interceptors.response = (response)=>{
+  // 对响应数据做点什么
+  return response
+}
+```
 
 
 
 
+实现拦截器的思路：
+- 在`WxRequest`类内部定义`interceptors`实例属性，属性中需要包含`request`以及`response`方法
+- 是否通过实例调用了拦截器
+  - 是：实例调用的拦截器覆盖默认拦截器
+  - 否：定义默认拦截器
+- 在发送请求之前，调用请求拦截器
+- 在服务器响应以后，调用响应拦截器
+  - 不管成功、失败响应，都需要调用响应拦截器
+  - 在响应拦截器，我们需要判断是请求成功还是失败，然后进行不同的业务逻辑处理。（eg:请求成功以后将数据简化返回，网络出现异常则给用户进行网络异常提示。）
+
+响应拦截器封需求：
+- 如果请求成功，将响应成功的数据传递给响应拦截器，同时在传递的数据中新增`isSuccess:true`字段，表示请求成功。
+- 如果请求失败，将响应失败的数据传递给响应拦截器，同时在传递的数据中新增`isSuccess:false`字段，表示请求失败。
+
+
+使用请求拦截器：
+- 在发送请求时，购物车列表、收货地址、更新头像等接口，都需要进行权限验证，因此我们需要在请求拦截器中判断本地是否存在访问令牌`token`,如果存在就需要在请求头中添加`token`字段。
+
+
+使用响应拦截器：
+- 在使用`wx.request`发送网络请求时。只要成功接收到服务器返回，无论`statusCode`是多少，都会进入`success`回调。因此开发者根据业务逻辑对返回值进行判断。
+  - 业务状态码 200，说明接口请求成功，服务器成功返回了数据
+  - 业务状态码 208，说明没有`token`或者`token`过期失效，需要登录或者重新登录
+  - 业务状态码 其他，说明请求或者响应出现了异常
+
+
+落地代码：
+
+utils/request.js
+```js
+/**
+ * 创建 WxRequest 类
+ * 通过类的方式进行封装，会让代码更加具有复用性
+ * 也可以方便添加新的属性和方法
+ */
+class WxRequest{
+
+    // 定义实例属性，用来设置默认请求参数
+    defaults = {
+        baseURL:'', // 基准路径
+        url:'',
+        data:null,
+        method:'GET',
+        // 请求头
+        header:{
+          'Content-type':'application/json'  // 设置数据的交互格式
+        },
+        timeout:60000 // 小程序默认超时时长1min
+    }
+
+    // 定义拦截器对象
+    // 需要包含 请求拦截器以及响应拦截器
+    interceptors = {
+        // 请求拦截器
+        request:(config)=>{
+            return config
+        },
+
+        // 响应拦截器
+        response:(response)=>{
+            return response
+        }
+
+    }
+
+    // 用于创建和初始化类的属性及方法
+    // 在实例化时传入的参数，会被 constructor 形参进行接收
+    constructor(params={}){
+        this.defaults = Object.assign({},this.defaults,params)
+    }
+
+    // request 实例方法接收一个对象类型的参数
+    // 属性值和wx.request 方法调用时传递参数保持一致
+    request(options){
+        // 注意：需要先合并完整的请求地址（baseURL + url）
+        // https://gmall-prod.atguigu.cn/mall-api/index/findBanner
+        options.url = this.defaults.baseURL + options.url
+
+        // 合并请求参数
+        options = {...this.defaults,...options}
+
+        // 在请求发送之前，调用请求拦截器，新增和修改请求参数
+        options = this.interceptors.request(options)
+
+
+        // 需要使用 Promise封装wx.request 处理异步请求
+        return new Promise((resolve,reject)=>{
+            wx.request({
+                ...options,
+                // 当接口调用成功时会触发 success 回调函数
+                success:(res)=>{
+                    // 不管是成功响应还是失败响应，都需要调用响应拦截器
+                    // 响应拦截器需要接收服务器响应的数据，然后对数据进行逻辑处理，处理好以后进行返回
+                    // 然后再通过 resolve 将返回的数据抛出去
+
+
+                    // 在给响应拦截器传递参数时，需要将请求参数也一起传递
+                    // 方便进行代码的调试或者其他逻辑处理，需要先合并参数
+                    // 然后将合并的参数传递给响应拦截器
+                    const mergeRes = Object.assign({},res,{config:options,isSuccess:true})
+
+
+                    // resolve(res)
+                    resolve(this.interceptors.response(mergeRes))
+                },
+                // 当接口调用失败时会触发 fail 回调函数
+                fail:(err)=>{
+                    // 不管是成功响应还是失败响应，都需要调用响应拦截器
+                    // reject(err)
+                    const mergeErr = Object.assign({},err,{config:options,isSuccess:false})
+                    reject(this.interceptors.response(mergeErr))
+                }
+            })
+        })
+    }
+
+    // 封装 GET 实例方法
+    get(url,data={},config={}){
+        return this.request(Object.assign({url,data,method:'GET'},config))
+    }
+
+    
+    // 封装 DELETE 实例方法
+    delete(url,data={},config={}){
+        return this.request(Object.assign({url,data,method:'DELETE'},config))
+    }
+
+
+    // 封装 POST 实例方法
+    post(url,data={},config={}){
+        return this.request(Object.assign({url,data,method:'POST'},config))
+    }
+
+    // 封装 PUT 实例方法
+    put(url,data={},config={}){
+        return this.request(Object.assign({url,data,method:'PUT'},config))
+    }
+}
+
+
+export default WxRequest
+```
+
+utils/http.js
+```js
+// --------------------------------- 以下时实例化的代码 -----------------------------------
+
+import  WxRequest from './request'
+import { getStorage,clearStorage } from './storage'
+import { modal,toast } from './extendApi'
+//  对 WxRequest 进行实例化
+const instance = new WxRequest({
+    baseURL:'https://gmall-prod.atguigu.cn/mall-api',
+    timeout:15000
+})
+
+
+// 配置请求拦截器
+instance.interceptors.request = (config)=>{
+    // 在发送请求之前做些什么
+
+    // 在发送请求之前，需要先判断本地是否存在访问令牌 token 
+    const token = getStorage('token')
+    if(token){
+        config.header['token'] = token;
+    }
+
+    // 如果存在token,就需要在请求头中添加token字段
+    return config
+}
+
+// 配置响应拦截器
+instance.interceptors.response = async (response)=>{
+    console.log('response',response)
+    const { isSuccess,data } = response;
+    if(!isSuccess){
+        wx.showToast({
+            title:'网络异常测试',
+            icon:'error'
+        })
+    }
+
+    // 判断服务器响应的业务代码
+    switch(data.code){
+        // 如果后端返回的业务状态码是200，说明请求成功，服务器成功返回了数据
+        case 200:
+            return data
+        // 业务状态码 208，说明没有`token`或者`token`过期失效，需要登录或者重新登录
+        case 208:
+            const res = await modal({
+                content:'鉴权失败，请重新登录',
+                showCancel:false  // 不显示取消按钮
+            })
+
+            if(res){
+                // 清楚之前失效的token及本地存储的所有信息
+                clearStorage()
+
+                wx.navigateTo({
+                  url: '/pages/login/login',
+                })
+            }
+
+            return Promise.reject(response)
+        default:
+            toast({
+                title:'程序出现异常，请联系客服或稍后重试'
+            })
+            return Promise.reject(response)
+    }
+    // 在服务器响应之后做些什么
+    // return response
+    // return data
+}
 
 
 
+//  将  WxRequest实例进行暴露出去，方便在其他文件中国进行使用
+export default instance;
+```
+
+
+pages/index/index.js
+```js
+// 导入创建的实例
+import instance from '../../utils/http'
+Page({
+    async handler(){
+        // const res = await instance.request({
+        //     url:'/index/findBanner',
+        //     method:'GET'
+        //   })
+
+        const res = await instance.get('/index/findBanner',{test:1}).catch((err)=>{
+
+        })
+        console.log(res)
+    }
+})
+```
+
+
+### 请求封装-添加并发请求
+
+思路分析：
+- 前端并发请求是指在前端页面同时向后端发起多个请求的情况。当一个页面需要请求多个接口获取数据时，为了提高页面的加载速度和用户体验，可以同时发起多个请求，这些请求之间就是并发的关系。
+
+
+我们通过两种方式发起多个请求：
+- 使用`async`和`await`方式
+- 使用`Promise.all()` 方式
+
+
+首先使用`async`和`await`方式发送请求，使用`async`和`await`能够控制异步任何以同步的流程执行，代码如下，这时候就会产生一个问题，当第一个请求执行完以后，才能执行第二个请求，这样就会造成请求的堵塞，影响渲染的速度，如下图：
+```js
+// 导入创建的实例
+import instance from '../../utils/http'
+Page({
+    async handler(){
+        await instance.get('/index/findBanner')
+        await instance.get('/index/findBanner')
+        await instance.get('/index/findBanner')
+        await instance.get('/index/findBanner')
+    }
+})
+```
+
+`Promise.all()` 能够将多个异步请求同时进行发送，也就是并行发送，并不会造成请求的堵塞
+```js
+// 导入创建的实例
+import instance from '../../utils/http'
+Page({
+    async handler(){
+        // 
+        await Promise.all([instance.get('/index/findBanner'),instance.get('/index/findBanner'),instance.get('/index/findBanner')，instance.get('/index/findBanner')])
+
+
+        // 也可用封装的实例all方法
+        // await instance.all(instance.get('/index/findBanner'),instance.get('/index/findBanner'),instance.get('/index/findBanner')，instance.get('/index/findBanner'))
+    }
+})
+```
 
 
 
+### 请求封装-添加loading
+
+思路分析：
+- 在封装时添加`loading`效果，从而提高用户使用体验
+  - 在请求发送之前，需要通过`wx.showLoading`展示`loading`效果
+  - 当服务器响应数据以后，需要调用`wx.hideLoading`隐藏`loading`效果
+
+> 要不要将`loading`添加到`WxRequest`内部？
+> - 在类内部进行添加，方便多个项目直接使用类提供的`loading`效果，也方便统一优化`wx.showLoading`使用体验。但是不方便自己来进行`loading`个性化定制。
+> - 如果想自己来控制`loading`效果，带来更丰富的交互体验，就不要将`loading`封装到内部类，但是需要开发者自己来优化`wx.showLoading`使用体验，每个项目都要写一份。
+
+
+大家可以按照自己的业务需求进行封装，在项目中我们会选择第一种方式。不过也会通过属性控制是否展示`loading`,从而方便类使用者自己控制`loading`显示。
+
+
+`loading`的展示和隐藏会存在以下问题：
+- 每次请求都会执行`wx.showLoading()`,但是页面中只会显示一个，后面的`loading`会将前面的覆盖。
+- 同时发起多次请求，只要有一个请求成功响应就会调用`wx.hideLoading()`,导致其他请求还没完整，也不会`loading`。
+- 请求过快 或 一个请求在另一个请求后立即触发，这时候会出现`loading`闪烁问题。
+
+
+我们通过**队列**的方式解决这三个问题：首先在类中新增一个实例属性`queue`,初始值是一个空数组。
+- 发送请求之前，判断`queue`,如果是空数组则显示`loading`,然后立即向`queue`新增请求标识。
+- 在`complete`中每次请求成功结束，从`queue`中移除一个请求标识，`queue`为空时隐藏`loading`。
+- 为了解决网络请求过快产生`loading`闪烁问题,可以使用定时器来做判断即可。
+
+
+在实际开发中，有的接口可能不需要显示`loading`效果，或者开发者希望自己来控制`loading`的样式与交互，那么就需要关闭默认的`loading`效果。这时候我们就需要一个开关来控制`loading`显示。
+- 类内部设置默认请求参数`isLoading`属性，默认值是`true`,在类内部根据`isLoading`属性做判断即可。
+- 某个接口不需要显示`loading`效果，可以在发送请求的时候，新增请求配置`isLoading`设置为`false`。
+- 整个项目都不需要显示`loading`效果，可以在实例化的时候，传入`isLoading`配置为`false`。
+
+
+落地代码：
+
+utils/request.js
+```js
+
+/**
+ * 创建 WxRequest 类
+ * 通过类的方式进行封装，会让代码更加具有复用性
+ * 也可以方便添加新的属性和方法
+ */
+class WxRequest{
+
+    // 定义实例属性，用来设置默认请求参数
+    defaults = {
+        baseURL:'', // 基准路径
+        url:'',
+        data:null,
+        method:'GET',
+        // 请求头
+        header:{
+          'Content-type':'application/json'  // 设置数据的交互格式
+        },
+        timeout:60000, // 小程序默认超时时长1min
+        isLoading:true // 控制是否使用默认的 loading,默认值true表示使用默认的loading
+    }
+
+    // 定义拦截器对象
+    // 需要包含 请求拦截器以及响应拦截器
+    interceptors = {
+        // 请求拦截器
+        request:(config)=>{
+            return config
+        },
+
+        // 响应拦截器
+        response:(response)=>{
+            return response
+        }
+    }
+
+    // 定义数组队列
+    // 初始值需要设置一个空数组，用来存储请求队列、存储请求标识
+    queue = []
+
+    // 用于创建和初始化类的属性及方法
+    // 在实例化时传入的参数，会被 constructor 形参进行接收
+    constructor(params={}){
+        this.defaults = Object.assign({},this.defaults,params)
+    }
+
+    // request 实例方法接收一个对象类型的参数
+    // 属性值和wx.request 方法调用时传递参数保持一致
+    request(options){
+        // 如果有新的请求，就清除上一次定时器
+        this.timerId && clearTimeout(this.timerId)
+        // 注意：需要先合并完整的请求地址（baseURL + url）
+        // https://gmall-prod.atguigu.cn/mall-api/index/findBanner
+        options.url = this.defaults.baseURL + options.url
+
+        // 合并请求参数
+        options = {...this.defaults,...options}
+
+        if(options.isLoading){
+            // 在请求发送之前，添加loading效果
+            // 判断 queue 队列是否为空，如果是空，就提示 loading，如果不是空，就不显示 loading
+            this.queue.length ===0 && wx.showLoading()
+            // 然后立即向 queue 数组队列中添加请求标识
+            // 每个标识代表是一个请求，标识是自定义的
+            this.queue.push('request')
+        }
+      
+
+
+        // 在请求发送之前，调用请求拦截器，新增和修改请求参数
+        options = this.interceptors.request(options)
+
+
+        // 需要使用 Promise封装wx.request 处理异步请求
+        return new Promise((resolve,reject)=>{
+            wx.request({
+                ...options,
+                // 当接口调用成功时会触发 success 回调函数
+                success:(res)=>{
+                    // 不管是成功响应还是失败响应，都需要调用响应拦截器
+                    // 响应拦截器需要接收服务器响应的数据，然后对数据进行逻辑处理，处理好以后进行返回
+                    // 然后再通过 resolve 将返回的数据抛出去
+
+
+                    // 在给响应拦截器传递参数时，需要将请求参数也一起传递
+                    // 方便进行代码的调试或者其他逻辑处理，需要先合并参数
+                    // 然后将合并的参数传递给响应拦截器
+                    const mergeRes = Object.assign({},res,{config:options,isSuccess:true})
+
+
+                    // resolve(res)
+                    resolve(this.interceptors.response(mergeRes))
+                },
+                // 当接口调用失败时会触发 fail 回调函数
+                fail:(err)=>{
+                    // 不管是成功响应还是失败响应，都需要调用响应拦截器
+                    // reject(err)
+                    const mergeErr = Object.assign({},err,{config:options,isSuccess:false})
+                    reject(this.interceptors.response(mergeErr))
+                },
+                // 当接口调用结束的回调函数（调用成功、失败都会执行）
+                complete:()=>{
+                    if(options.isLoading){
+                        // 每次从 queue 队列中删除一个标识
+                        this.queue.pop()
+                        this.queue.length===0 && this.queue.push('request')
+                        this.timerId = setTimeout(()=>{
+                            this.queue.pop()
+                            // 在删除标识以后，需要判断目前 queue 数组是否为空
+                            // 如果是空，说明并发请求完成了，就需要隐藏loading
+                            this.queue.length===0 && wx.hideLoading()
+
+                            clearTimeout(this.timerId)
+                        },1)
+                    }
+                }
+            })
+        })
+    }
+
+    // 封装 GET 实例方法
+    get(url,data={},config={}){
+        return this.request(Object.assign({url,data,method:'GET'},config))
+    }
+
+    
+    // 封装 DELETE 实例方法
+    delete(url,data={},config={}){
+        return this.request(Object.assign({url,data,method:'DELETE'},config))
+    }
+
+
+    // 封装 POST 实例方法
+    post(url,data={},config={}){
+        return this.request(Object.assign({url,data,method:'POST'},config))
+    }
+
+    // 封装 PUT 实例方法
+    put(url,data={},config={}){
+        return this.request(Object.assign({url,data,method:'PUT'},config))
+    }
+
+    // 用来处理并发请求
+    all(...promise){
+        // 通过展开运算符接收传递的参数
+        // 那么展开运算符会将传入的参数转成数组
+        promise.all(promise)
+    }
+}
+
+
+export default WxRequest
+
+```
+
+
+utils/http.js
+```js
+// --------------------------------- 以下时实例化的代码 -----------------------------------
+
+import  WxRequest from './request'
+import { getStorage,clearStorage } from './storage'
+import { modal,toast } from './extendApi'
+//  对 WxRequest 进行实例化
+const instance = new WxRequest({
+    baseURL:'https://gmall-prod.atguigu.cn/mall-api',
+    timeout:15000,
+    // isLoading:false // 如果整个项目都不需要loading,此处设置为false即可
+})
+
+
+// 配置请求拦截器
+instance.interceptors.request = (config)=>{
+    // 在发送请求之前做些什么
+
+    // 在发送请求之前，需要先判断本地是否存在访问令牌 token 
+    const token = getStorage('token')
+    if(token){
+        config.header['token'] = token;
+    }
+
+    // 如果存在token,就需要在请求头中添加token字段
+    return config
+}
+
+// 配置响应拦截器
+instance.interceptors.response = async (response)=>{
+    console.log('response',response)
+    const { isSuccess,data } = response;
+    if(!isSuccess){
+        wx.showToast({
+            title:'网络异常测试',
+            icon:'error'
+        })
+    }
+
+    // 判断服务器响应的业务代码
+    switch(data.code){
+        // 如果后端返回的业务状态码是200，说明请求成功，服务器成功返回了数据
+        case 200:
+            return data
+        // 业务状态码 208，说明没有`token`或者`token`过期失效，需要登录或者重新登录
+        case 208:
+            const res = await modal({
+                content:'鉴权失败，请重新登录',
+                showCancel:false  // 不显示取消按钮
+            })
+
+            if(res){
+                // 清楚之前失效的token及本地存储的所有信息
+                clearStorage()
+
+                wx.navigateTo({
+                  url: '/pages/login/login',
+                })
+            }
+
+            return Promise.reject(response)
+        default:
+            toast({
+                title:'程序出现异常，请联系客服或稍后重试'
+            })
+            return Promise.reject(response)
+    }
+    // 在服务器响应之后做些什么
+    // return response
+    // return data
+}
 
 
 
+//  将  WxRequest实例进行暴露出去，方便在其他文件中国进行使用
+export default instance;
+```
+
+pages/index/index.js
+```js
+// 导入创建的实例
+import instance from '../../utils/http'
+Page({
+    async handler(){
+        const res = await instance.get('/index/findBanner',null,{isLoading:false})
+        console.log('99',res)
+    }
+})
+```
+
+
+## 封装uploadFile
+
+思路分析：
+- `wx.uploadFile`也是我们在开发中常用的一个`API`,用来将本地资源上传到服务器。
+
+例如：在获取微信头像以后，将微信头像上传到公司服务器。
+```js
+wx.uploadFile({
+  url:'',// 必填项，开发者服务器地址
+  filePath:'',// 必填项，要上传文件资源的路径（本地路径）
+  name:'',// 必填项，文件对应的key,开发者在服务端可以通过这个key获取文件二进制内容
+})
+```
+
+
+在了解API以后，我们直接对`wx.uploadFile`进行封装即可。
+- 首先在`WxRequest`类内部创建`upload`实例方法，实例方法接收四个属性：
+```js
+/**
+ * 文件上传接口封装
+ * url 文件上传地址
+ * filePath 要上传文件资源的路径
+ * name 文件对应的key
+ * config 其他配置项
+ * 
+*/
+upload(url,filePath,name,config={}){
+  return this.request(
+    Object.assign({url,filePath,name,method:'UPLOAD'},config)
+  )
+}
+```
+- 这时我们需要在`request`实例方法，对`method`进行判断，如果是`UPLOAD`，则调用`wx.uploadFile`上传API
+```js
+request(options){
+  // coding...
+
+}
+```
 
 
 
+封装后的落地代码：
 
 
+pages/index/index.wxml
+```html
+<view>
+    <button class="btn" open-type="chooseAvatar" bindchooseavatar="chooseavatar">
+        <image class="avatar" src="{{avatarUrl}}" mode=""/>
+    </button>
+</view>
+```
+pages/index/index.js
+```js
+// 导入创建的实例
+import instance from '../../utils/http'
+Page({
+    data: {
+        avatarUrl:'../../assets/index/1.png'
+    },
+    // 获取微信头像
+    async chooseavatar(event){
+        console.log('event',event);
+        // 目前获取的微信头像是临时路径，临时路径是有失效时间的，在实际开发中，需要将临时路径上传到公司的服务器
+        // console.log('222',event.detail.avatarUrl);
+        const {avatarUrl} = event.detail
+        const res = await instance.upload('/fileUpload',avatarUrl,'file')
+        this.setData({
+            avatarUrl:res.data
+        })
+
+        // wx.uploadFile({
+        //   filePath: event.detail.avatarUrl,
+        //   name: 'file',
+        //   url: 'https://',
+        //   success:(res)=>{
+        //     //  服务器返回的数据时JSON字符串，在使用的时候，需要进行转换JSON.parse进行转换
+        //     res.data = JSON.parse(res.data)
+        //     console.log('123',res)
+
+        //     this.setData({
+        //         avatarUrl:res.data.data
+        //     })
+        //   }
+        // })
+
+        // this.setData({
+        //     avatarUrl:event.detail.avatarUrl
+        // })
+    }
+})
+```
 
 
+utils/request.js
+```js
+
+/**
+ * 创建 WxRequest 类
+ * 通过类的方式进行封装，会让代码更加具有复用性
+ * 也可以方便添加新的属性和方法
+ */
+class WxRequest{
+
+    // 定义实例属性，用来设置默认请求参数
+    defaults = {
+        baseURL:'', // 基准路径
+        url:'',
+        data:null,
+        method:'GET',
+        // 请求头
+        header:{
+          'Content-type':'application/json'  // 设置数据的交互格式
+        },
+        timeout:60000, // 小程序默认超时时长1min
+        isLoading:true // 控制是否使用默认的 loading,默认值true表示使用默认的loading
+    }
+
+    // 定义拦截器对象
+    // 需要包含 请求拦截器以及响应拦截器
+    interceptors = {
+        // 请求拦截器
+        request:(config)=>{
+            return config
+        },
+
+        // 响应拦截器
+        response:(response)=>{
+            return response
+        }
+    }
+
+    // 定义数组队列
+    // 初始值需要设置一个空数组，用来存储请求队列、存储请求标识
+    queue = []
+
+    // 用于创建和初始化类的属性及方法
+    // 在实例化时传入的参数，会被 constructor 形参进行接收
+    constructor(params={}){
+        this.defaults = Object.assign({},this.defaults,params)
+    }
+
+    // request 实例方法接收一个对象类型的参数
+    // 属性值和wx.request 方法调用时传递参数保持一致
+    request(options){
+        // 如果有新的请求，就清除上一次定时器
+        this.timerId && clearTimeout(this.timerId)
+        // 注意：需要先合并完整的请求地址（baseURL + url）
+        // https://gmall-prod.atguigu.cn/mall-api/index/findBanner
+        options.url = this.defaults.baseURL + options.url
+
+        // 合并请求参数
+        options = {...this.defaults,...options}
+
+        // 上传文件自带loading所以不需要自定义
+        if(options.isLoading && options.method !== 'UPLOAD'){
+            // 在请求发送之前，添加loading效果
+            // 判断 queue 队列是否为空，如果是空，就提示 loading，如果不是空，就不显示 loading
+            this.queue.length ===0 && wx.showLoading()
+            // 然后立即向 queue 数组队列中添加请求标识
+            // 每个标识代表是一个请求，标识是自定义的
+            this.queue.push('request')
+        }
+      
 
 
+        // 在请求发送之前，调用请求拦截器，新增和修改请求参数
+        options = this.interceptors.request(options)
 
 
+        // 需要使用 Promise封装wx.request 处理异步请求
+        return new Promise((resolve,reject)=>{
+            if(options.method ==='UPLOAD'){
+                wx.uploadFile({
+                  ...options,
+                  success:(res)=>{
+                    // 需要将服务器返回的JSON字符串通过JSON.parse 转成对象
+                    res.data = JSON.parse(res.data)
+
+                    // 合并参数
+                    const mergeRes = Object.assign({},res,{config:options,isSuccess:true})
+                    resolve(this.interceptors.response(mergeRes))
+                  },
+                  fail:(err)=>{
+                    // 合并参数
+                    const mergeErr = Object.assign({},err,{config:options,isSuccess:false})
+                    resolve(this.interceptors.response(mergeErr))
+                  }
+                })
+            }else{
+                wx.request({
+                    ...options,
+                    // 当接口调用成功时会触发 success 回调函数
+                    success:(res)=>{
+                        // 不管是成功响应还是失败响应，都需要调用响应拦截器
+                        // 响应拦截器需要接收服务器响应的数据，然后对数据进行逻辑处理，处理好以后进行返回
+                        // 然后再通过 resolve 将返回的数据抛出去
+    
+    
+                        // 在给响应拦截器传递参数时，需要将请求参数也一起传递
+                        // 方便进行代码的调试或者其他逻辑处理，需要先合并参数
+                        // 然后将合并的参数传递给响应拦截器
+                        const mergeRes = Object.assign({},res,{config:options,isSuccess:true})
+    
+    
+                        // resolve(res)
+                        resolve(this.interceptors.response(mergeRes))
+                    },
+                    // 当接口调用失败时会触发 fail 回调函数
+                    fail:(err)=>{
+                        // 不管是成功响应还是失败响应，都需要调用响应拦截器
+                        // reject(err)
+                        const mergeErr = Object.assign({},err,{config:options,isSuccess:false})
+                        reject(this.interceptors.response(mergeErr))
+                    },
+                    // 当接口调用结束的回调函数（调用成功、失败都会执行）
+                    complete:()=>{
+                        if(options.isLoading){
+                            // 每次从 queue 队列中删除一个标识
+                            this.queue.pop()
+                            this.queue.length===0 && this.queue.push('request')
+                            this.timerId = setTimeout(()=>{
+                                this.queue.pop()
+                                // 在删除标识以后，需要判断目前 queue 数组是否为空
+                                // 如果是空，说明并发请求完成了，就需要隐藏loading
+                                this.queue.length===0 && wx.hideLoading()
+    
+                                clearTimeout(this.timerId)
+                            },1)
+                        }
+                    }
+                })
+            }
+         
+        })
+    }
+
+    // 封装 GET 实例方法
+    get(url,data={},config={}){
+        return this.request(Object.assign({url,data,method:'GET'},config))
+    }
+
+    
+    // 封装 DELETE 实例方法
+    delete(url,data={},config={}){
+        return this.request(Object.assign({url,data,method:'DELETE'},config))
+    }
 
 
+    // 封装 POST 实例方法
+    post(url,data={},config={}){
+        return this.request(Object.assign({url,data,method:'POST'},config))
+    }
+
+    // 封装 PUT 实例方法
+    put(url,data={},config={}){
+        return this.request(Object.assign({url,data,method:'PUT'},config))
+    }
+
+    // 用来处理并发请求
+    all(...promise){
+        // 通过展开运算符接收传递的参数
+        // 那么展开运算符会将传入的参数转成数组
+        promise.all(promise)
+    }
+
+    // upload 实例方法,用来对wx.uploadFile 进行封装
+    upload(url,filePath,name,config={}){
+        return this.request(Object.assign({url,filePath,name,method:'UPLOAD'},config))
+    }
+}
 
 
+export default WxRequest
+```
+
+utils/https.js
+```js
+// --------------------------------- 以下时实例化的代码 -----------------------------------
+
+import  WxRequest from './request'
+import { getStorage,clearStorage } from './storage'
+import { modal,toast } from './extendApi'
+//  对 WxRequest 进行实例化
+const instance = new WxRequest({
+    baseURL:'https://gmall-prod.atguigu.cn/mall-api',
+    timeout:15000,
+    // isLoading:false // 如果整个项目都不需要loading,此处设置为false即可
+})
+
+
+// 配置请求拦截器
+instance.interceptors.request = (config)=>{
+    // 在发送请求之前做些什么
+
+    // 在发送请求之前，需要先判断本地是否存在访问令牌 token 
+    const token = getStorage('token')
+    if(token){
+        config.header['token'] = token;
+    }
+
+    // 如果存在token,就需要在请求头中添加token字段
+    return config
+}
+
+// 配置响应拦截器
+instance.interceptors.response = async (response)=>{
+    console.log('response',response)
+    const { isSuccess,data } = response;
+    if(!isSuccess){
+        wx.showToast({
+            title:'网络异常测试',
+            icon:'error'
+        })
+    }
+
+    // 判断服务器响应的业务代码
+    switch(data.code){
+        // 如果后端返回的业务状态码是200，说明请求成功，服务器成功返回了数据
+        case 200:
+            return data
+        // 业务状态码 208，说明没有`token`或者`token`过期失效，需要登录或者重新登录
+        case 208:
+            const res = await modal({
+                content:'鉴权失败，请重新登录',
+                showCancel:false  // 不显示取消按钮
+            })
+
+            if(res){
+                // 清楚之前失效的token及本地存储的所有信息
+                clearStorage()
+
+                wx.navigateTo({
+                  url: '/pages/login/login',
+                })
+            }
+
+            return Promise.reject(response)
+        default:
+            toast({
+                title:'程序出现异常，请联系客服或稍后重试'
+            })
+            return Promise.reject(response)
+    }
+    // 在服务器响应之后做些什么
+    // return response
+    // return data
+}
+
+//  将  WxRequest实例进行暴露出去，方便在其他文件中国进行使用
+export default instance;
+```
+
+
+> 注意！！！
+> 
+> 此处是根据[学习视频](https://www.bilibili.com/video/BV1LF4m1E7kB/?p=118&spm_id_from=pageDriver&vd_source=46043ae66b9cbf88ed957e04e481ddc0)
+>
+> 教程中封装的网络请求模块发布到了npm,可以使用npm包实现功能,`npm install mina-request`。
+> - 安装后构建npm
+> - 其余步骤参考文档开发即可,[mina-request](https://www.npmjs.com/package/mina-request)
+
+
+http.js
+```js
+import  WxRequest from 'mina-request';
+
+import { getStorage,clearStorage } from './storage'
+import { modal,toast } from './extendApi'
+//  对 WxRequest 进行实例化
+const instance = new WxRequest({
+    baseURL:'https://gmall-prod.atguigu.cn/mall-api',
+    timeout:15000,
+    // isLoading:false // 如果整个项目都不需要loading,此处设置为false即可
+})
+
+
+// 配置请求拦截器
+instance.interceptors.request = (config)=>{
+    // 在发送请求之前做些什么
+    // 在发送请求之前，需要先判断本地是否存在访问令牌 token 
+    const token = getStorage('token')
+    if(token){
+        config.header['token'] = token;
+    }
+
+    // 如果存在token,就需要在请求头中添加token字段
+    return config
+}
+
+// 配置响应拦截器
+instance.interceptors.response = async (response)=>{
+    console.log('response',response)
+    const { isSuccess,data } = response;
+    if(!isSuccess){
+        wx.showToast({
+            title:'网络异常测试',
+            icon:'error'
+        })
+        return Promise.reject(response)
+    }
+
+    // 判断服务器响应的业务代码
+    switch(data.code){
+        // 如果后端返回的业务状态码是200，说明请求成功，服务器成功返回了数据
+        case 200:
+            return data
+        // 业务状态码 208，说明没有`token`或者`token`过期失效，需要登录或者重新登录
+        case 208:
+            const res = await modal({
+                content:'鉴权失败，请重新登录',
+                showCancel:false  // 不显示取消按钮
+            })
+            if(res){
+                // 清楚之前失效的token及本地存储的所有信息
+                clearStorage()
+                wx.navigateTo({
+                  url: '/pages/login/login',
+                })
+            }
+            return Promise.reject(response)
+        default:
+            toast({
+                title:'程序出现异常，请联系客服或稍后重试'
+            })
+            return Promise.reject(response)
+    }
+    // 在服务器响应之后做些什么
+    // return response
+    // return data
+}
+
+//  将  WxRequest实例进行暴露出去，方便在其他文件中国进行使用
+export default instance;
+```
+
+
+## 设置环境变量
+
+在实际开发中，不同的开发环境，调用的接口地址是不一样的。
+
+例如：开发环境需要调用开发版的接口地址，生产环境需要调用正式版的接口地址。
+
+
+这时候，我们就可以使用小程序提供的`wx.getAccountInfoSync()`接口，用来获取当前账号信息，在账号信息中包含着小程序当前环境版本。
+
+| 环境版本 | 合法值  |
+| :------- | :-----: |
+| 开发版   | develop |
+| 体验版   |  trial  |
+| 正式版   | release |
