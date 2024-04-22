@@ -2750,3 +2750,171 @@ export default instance;
 | 开发版   | develop |
 | 体验版   |  trial  |
 | 正式版   | release |
+
+
+落地代码：
+
+utils/env.js
+```js
+// 配置当前小程序项目的环境变量
+
+// 获取当前小程序的账号信息
+const { miniProgram } = wx.getAccountInfoSync()
+
+// 获取小程序的版本
+const { envVersion } = miniProgram;
+
+let env = {
+    baseUrl:'https://gmall-prod.atguigu.cn/mall-api'
+}
+
+switch(envVersion){
+    // 开发版本
+    case 'develop':
+        env.baseUrl = 'https://gmall-prod.atguigu.cn/mall-api'
+        break;
+    // 体验版
+    case 'trail':
+        env.baseUrl = 'https://gmall-prod.atguigu.cn/mall-api'
+        break;
+    // 正式版
+    case 'release':
+        env.baseUrl = 'https://gmall-prod.atguigu.cn/mall-api'
+        break;
+    default:
+        env.baseUrl = 'https://gmall-prod.atguigu.cn/mall-api'
+        break;
+}
+
+
+export { env }
+```
+
+utils/https.js
+```js
+// --------------------------------- 以下时实例化的代码 -----------------------------------
+// import  WxRequest from 'mina-request'  // 如果通过npm安装了此包
+import  WxRequest from './request'
+import { getStorage,clearStorage } from './storage'
+import { modal,toast } from './extendApi'
+import {env} from './env'
+
+
+//  对 WxRequest 进行实例化
+const instance = new WxRequest({
+    // baseURL:'https://gmall-prod.atguigu.cn/mall-api',
+    baseURL:env.baseUrl,
+    timeout:15000,
+    // isLoading:false // 如果整个项目都不需要loading,此处设置为false即可
+})
+
+
+// 配置请求拦截器
+instance.interceptors.request = (config)=>{
+    // 在发送请求之前做些什么
+    // 在发送请求之前，需要先判断本地是否存在访问令牌 token 
+    const token = getStorage('token')
+    if(token){
+        config.header['token'] = token;
+    }
+    // 如果存在token,就需要在请求头中添加token字段
+    return config
+}
+
+// 配置响应拦截器
+instance.interceptors.response = async (response)=>{
+    console.log('response',response)
+    const { isSuccess,data } = response;
+    if(!isSuccess){
+        wx.showToast({
+            title:'网络异常测试',
+            icon:'error'
+        })
+        return Promise.reject(response)
+    }
+
+    // 判断服务器响应的业务代码
+    switch(data.code){
+        // 如果后端返回的业务状态码是200，说明请求成功，服务器成功返回了数据
+        case 200:
+            return data
+        // 业务状态码 208，说明没有`token`或者`token`过期失效，需要登录或者重新登录
+        case 208:
+            const res = await modal({
+                content:'鉴权失败，请重新登录',
+                showCancel:false  // 不显示取消按钮
+            })
+            if(res){
+                // 清楚之前失效的token及本地存储的所有信息
+                clearStorage()
+                wx.navigateTo({
+                  url: '/pages/login/login',
+                })
+            }
+            return Promise.reject(response)
+        default:
+            toast({
+                title:'程序出现异常，请联系客服或稍后重试'
+            })
+            return Promise.reject(response)
+    }
+}
+
+//  将  WxRequest实例进行暴露出去，方便在其他文件中国进行使用
+export default instance;
+```
+
+
+## 接口调用方式说明
+
+思路分析：
+- 在开发中，我们会将所有的网络请求方法放置在`api`目录下统一管理，然后按照模块功能来划分成对应的文件，在文件中将接口封装成一个个方法单独导出，例如：
+```js
+// 导入封装的 网络请求模块实例http.js
+import http from '../utils/http'
+
+/***
+ * 用来获取首页轮播图数据
+ * 
+ */
+// export const reqSwiperData = ()=>{
+//    return  http.get('/index/findBanner')
+// }
+
+export const reqSwiperData = ()=>http.get('/index/findBanner')
+
+```
+
+ 这样做有以下几点好处：
+ - 易于维护：一个文件就是一个模块，一个方法就是一个功能，清晰明了，查找方便
+ - 便于复用：哪里使用，哪里导入，可以在任何一个业务组件中导入需要的方法
+ - 团队合作：分工合作
+
+
+落地代码：
+
+api/index.js
+```js
+// 导入封装的 网络请求模块实例
+import http from '../utils/http'
+
+/***
+ * 用来获取首页轮播图数据
+ */
+export const reqSwiperData = ()=>{
+   return  http.get('/index/findBanner')
+}
+```
+
+
+pages/index/index.js
+```js
+// 导入接口API函数
+import {reqSwiperData} from '../../api/index.js'
+Page({
+  async handler(){
+    const res =  await reqSwiperData()
+    console.log('99',res)
+  }
+})
+```
