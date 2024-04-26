@@ -878,10 +878,61 @@ Component({
 
 
 
+## 框架扩展-mobx-miniprogram
+
+### mobx-miniprogram介绍
+
+小程序页面、组件间的数据通信方式有以下6种：
+- 数据绑定：`properties`
+- 获取组件实例：`this.selectComponent()`
+- 事件绑定：`this.triggerEvent()`
+- 获取应用实例：`getApp()`
+- 页面间通信:`eventChannel`
+- 事件总线：`pubsub-js`
+
+
+在中小型项目中，使用这些数据通信方式已经能够满足我们的项目需求。
+
+但是随着项目的业务逻辑越来越复杂，组件和页面间通信就会变得非常复杂。例如：有些状态需要在多个页面间进行同步使用，一个地方发生变更，所有使用的地方都需要发生改变，这时候如果使用前面的数据通信方案进行传递数据，管理和维护将存在很大的问题。
+
+
+为了方便进行页面、组件之间数据的传递，小程序官方提供了一个扩展工具库：`mobx-miniprogram`
+- `mobx-miniprogram`是针对微信小程序开发的一个简单、高效、轻量级状态管理库，它基于`Mobx`状态管理框架实现。使用`mobx-miniprogram`定义管理的状态是响应式的，当状态一旦改变，所有关联组件都会自动更新相对应的数据。
+- 通过该扩展库，开发者可以很方便地在小程序中全局共享状态，并自动更新视图组件，从而提升小程序的开发效率。
+- 在使用`mobx-miniprogram`需要安装两个包：`mobx-miniprogram`和`mobx-miniprogram-bindings`
+  - `mobx-miniprogram`的作用：创建`Store`对象，用于存储应用的数据
+  - `mobx-miniprogram-bindings`的作用：将状态和组件、页面进行绑定关联，从而在组件和页面中操作数据
+```js
+npm install mobx-miniprogram mobx-miniprogram-bindings
+```
+官方文档:
+- [mobx-miniprogram官方文档](https://github.com/wechat-miniprogram/mobx)
+- [mobx-miniprogram-bindings官方文档](https://github.com/wechat-miniprogram/mobx-miniprogram-bindings)
 
 
 
 
+### 创建Store对象
+
+创建`Store`对象需要使用`mobx-miniprogram`,因此需要掌握`mobx-miniprogram`的三个核心概念：
+- `observable`：用于创建一个被监视的对象，对象的属性就是应用的状态（`state`）,这些状态会被转换成响应式数据
+- `action`:用于修改状态（`state`）的方法，需要使用`action`函数显式的声明创建。
+- `computed`：根据已有状态（`state`）生成的新值。计算属性是一个方法，在方法前面必须加上`get`修饰符。
+
+
+`mobx-miniprogram`使用步骤：
+- 在项目的根目录下创建`store`文件夹，然后在该文件夹下新建`index.js`
+- 在`/store/index.js`中导入`observable`、`action`方法
+```js
+import { observable,action } from 'mobx-miniprogram'
+```
+- 使用`observable`方法需要接收一个`store`对象，存储应用的状态
+
+
+
+
+
+## 框架扩展-miniprogram-computed
 
 
 
